@@ -1,0 +1,211 @@
+<!doctype html>
+<!-- pixel-wallpaper {"format":1,"type":"wallpaper"} -->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>极光小屋</title>
+<!--
+  像素幻境 · 单文件动态壁纸示例（范式 1.0）
+  ── 这是一个完全自包含的 HTML 文件：双击就能看，拖进「像素幻境」就能当壁纸。
+  ── 规范要点（详见 skill/SKILL.md）：
+     · 无外部请求，素材全部内嵌或纯代码生成
+     · 画布随窗口尺寸自适应，任何屏幕比例都能铺满
+     · 所有动画都是时间 t 的纯函数，14 秒完美无缝循环
+     · 像素风：小画布 + image-rendering: pixelated 放大
+-->
+<style>
+  html, body { margin: 0; height: 100%; background: #0b1026; overflow: hidden; }
+  canvas { width: 100vw; height: 100vh; display: block; image-rendering: pixelated;
+           object-fit: cover; }
+</style>
+</head>
+<body>
+<canvas id="c" width="320" height="180"></canvas>
+<script>
+"use strict";
+const cvs = document.getElementById("c");
+const ctx = cvs.getContext("2d", { alpha: false });
+const W = 320, H = 180;
+const LOOP = 14;                       // loop length in seconds — every phase below is t/LOOP*n
+
+// ---------- the palette ----------
+const SKY = ["#0b1026", "#131a38", "#1b2447"];        // night, top to horizon
+const AURORA = ["#38e88a", "#4fd4c8", "#7a7ef0", "#b46ef0"];
+const SNOW = ["#243252", "#2e3f66", "#3d5180", "#54719f"];
+const CABIN = ["#2a1f14", "#3d2d1c", "#57402a"];
+const WINDOWLIGHT = "#ffd98a";
+const STAR = "#dfe6ff";
+
+// deterministic pseudo-random — so the scene is identical every run
+function rnd(i, k) {
+  const s = Math.sin(i * 127.1 + k * 311.7) * 43758.5453;
+  return s - Math.floor(s);
+}
+
+// ---------- static backdrop, drawn once ----------
+const ground = [];                     // snowy hill silhouettes, far to near
+for (let layer = 0; layer < 3; layer++) {
+  const base = 118 + layer * 18;
+  const amp = 10 + layer * 5, freq = 0.02 + layer * 0.01, ph = rnd(layer, 7) * 6.28;
+  ground.push({ base, amp, freq, ph, col: SNOW[layer] });
+}
+// trees on the nearest hill
+const trees = [];
+for (let i = 0; i < 16; i++) {
+  const x = 4 + rnd(i, 1) * 312;
+  if (x > 200 && x < 296) continue;    // keep the cabin clear
+  trees.push({ x, y: 148 + Math.round(rnd(i, 2) * 5), h: 6 + rnd(i, 3) * 8, w: 3 + rnd(i, 4) * 2 });
+}
+const stars = [];
+for (let i = 0; i < 90; i++) stars.push({ x: rnd(i, 11) * W, y: rnd(i, 12) * 100, tw: 1 + Math.floor(rnd(i, 13) * 3), ph: rnd(i, 14) * 6.28, big: rnd(i, 15) > 0.93 });
+
+function backdrop() {
+  // sky gradient
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, SKY[0]); g.addColorStop(0.55, SKY[1]); g.addColorStop(1, SKY[2]);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  // hills
+  for (const hl of ground) {
+    ctx.fillStyle = hl.col;
+    ctx.beginPath(); ctx.moveTo(0, H);
+    for (let x = 0; x <= W; x += 2) {
+      const y = hl.base + Math.sin(x * hl.freq * 6.28 + hl.ph) * hl.amp
+                        + Math.sin(x * hl.freq * 17 + hl.ph * 2) * hl.amp * 0.3;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+  }
+  // trees (dark pine triangles with a snow rim)
+  for (const t of trees) {
+    ctx.fillStyle = "#16203a";
+    for (let s = 0; s < 3; s++) {
+      const w = t.w * (1 - s * 0.26), y0 = t.y - s * t.h * 0.3, h2 = t.h * 0.5;
+      ctx.beginPath();
+      ctx.moveTo(t.x, y0 - h2); ctx.lineTo(t.x - w / 2, y0); ctx.lineTo(t.x + w / 2, y0);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = "#2e3f66"; ctx.fillRect(t.x - t.w * 0.28, t.y - t.h * 0.62, t.w * 0.56, 1);
+  }
+  // the cabin: log walls, snow roof, chimney
+  const cx = 246, cy = 128;
+  ctx.fillStyle = CABIN[0]; ctx.fillRect(cx, cy, 34, 22);            // wall
+  ctx.fillStyle = CABIN[1];
+  for (let i = 0; i < 5; i++) ctx.fillRect(cx, cy + 2 + i * 4, 34, 2); // log lines
+  ctx.fillStyle = CABIN[2]; ctx.fillRect(cx - 3, cy - 10, 40, 6);     // roof
+  ctx.fillStyle = SNOW[2];  ctx.fillRect(cx - 4, cy - 12, 42, 3);     // snow on roof
+  ctx.fillStyle = CABIN[0]; ctx.fillRect(cx + 22, cy - 20, 5, 12);    // chimney
+  ctx.fillStyle = SNOW[2];  ctx.fillRect(cx + 21, cy - 21, 7, 2);
+  ctx.fillStyle = "#1a2440"; ctx.fillRect(cx + 6, cy + 8, 22, 10);    // door
+  ctx.fillStyle = "#3d2d1c"; ctx.fillRect(cx + 16, cy + 8, 2, 10);
+}
+backdrop();
+
+// ---------- the living parts ----------
+function draw(t) {
+  backdrop();                                     // backdrop first (cheap: shapes only)
+
+  // stars: each twinkles on its own sub-phase of the loop
+  for (const s of stars) {
+    const tw = 0.35 + 0.65 * Math.pow(0.5 + 0.5 * Math.sin((t / LOOP) * 6.283 * s.tw + s.ph), 2);
+    ctx.globalAlpha = tw;
+    ctx.fillStyle = STAR;
+    ctx.fillRect(Math.round(s.x), Math.round(s.y), s.big ? 2 : 1, s.big ? 2 : 1);
+  }
+  ctx.globalAlpha = 1;
+
+  // aurora: three curtains of vertical light rays. Each ray is 2px wide, its top rides a slow
+  // wave, its bottom is jagged (per-column noise), and it fades top→bottom so it reads as a
+  // glowing curtain, not a flag. All phases are multiples of the loop → seamless.
+  ctx.globalCompositeOperation = "lighter";
+  for (let r = 0; r < 3; r++) {
+    const col = AURORA[r * 2 % 4];
+    const ph = (t / LOOP) * 6.283 * (1 + r * 0.5) + r * 2.1;
+    for (let x = 0; x < W; x += 2) {
+      const gap = Math.sin(x * 0.055 + r * 9);          // ray/no-ray: the curtain tears
+      if (gap < -0.15) continue;
+      const sway = Math.sin(x * 0.02 + ph) * 10 + Math.sin(x * 0.007 - ph * 0.7) * 16;
+      const top = 12 + r * 12 + sway;
+      const jag = (rnd(x | 0, 40 + r) - 0.5) * 8;        // static raggedness per column
+      const len = 14 + Math.abs(Math.sin(x * 0.13 + ph * 1.4)) * 14 + jag;
+      const a = 0.14 + 0.12 * (0.5 + 0.5 * Math.sin(x * 0.031 - ph));
+      const L = Math.max(4, Math.round(len));
+      // three fade segments: bright head, medium body, faint tail
+      ctx.fillStyle = col;
+      ctx.globalAlpha = a;
+      ctx.fillRect(x, Math.round(top), 2, Math.round(L * 0.3));
+      ctx.globalAlpha = a * 0.55;
+      ctx.fillRect(x, Math.round(top + L * 0.3), 2, Math.round(L * 0.4));
+      ctx.globalAlpha = a * 0.22;
+      ctx.fillRect(x, Math.round(top + L * 0.7), 2, Math.round(L * 0.3));
+    }
+  }
+  ctx.globalCompositeOperation = "source-over";
+  ctx.globalAlpha = 1;
+
+  // the warm window: flickers gently like a fire inside (2 pulses per loop)
+  const fire = 0.75 + 0.25 * Math.sin((t / LOOP) * 6.283 * 2) * Math.sin((t / LOOP) * 6.283 * 3 + 1.3);
+  ctx.fillStyle = WINDOWLIGHT;
+  ctx.globalAlpha = 0.55 + 0.45 * fire;
+  ctx.fillRect(252, 134, 8, 7);
+  // the light it spills onto the snow
+  ctx.globalAlpha = 0.10 + 0.12 * fire;
+  const sg = ctx.createRadialGradient(256, 141, 2, 256, 141, 26);
+  sg.addColorStop(0, WINDOWLIGHT); sg.addColorStop(1, "rgba(255,217,138,0)");
+  ctx.fillStyle = sg;
+  ctx.beginPath(); ctx.arc(256, 141, 26, 0, 6.283); ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // chimney smoke: puffs rise on a 2-per-loop cycle, drifting right; alpha in and out
+  for (let i = 0; i < 5; i++) {
+    const ph = ((t / LOOP) * 2 + i * 0.2) % 1;                 // 0..1 puff life
+    const px = 248 + Math.sin(ph * 5 + i) * 4 + ph * 10;       // drift
+    const py = 106 - ph * 34;                                  // rise
+    const r = 1.5 + ph * 3.5;
+    ctx.globalAlpha = 0.28 * Math.sin(3.14 * ph);              // fade in and out
+    ctx.fillStyle = "#8fa3c8";
+    ctx.beginPath(); ctx.arc(px, py, r, 0, 6.283); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // falling snow: three depths, each wrapping within exactly n sweeps per loop → seamless
+  for (let d = 0; d < 3; d++) {
+    const n = 1 + d;                       // sweeps per loop: 1, 2, 3
+    const count = 30 + d * 22;
+    const speed = 14 + d * 16;
+    const drift = 8 + d * 6;
+    for (let i = 0; i < count; i++) {
+      const x0 = rnd(i + d * 100, 21) * W;
+      const y0 = rnd(i + d * 100, 22) * H;
+      const y = (y0 + (t / LOOP) * n * H * (H / (speed * 9))) % H;
+      const x = (x0 + Math.sin(y * 0.05 + i) * drift) % W;
+      ctx.fillStyle = d === 2 ? "#e8eefc" : "#aebfe0";
+      ctx.globalAlpha = 0.5 + d * 0.18;
+      ctx.fillRect(Math.round(x), Math.round(y), 1 + (d === 2 ? 1 : 0), 1 + (d === 2 ? 1 : 0));
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+
+// ---------- the loop: drives itself from the wall clock so it survives throttling ----------
+let start = null;
+function frame(now) {
+  if (start === null) start = now;
+  draw(((now - start) / 1000) % LOOP);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+// fit any window: keep 16:9, cover like CSS object-fit: cover
+function fit() {
+  const vw = innerWidth, vh = innerHeight;
+  const s = Math.max(vw / W, vh / H);
+  cvs.style.width = W * s + "px";
+  cvs.style.height = H * s + "px";
+  cvs.style.position = "absolute";
+  cvs.style.left = (vw - W * s) / 2 + "px";
+  cvs.style.top = (vh - H * s) / 2 + "px";
+}
+addEventListener("resize", fit); fit();
+</script>
+</body>
+</html>

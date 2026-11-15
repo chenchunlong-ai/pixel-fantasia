@@ -1,0 +1,112 @@
+<!doctype html>
+<!-- pixel-wallpaper {"format":1,"type":"pet"} -->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>雪地小狐</title>
+<!--
+  像素幻境 · 单文件宠物示例（范式 1.0）
+  ── 宠物和壁纸同一个范式，只有三条额外约定：
+     · 背景必须透明（body 透明，只画宠物本体）
+     · 画面里只有宠物自己，容器负责把它叠到壁纸上、缩放、旋转、移动
+     · 动画循环（这里是一只原地踏步、尾巴摇摆的小狐狸）
+-->
+<style>
+  html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; }
+  canvas { width: 100vw; height: 100vh; display: block; image-rendering: pixelated; }
+</style>
+</head>
+<body>
+<canvas id="c" width="64" height="64"></canvas>
+<script>
+"use strict";
+const cvs = document.getElementById("c");
+const ctx = cvs.getContext("2d");
+const LOOP = 2.4;                      // one walk cycle, seconds
+
+// the fox palette
+const FUR = "#e8803a", FUR_DARK = "#c05f22", BELLY = "#f5e7d8", DARK = "#26160c", NOSE = "#1a0f08", TONGUE = "#e86070";
+
+// body parts in local units; everything swings on gait phase
+function draw(t) {
+  const p = (t / LOOP) * 4;                        // 4 steps per loop
+  const gait = p % 1;                              // 0..1 within one step
+  const bounce = Math.abs(Math.sin(gait * 3.14)) * 1.2;   // hop of each step
+  const legF = Math.sin(gait * 6.28) * 3;          // front leg swing
+  const legB = Math.sin(gait * 6.28 + 3.14) * 3;   // back legs, opposite phase
+  const tail = Math.sin((t / LOOP) * 6.283) * 5;   // lazy tail wave, once per loop
+  const head = Math.sin((t / LOOP) * 6.283 * 2) * 1; // slight head bob
+
+  const cx = 32, cy = 34 - bounce;
+
+  ctx.clearRect(0, 0, 64, 64);
+
+  // tail: two segments sweeping behind (overlaps the body so it stays connected)
+  ctx.fillStyle = FUR;
+  ctx.fillRect(cx - 13, cy - 4 - tail * 0.3, 8, 4);
+  ctx.fillStyle = BELLY;                           // white tail tip
+  ctx.fillRect(cx - 16, cy - 5 - tail * 0.5, 4, 4);
+
+  // back legs
+  ctx.fillStyle = FUR_DARK;
+  ctx.fillRect(cx - 7, cy + 4 + legB * 0.5, 3, 6);
+  ctx.fillRect(cx - 1, cy + 4 - legB * 0.5, 3, 6);
+  // body
+  ctx.fillStyle = FUR;
+  ctx.fillRect(cx - 8, cy - 3, 14, 8);
+  ctx.fillStyle = BELLY;
+  ctx.fillRect(cx - 8, cy + 2, 14, 3);
+  // front legs
+  ctx.fillStyle = FUR_DARK;
+  ctx.fillRect(cx + 3, cy + 4 + legF * 0.5, 3, 6);
+  ctx.fillRect(cx + 7, cy + 4 - legF * 0.5, 3, 6);
+  // paws
+  ctx.fillStyle = DARK;
+  ctx.fillRect(cx + 3, cy + 10 + legF * 0.5, 3, 1);
+  ctx.fillRect(cx + 7, cy + 10 - legF * 0.5, 3, 1);
+
+  // head
+  const hy = cy - 7 + head;
+  ctx.fillStyle = FUR;
+  ctx.fillRect(cx + 5, hy, 10, 7);                 // skull
+  ctx.fillRect(cx + 13, hy + 3, 5, 4);             // snout
+  // ears: one flicks once per loop
+  const flick = ((t / LOOP) % 1) < 0.12 ? -1 : 0;
+  ctx.fillStyle = FUR;
+  ctx.fillRect(cx + 5, hy - 4, 2, 4);
+  ctx.fillRect(cx + 9, hy - 4 + flick, 2, 4);
+  ctx.fillStyle = DARK;
+  ctx.fillRect(cx + 9, hy + 1, 2, 1);              // eye
+  ctx.fillStyle = NOSE;
+  ctx.fillRect(cx + 17, hy + 3, 2, 2);
+  // a pink tongue when the step lands (a little joy on every 4th step)
+  if (p % 4 < 0.5) { ctx.fillStyle = TONGUE; ctx.fillRect(cx + 14, hy + 7, 2, 2); }
+
+  // chest fluff
+  ctx.fillStyle = BELLY;
+  ctx.fillRect(cx + 4, cy + 1, 3, 4);
+}
+
+let start = null;
+function frame(now) {
+  if (start === null) start = now;
+  draw(((now - start) / 1000) % (LOOP * 4));       // 4 loops so the tongue beat lands off-cycle
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+function fit() {
+  // the container puts each pet in a fixed-size slot; a pet should fill ~55% of its viewport's
+  // smaller dimension — never fullscreen
+  const vw = innerWidth, vh = innerHeight;
+  const s = (Math.min(vw, vh) * 0.55) / 64;
+  cvs.style.width = 64 * s + "px";
+  cvs.style.height = 64 * s + "px";
+  cvs.style.position = "absolute";
+  cvs.style.left = (vw - 64 * s) / 2 + "px";
+  cvs.style.top = (vh - 64 * s) / 2 + "px";
+}
+addEventListener("resize", fit); fit();
+</script>
+</body>
+</html>

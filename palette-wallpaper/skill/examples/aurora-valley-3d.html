@@ -1,0 +1,227 @@
+<!doctype html>
+<!-- pixel-wallpaper {"format":1,"type":"wallpaper"} -->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Aurora Valley 3D</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #050810; }
+  canvas { display: block; width: 100vw; height: 100vh; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+// Aurora Valley — a self-contained 3D wallpaper. Hand-written WebGL, no libraries,
+// no network, no assets: every mountain, curtain and star is procedural.
+// Skill compliance: adapts to any resolution, capped DPR, 30fps, pauses when hidden.
+"use strict";
+const dbg = (m) => { try { window.chrome && chrome.webview && chrome.webview.postMessage({ type: "dbg", src: "aurora3d", ...m }); } catch (e) {} };
+dbg({ boot: 1, vis: document.visibilityState, hid: document.hidden });
+addEventListener("error", (e) => dbg({ scriptError: String(e.message || e), at: String(e.filename || "").slice(-40) + ":" + e.lineno }));
+addEventListener("unhandledrejection", (e) => dbg({ rejection: String(e.reason) }));
+const cvs = document.getElementById("c");
+const gl = cvs.getContext("webgl", { antialias: false, alpha: false });
+if (!gl) dbg({ gl: "FAIL: no webgl context" });
+cvs.addEventListener("webglcontextlost", (e) => { e.preventDefault(); dbg({ gl: "context lost" }); });
+cvs.addEventListener("webglcontextrestored", () => dbg({ gl: "context restored" }));
+
+const VERT = `
+attribute vec2 p;
+void main() { gl_Position = vec4(p, 0.0, 1.0); }
+`;
+
+const FRAG = `
+precision highp float;
+uniform vec2 R;        // canvas resolution
+uniform float T;       // seconds, paused when hidden so no drift
+uniform float DPR;
+
+// ---- hash / noise / fbm ----------------------------------------------------
+float hash(vec2 q) {
+  q = fract(q * vec2(234.34, 435.345));
+  q += dot(q, q + 34.23);
+  return fract(q.x * q.y);
+}
+float noise(vec2 q) {
+  vec2 i = floor(q), f = fract(q);
+  f = f * f * (3.0 - 2.0 * f);
+  float a = hash(i), b = hash(i + vec2(1, 0)), c = hash(i + vec2(0, 1)), d = hash(i + vec2(1, 1));
+  return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+float fbm(vec2 q) {
+  float v = 0.0, a = 0.5;
+  for (int i = 0; i < 4; i++) { v += a * noise(q); q = q * 2.03 + vec2(11.7, 5.3); a *= 0.5; }
+  return v;
+}
+
+// ---- ridgeline: a fbm mountain profile in "world" x ------------------------
+float ridge(float x, float seed, float amp) {
+  // two octaves of terrain: broad swells + sharp jags, then peak-sharpen
+  float h = 0.62 * fbm(vec2(x * 1.7 + seed * 37.0, seed * 91.0))
+          + 0.38 * fbm(vec2(x * 6.5 + seed * 11.0, seed * 53.0));
+  h = pow(h, 1.5);
+  return amp * (0.05 + 1.7 * h);
+}
+
+void main() {
+  vec2 uv = gl_FragCoord.xy / R;          // 0..1
+  float x = uv.x * (R.x / R.y);           // aspect-corrected world x
+  float t = T;
+
+  // ---- deep sky: cold gradient, darkest at top -----------------------------
+  vec3 col = mix(vec3(0.024, 0.043, 0.090), vec3(0.055, 0.075, 0.135), uv.y * 1.4 - 0.2);
+
+  // ---- stars (twinkle, dimmed low in the sky) ------------------------------
+  vec2 sg = gl_FragCoord.xy / DPR / 3.0;
+  float star = step(0.996, hash(floor(sg)));
+  float tw = 0.55 + 0.45 * sin(t * (2.0 + 3.0 * hash(floor(sg) + 7.0)) + hash(floor(sg)) * 40.0);
+  col += vec3(0.9, 0.95, 1.0) * star * tw * smoothstep(0.06, 0.5, uv.y) * 0.85;
+
+  // ---- moon with a soft halo ------------------------------------------------
+  vec2 mp = vec2(0.80, 0.84);
+  float md = length((uv - mp) * vec2(R.x / R.y, 1.0));
+  col += vec3(0.80, 0.86, 0.97) * (smoothstep(0.032, 0.027, md) * 1.0
+        + exp(-md * 6.0) * 0.30);
+
+  // ---- aurora curtains: layered, waving, green -> violet --------------------
+  // each layer hangs from a waving base high in the sky, fading upward;
+  // brightness is vertically-stretched fbm streaks so it reads as curtains
+  for (int L = 0; L < 3; L++) {
+    float fl = float(L);
+    float speed = 0.11 + fl * 0.05;
+    float yBase = 0.52 + fl * 0.11
+      + 0.045 * sin(x * (2.1 - fl * 0.6) + t * (0.5 + fl * 0.23) + fl * 3.7)
+      + 0.04 * fbm(vec2(x * 1.6 + fl * 8.0, t * (0.22 + fl * 0.09)));
+    float d = uv.y - yBase;
+    // hang upward from the base, fading fast below it (soft base edge)
+    float curtain = exp(-max(d, 0.0) * (4.2 - fl * 0.8) - max(-d, 0.0) * 14.0);
+    // vertical streaks drifting sideways (stretched hard in y to hang like cloth)
+    float streak = fbm(vec2(x * 3.2 - t * speed, uv.y * 0.30 - t * 0.07));
+    float bright = curtain * pow(streak, 1.35) * (1.0 - fl * 0.18);
+    vec3 tint = mix(vec3(0.10, 0.95, 0.45), vec3(0.45, 0.25, 0.95),
+                    clamp(d * 1.8 + fl * 0.15, 0.0, 1.0));
+    col += tint * bright;
+    // the base edge glows and the sky just under it catches some light
+    col += vec3(0.25, 1.0, 0.55) * exp(-abs(d) * 12.0) * pow(streak, 2.0) * 0.22;
+    col += tint * exp(-max(-d, 0.0) * 6.0) * pow(streak, 2.4) * 0.05;
+  }
+
+  // ---- mountain ridges, far to near with parallax drift ---------------------
+  // dark silhouettes; the crest catches a thin aurora rim light
+  vec3 mtnCols[3];
+  mtnCols[0] = vec3(0.062, 0.082, 0.135);
+  mtnCols[1] = vec3(0.040, 0.052, 0.095);
+  mtnCols[2] = vec3(0.016, 0.022, 0.050);
+  for (int M = 0; M < 3; M++) {
+    float fm = float(M);
+    float drift = t * (0.004 + fm * 0.006);          // tiny slow parallax
+    float hTop = ridge(x + drift + fm * 13.1, fm, 0.30 - fm * 0.05) + 0.09 - fm * 0.015;
+    float m = smoothstep(hTop + 0.004, hTop - 0.004, uv.y);
+    col = mix(col, mtnCols[M], m);
+    // crest rim light, tinted by aurora green
+    col += vec3(0.35, 0.9, 0.6)
+         * smoothstep(0.014, 0.0, abs(uv.y - hTop)) * (0.20 - fm * 0.04);
+    // snow patches on upper slopes
+    float snow = smoothstep(0.55, 0.9, fbm(vec2(x * 7.0 + fm * 31.0, uv.y * 9.0)))
+               * smoothstep(hTop - 0.13, hTop, uv.y) * m;
+    col = mix(col, vec3(0.55, 0.64, 0.78), snow * (0.24 - fm * 0.05));
+  }
+
+  // ---- valley floor with a frozen river catching aurora light ---------------
+  float floorY = 0.075;
+  float ground = smoothstep(floorY + 0.003, floorY - 0.003, uv.y);
+  col = mix(col, vec3(0.045, 0.06, 0.10), ground);
+  float river = smoothstep(0.012, 0.0, abs(uv.y - floorY - 0.02
+      - 0.012 * sin(x * 5.0 + t * 0.6)))
+    * smoothstep(0.55, 0.9, noise(vec2(x * 3.0, t * 0.2)));
+  col += vec3(0.20, 0.75, 0.50) * river * 0.30;
+
+  // ---- falling snow (sparse, three depths) ----------------------------------
+  for (int S = 0; S < 3; S++) {
+    float fs = float(S);
+    vec2 sp = vec2(x * (3.0 + fs) + t * (0.10 + fs * 0.10),
+                   uv.y * (2.6 + fs * 1.2) + t * (0.16 + fs * 0.10));
+    vec2 cell = floor(sp * 9.0);
+    float flake = step(0.965, hash(cell + fs * 17.0));
+    vec2 fpos = fract(sp * 9.0) - 0.5 - 0.3 * vec2(sin(t + hash(cell) * 6.0), 0);
+    col += vec3(0.85, 0.9, 1.0) * flake * smoothstep(0.14, 0.0, length(fpos)) * (0.30 + fs * 0.16);
+  }
+
+  // gentle vignette so edges sink into night
+  col *= 0.82 + 0.18 * smoothstep(1.25, 0.3, length(uv - vec2(0.5, 0.45)) * 1.6);
+
+  gl_FragColor = vec4(col, 1.0);
+}
+`;
+
+function compile(type, src) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src);
+  gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS))
+    throw new Error(gl.getShaderInfoLog(s) || "shader compile failed");
+  return s;
+}
+const prog = gl.createProgram();
+gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
+gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
+gl.linkProgram(prog);
+if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+gl.useProgram(prog);
+
+// one fullscreen triangle strip
+const buf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+const loc = gl.getAttribLocation(prog, "p");
+gl.enableVertexAttribArray(loc);
+gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+const uR = gl.getUniformLocation(prog, "R");
+const uT = gl.getUniformLocation(prog, "T");
+const uDPR = gl.getUniformLocation(prog, "DPR");
+
+function resize() {
+  const dpr = Math.min(devicePixelRatio || 1, 1.5);   // perf redline: cap DPR
+  cvs.width = Math.round(innerWidth * dpr);
+  cvs.height = Math.round(innerHeight * dpr);
+  gl.viewport(0, 0, cvs.width, cvs.height);
+}
+addEventListener("resize", resize);
+resize();
+
+const FRAME = 1000 / 30;                               // 30fps redline
+let last = 0, t = 0, drew = 0;
+let timeScale = 1;
+window.wallSpeed = (v) => { timeScale = Math.min(5, Math.max(0.1, +v || 1)); };   // app speed knob
+function frame(now) {
+  requestAnimationFrame(frame);
+  if (drew === 0 || (drew === 1 && frame.prev)) {      // one-time visibility + GL probe
+    let renderer = "";
+    try {
+      const ext = gl.getExtension("WEBGL_debug_renderer_info");
+      renderer = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : "?";
+    } catch (e) {}
+    dbg({ probe: 1, vis: document.visibilityState, hid: document.hidden,
+      w: cvs.width, h: cvs.height, renderer });
+  }
+  if (document.hidden) { frame.prev = 0; return; }     // pause when not visible
+  if (frame.prev && now - frame.prev > 1500) dbg({ stall: Math.round(now - frame.prev) });
+  if (now - last < FRAME) return;
+  last = now;
+  t += (now - (frame.prev || now)) / 1000 * timeScale;  // clock excludes hidden time, scaled
+  frame.prev = now;
+  gl.uniform2f(uR, cvs.width, cvs.height);
+  gl.uniform1f(uT, t);
+  gl.uniform1f(uDPR, Math.min(devicePixelRatio || 1, 1.5));
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  if (!drew) { drew = 1; dbg({ gl: "first draw done" }); }
+}
+requestAnimationFrame(frame);
+
+window.__wallTest = { ok: true, glError: null };
+dbg({ ready: 1 });
+</script>
+</body>
+</html>

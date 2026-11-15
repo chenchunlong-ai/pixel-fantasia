@@ -1,0 +1,33 @@
+# whitelist-style: everything is ignored except what this project publishes
+*
+
+# --- published: the app and its engine ---
+!src/
+!src/**
+!palette-wallpaper/
+!palette-wallpaper/**
+# built artifacts stay out entirely (screenshots for README live in docs/img)
+palette-wallpaper/out/
+!docs/
+!docs/**
+!privacy.html
+!package.json
+!package-lock.json
+
+# --- published: community & legal ---
+!LICENSE
+!NOTICE.md
+!README.md
+!CHANGELOG.md
+!CONTRIBUTING.md
+!CODE_OF_CONDUCT.md
+!.github/
+!.github/**
+!.gitignore
+
+# --- but never these, anywhere ---
+node_modules/
+out/**/deps/
+palette-wallpaper/out/deps/
+**/*.log
+settings.json
