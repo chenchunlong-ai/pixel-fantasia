@@ -1,5 +1,7 @@
 <div align="center">
 
+简体中文 | [**English**](README.en.md)
+
 # 像素幻境 · Pixel Fantasia
 
 **轻量像素动态壁纸 · 一键换色 · 可装自制壁纸和桌宠**
