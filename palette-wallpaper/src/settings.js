@@ -570,6 +570,11 @@ async function copySkillPrompt(spec) {
   }
 }
 
+// the renderer profile grows with 3D wallpapers — show the real size and let the user reclaim it
+$("#cacheClear").onclick = () => {
+  $("#cacheHint").textContent = "";
+  say({ type: "clearCache" });
+};
 // ---- about panel: version + contact links (click to copy — WACK forbids opening browsers) ----
 const REPO_URLS = {
   gh: "https://github.com/chenchunlong-ai/pixel-fantasia",
@@ -794,7 +799,9 @@ globalThis.pixelFXSettings = {
       $("#msg").textContent = t("skillSaveFail", { err: s.skillSaveFail });
       $("#msg").className = "";
     }
-    if (s.skillText != null) copySkillPrompt(s.skillText);
+        if (s.skillText != null) copySkillPrompt(s.skillText);
+    if (s.cacheCleared) $("#cacheHint").textContent = t("cacheDone");
+    else if (s.cacheMb != null) $("#cacheHint").textContent = t("cacheHint", { mb: s.cacheMb });
     $("#pause").textContent = paused ? t("resumeBtn") : t("pauseBtn");
     updateState();
   },
@@ -804,5 +811,6 @@ if (!host) {
   const saved = localStorage.getItem("pixelfx-palette.config");
   pixelFXSettings.load(saved || JSON.stringify(normalize(null)));
 } else {
-  say({ type: "ready" });
+    say({ type: "ready" });
+  say({ type: "getCacheInfo" });
 }

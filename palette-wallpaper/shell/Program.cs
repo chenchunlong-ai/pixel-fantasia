@@ -83,8 +83,11 @@ namespace PixelFX
                 else if (e.Reason == SessionSwitchReason.SessionUnlock) Wallpaper.SessionLock(false);
             };
 
+                        // a "clean cache" click only writes a flag: the kernel keeps its cache files open,
+            // so the real wipe happens here, on start, before the browser comes up.
+            WipeCacheIfFlagged();
             // create the renderer once the message loop is pumping
-            CoreWebView2Environment.CreateAsync(null, Path.Combine(Store.DataDir, "webview")).ContinueWith(delegate (System.Threading.Tasks.Task<CoreWebView2Environment> t)
+            CoreWebView2Environment.CreateAsync(null, Path.Combine(Store.DataDir, "webview"), EnvOptions()).ContinueWith(delegate (System.Threading.Tasks.Task<CoreWebView2Environment> t)
             {
                 if (t.IsFaulted)
                 {
@@ -293,7 +296,9 @@ namespace PixelFX
                 else if (t == "importWallpaperData") ImportWallpaper(d);
                 else if (t == "importPetData") ImportPet(d);
                 else if (t == "saveSkill") SaveSkill();
-                else if (t == "getSkillText") PushSkillText();
+                                else if (t == "getSkillText") PushSkillText();
+                else if (t == "getCacheInfo") PushCacheInfo();
+                else if (t == "clearCache") ClearCache();
                 else if (t == "removeWallpaper") RemoveWallpaper(d);
                 else if (t == "removePet") RemovePet(d);
                 else if (t == "restoreHidden") RestoreHidden(d);
@@ -405,6 +410,82 @@ namespace PixelFX
             catch (Exception ex) { Log("skill text failed: " + ex.Message); }
         }
 
+                // ---- webview cache: cap it, report it, let the user wipe it --------------------------
+        // A 3D wallpaper makes Chromium write shader and GPU caches. Unbounded, the profile
+        // grows by tens of MB, which would make the "under 1 MB" claim look false in
+        // Settings > Apps. Both caches are capped at 8 MB below; the button in the about
+        // panel reports the real size and lets the user reclaim it.
+        private static CoreWebView2EnvironmentOptions EnvOptions()
+        {
+            return new CoreWebView2EnvironmentOptions("--disk-cache-size=8388608 --gpu-disk-cache-size-kb=8192 --disable-component-update --disable-features=OptimizationHints,OptimizationGuideModelDownloading,Translate,MediaRouter,MSOfficeLinkHandler");
+        }
+
+        private static string CacheDir() { return Path.Combine(Store.DataDir, "webview"); }
+
+        private static long DirSize(string dir)
+        {
+            long n = 0;
+            try
+            {
+                foreach (string f in Directory.GetFiles(dir, "*", SearchOption.AllDirectories))
+                    try { n += new FileInfo(f).Length; } catch { }
+            }
+            catch { }
+            return n;
+        }
+
+        private static string Mb(long bytes)
+        {
+            return (bytes / 1048576.0).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        private static void WipeCacheIfFlagged()
+        {
+            string flag = Path.Combine(Store.DataDir, "cache-clear.flag");
+            if (!File.Exists(flag)) return;
+            try
+            {
+                long before = DirSize(CacheDir());
+                if (Directory.Exists(CacheDir())) Directory.Delete(CacheDir(), true);
+                File.Delete(flag);
+                Log("cache wiped on start, freed " + Mb(before) + " MB");
+            }
+            catch (Exception ex) { Log("cache wipe on start failed: " + ex.Message); }
+        }
+
+        private static void PushCacheInfo()
+        {
+            try
+            {
+                if (Settings == null || Settings.IsDisposed) return;
+                Settings.PushState("{\"cacheMb\":" + Mb(DirSize(CacheDir())) + "}");
+            }
+            catch (Exception ex) { Log("cache info failed: " + ex.Message); }
+        }
+
+        private static void ClearCache()
+        {
+            try
+            {
+                // the kernel keeps these files open, so the full wipe waits for the next start;
+                // try now too, so a small cache disappears immediately.
+                File.WriteAllText(Path.Combine(Store.DataDir, "cache-clear.flag"), "1");
+                foreach (string name in new string[] { "Cache", "Code Cache", "GPUCache", "ShaderCache", "GrShaderCache" })
+                {
+                    try
+                    {
+                        foreach (string p in Directory.GetDirectories(CacheDir(), name, SearchOption.AllDirectories))
+                            try { Directory.Delete(p, true); } catch { }
+                    }
+                    catch { }
+                }
+                long left = DirSize(CacheDir());
+                Log("cache clear requested, " + Mb(left) + " MB still on disk");
+                if (Settings != null && !Settings.IsDisposed)
+                    Settings.PushState("{\"cacheCleared\":true,\"cacheMb\":" + Mb(left) + "}");
+            }
+            catch (Exception ex) { Log("cache clear failed: " + ex.Message); }
+        }
         private static void RemoveWallpaper(Dictionary<string, object> d)
         {
             try
