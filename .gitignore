@@ -32,3 +32,10 @@ out/**/deps/
 palette-wallpaper/out/deps/
 **/*.log
 settings.json
+
+# --- published: cross-AI collaboration protocol ---
+!AGENTS.md
+!collab/
+!collab/**
+# locks are transient state, never committed
+collab/locks/
