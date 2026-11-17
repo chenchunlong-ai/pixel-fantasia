@@ -293,6 +293,7 @@ namespace PixelFX
                 else if (t == "importWallpaperData") ImportWallpaper(d);
                 else if (t == "importPetData") ImportPet(d);
                 else if (t == "saveSkill") SaveSkill();
+                else if (t == "getSkillText") PushSkillText();
                 else if (t == "removeWallpaper") RemoveWallpaper(d);
                 else if (t == "removePet") RemovePet(d);
                 else if (t == "restoreHidden") RestoreHidden(d);
@@ -389,6 +390,19 @@ namespace PixelFX
                 if (Settings != null && !Settings.IsDisposed)
                     Settings.PushState("{\"skillSaveFail\":" + new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(ex.Message) + "}");
             }
+        }
+
+        // hand the embedded SKILL.md to the settings page, which copies it into a one-shot
+        // AI prompt (the store listing promises "one sentence -> a wallpaper", so the button
+        // must deliver the real spec, not a link).
+        private static void PushSkillText()
+        {
+            try
+            {
+                if (Settings == null || Settings.IsDisposed) return;
+                Settings.PushState("{\"skillText\":" + new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(App.SkillMd) + "}");
+            }
+            catch (Exception ex) { Log("skill text failed: " + ex.Message); }
         }
 
         private static void RemoveWallpaper(Dictionary<string, object> d)

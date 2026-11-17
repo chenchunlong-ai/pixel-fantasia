@@ -542,6 +542,34 @@ document.querySelectorAll(".menuPanel").forEach((p) => p.addEventListener("click
 // the authoring skill ships inside the app — save it to the user's documents folder on click
 $("#skillSave").onclick = () => say({ type: "saveSkill" });
 
+// "one sentence -> a wallpaper": copy a ready-to-paste prompt (the full authoring spec
+// plus two fill-in templates). The spec ships inside the shell, so we ask for it first.
+$("#skillPrompt").onclick = () => {
+  $("#promptHint").textContent = "";
+  say({ type: "getSkillText" });
+};
+
+async function copySkillPrompt(spec) {
+  const body = [
+    t("skillPromptIntro"),
+    "",
+    t("skillPromptTplWall"),
+    t("skillPromptTplPet"),
+    "",
+    t("skillPromptSpecHead"),
+    "",
+    String(spec || "").trim(),
+    "",
+    t("skillPromptSpecTail"),
+  ].join("\n");
+  try {
+    await navigator.clipboard.writeText(body);
+    $("#promptHint").textContent = t("skillPromptCopied");
+  } catch (e) {
+    $("#promptHint").textContent = t("skillPromptFail");     // clipboard denied: say so
+  }
+}
+
 // ---- about panel: version + contact links (click to copy — WACK forbids opening browsers) ----
 const REPO_URLS = {
   gh: "https://github.com/chenchunlong-ai/pixel-fantasia",
@@ -766,6 +794,7 @@ globalThis.pixelFXSettings = {
       $("#msg").textContent = t("skillSaveFail", { err: s.skillSaveFail });
       $("#msg").className = "";
     }
+    if (s.skillText != null) copySkillPrompt(s.skillText);
     $("#pause").textContent = paused ? t("resumeBtn") : t("pauseBtn");
     updateState();
   },
