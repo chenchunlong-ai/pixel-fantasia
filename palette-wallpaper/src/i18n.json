@@ -1,7 +1,7 @@
 {
  "zh": {
   "appName": "像素幻境",
-  "appSub": "轻量像素动态壁纸 · 一键换色 · 可装自制壁纸和桌宠",
+  "appSub": "不到 1MB 的像素动态壁纸，还能养桌宠：免费开源、完全离线不联网，不收集任何信息；内置 AI 制作规范，一句话生成你的壁纸和桌宠。",
   "settingsTitle": "像素幻境 · 设置",
   "wallpaper": "壁纸",
   "currentEffect": "当前壁纸",
@@ -214,7 +214,7 @@
  },
  "en": {
   "appName": "Pixel Fantasia",
-  "appSub": "Lightweight pixel live wallpapers · one-click recolor · load your own wallpapers & pets",
+  "appSub": "Pixel live wallpapers under 1 MB, plus desktop pets: free & open source, fully offline, collects nothing; built-in AI authoring spec - one sentence makes your wallpaper and pet.",
   "settingsTitle": "Pixel Fantasia · Settings",
   "wallpaper": "Wallpaper",
   "currentEffect": "Current wallpaper",
@@ -427,7 +427,7 @@
  },
  "ja": {
   "appName": "ピクセル幻想",
-  "appSub": "軽量ピクセル動く壁紙 · ワンクリック色替え · 自作壁紙とペットを追加",
+  "appSub": "1MB 未満のピクセル動く壁紙、ペットも飼える：無料・オープンソース、完全オフラインで情報収集なし；AI 制作仕様を内蔵、ひと言で壁紙とペットを生成。",
   "settingsTitle": "ピクセル幻想 · 設定",
   "wallpaper": "壁紙",
   "currentEffect": "効果",
@@ -594,7 +594,7 @@
  },
  "ko": {
   "appName": "픽셀 환상",
-  "appSub": "가벼운 픽셀 라이브 배경 · 원클릭 색상 변경 · 자작 배경과 펫 추가",
+  "appSub": "1MB 미만 픽셀 라이브 배경, 펫도 키울 수 있어요: 무료·오픈소스, 완전 오프라인, 정보 수집 없음; AI 제작 규격 내장, 한마디로 배경과 펫 생성.",
   "settingsTitle": "픽셀 환상 · 설정",
   "wallpaper": "배경화면",
   "currentEffect": "효과",
@@ -761,7 +761,7 @@
  },
  "ru": {
   "appName": "Пиксельная Фантазия",
-  "appSub": "Лёгкие пиксельные живые обои · перекраска в один клик · свои обои и питомцы",
+  "appSub": "Пиксельные живые обои меньше 1 МБ, и питомцы: бесплатно, открытый код, полностью офлайн, ничего не собирает; встроенная спецификация ИИ — одна фраза, и обои с питомцем готовы.",
   "settingsTitle": "Пиксельная Фантазия · Настройки",
   "wallpaper": "Обои",
   "currentEffect": "Эффект",
@@ -928,7 +928,7 @@
  },
  "es": {
   "appName": "Fantasía de Píxeles",
-  "appSub": "Fondos de píxeles ligeros · recolor con un clic · añade tus fondos y mascotas",
+  "appSub": "Fondos animados de píxeles de menos de 1 MB, y mascotas: gratis y open source, totalmente offline, no recopila nada; especificación de IA integrada: una frase crea tu fondo y tu mascota.",
   "settingsTitle": "Fantasía de Píxeles · Ajustes",
   "wallpaper": "Fondo",
   "currentEffect": "Efecto",
@@ -1095,7 +1095,7 @@
  },
  "pt": {
   "appName": "Fantasia de Pixels",
-  "appSub": "Papéis de parede de pixels leves · recolorir num clique · adicione os seus papéis e pets",
+  "appSub": "Papéis de parede animados de pixels com menos de 1 MB, e pets: grátis e open source, totalmente offline, não coleta nada; especificação de IA embutida: uma frase cria seu papel e seu pet.",
   "settingsTitle": "Fantasia de Pixels · Ajustes",
   "wallpaper": "Papel de parede",
   "currentEffect": "Efeito",
@@ -1262,7 +1262,7 @@
  },
  "de": {
   "appName": "Pixel-Fantasie",
-  "appSub": "Leichte Pixel-Live-Wallpaper · Farbwechsel per Klick · eigene Wallpaper & Haustiere",
+  "appSub": "Pixel-Live-Wallpaper unter 1 MB, dazu Haustiere: kostenlos & Open Source, komplett offline, sammelt nichts; integrierte KI-Spezifikation - ein Satz erzeugt Wallpaper und Haustier.",
   "settingsTitle": "Pixel-Fantasie · Einstellungen",
   "wallpaper": "Hintergrund",
   "currentEffect": "Effekt",
@@ -1429,7 +1429,7 @@
  },
  "fr": {
   "appName": "Fantaisie Pixel",
-  "appSub": "Fonds d'écran pixels légers · recoloration en un clic · vos fonds d'écran et vos mascottes",
+  "appSub": "Fonds d'écran animés en pixels de moins de 1 MB, et des mascottes : gratuit et open source, entièrement hors ligne, ne collecte rien ; spécification IA intégrée : une phrase crée votre fond et votre mascotte.",
   "settingsTitle": "Fantaisie Pixel · Réglages",
   "wallpaper": "Fond d’écran",
   "currentEffect": "Effet",
