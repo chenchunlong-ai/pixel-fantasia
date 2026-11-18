@@ -115,6 +115,10 @@ export function initPets(say) {
   const drawer = createBuiltinDrawer();
   const mounts = new Map();          // petId -> { wrap, c, pid } (file pets)
   let cfg = null;
+  let renderFx = null;               // the scene actually on screen: the config's fx normally,
+                                     // but hotkey/auto-cycle/time-rule switches happen inside the
+                                     // wallpaper page, so the page tells us the new fx (pets must
+                                     // follow the scene, or the old pet stays on the new wallpaper)
   let builtinTicker = 0;             // shared rAF handle for the builtin canvases
   let last = 0;
 
@@ -136,14 +140,22 @@ export function initPets(say) {
 
   function render() {
     if (!cfg) return;
-    const fxId = cfg.fx || "";
+    const fxId = renderFx || cfg.fx || "";
+    // master switch: no pet layer at all
+    if (cfg.petOn === false) {
+      slots.innerHTML = "";
+      drawer.sync([]);
+      say({ type: "dbg", fx: fxId, n: 0, pets: [] });
+      return;
+    }
     const all = [...BUILTIN_PETS.map((id) => ({ id, builtin: true })), ...(cfg.pets || [])];
     let enabledIdx = 0;                                   // pets without a saved pose fan out across the screen
     const enabled = [];                                   // [{ pet, pose }] — poses normalised first
     for (const pet of all) {
       const saved = (cfg.petCfg[fxId] || {})[pet.id];
-      const pose = saved || petPose(cfg, fxId, pet.id, !pet.builtin);   // builtins stay off until enabled
-      if (!saved && !pose.on) continue;
+      // pets are enabled PER WALLPAPER: no record for this wallpaper means off (builtin and file
+      // pets alike). Otherwise a pet enabled on wallpaper A leaks onto every other wallpaper.
+      const pose = saved || petPose(cfg, fxId, pet.id, false);
       if (!saved) { pose.x = 34 + (enabledIdx % 3) * 16; pose.y = 30 + Math.floor(enabledIdx / 3) * 18; }
       enabledIdx += pose.on ? 1 : 0;
       if (!pose.on) continue;
@@ -206,6 +218,14 @@ export function initPets(say) {
     /** The shell pushes the whole config here on every apply. */
     apply(json) {
       cfg = typeof json === "string" ? JSON.parse(json) : json;
+      renderFx = cfg.fx;
+      render();
+    },
+    /** The scene changed inside the wallpaper page (hotkey "next", auto cycle, time rule): re-read
+        this wallpaper's pet set instead of keeping the previous one on screen. */
+    fx(id) {
+      if (!cfg) return;
+      renderFx = id;
       render();
     },
   };

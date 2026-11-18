@@ -42,6 +42,7 @@ function apply(id, opts) {
     if (raf) { cancelAnimationFrame(raf); raf = 0; }
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, W, H);
+    if (globalThis.pixelFXPets) globalThis.pixelFXPets.fx(id);   // drop the old wallpaper's pets
     say({ type: "state", fx: id, paused: true });
     return;
   }
@@ -58,6 +59,9 @@ function apply(id, opts) {
     canvas.height = h;
   }
   document.title = "Pixel Fantasia";
+  // the pet layer follows the scene: each wallpaper keeps its own pets, so the previous one's
+  // pet must go even though the shell's config still names the old fx
+  if (globalThis.pixelFXPets) globalThis.pixelFXPets.fx(real);
   say({ type: "state", fx: real, paused });
 }
 

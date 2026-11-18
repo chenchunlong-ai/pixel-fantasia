@@ -370,6 +370,12 @@ namespace PixelFX
                 string file = Path.Combine(Store.PetDir, id + ".html");
                 File.Copy(src, file, true);
                 Cfg.pets.Add(new PetFile { id = id, name = name, file = file });
+                // a freshly imported pet is turned ON for the wallpaper it was dropped on: pets are
+                // enabled per wallpaper now, so "no record" means off everywhere else
+                if (Cfg.petCfg == null) Cfg.petCfg = new Dictionary<string, Dictionary<string, PetPose>>();
+                string fxKey = Cfg.fx ?? "";
+                if (!Cfg.petCfg.ContainsKey(fxKey)) Cfg.petCfg[fxKey] = new Dictionary<string, PetPose>();
+                Cfg.petCfg[fxKey][id] = new PetPose { on = true };
                 Apply(Cfg);
                 Log("imported pet " + src);
             }

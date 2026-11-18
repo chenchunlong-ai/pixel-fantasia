@@ -496,7 +496,7 @@ function fillPets() {
   const boxE = $("#petEnabled"), boxA = $("#petAll");
   boxE.innerHTML = ""; boxA.innerHTML = "";
   for (const pet of all) {
-    const pose = petPose(cfg, cfg.fx, pet.id, !pet.builtin);
+    const pose = petPose(cfg, cfg.fx, pet.id, false);
     const chip = document.createElement("button");
     chip.className = "chip" + (pose.on ? " on" : "");
     chip.textContent = pet.name;
@@ -634,7 +634,7 @@ function enabledPets() {
     ...BUILTIN_PETS.map((id) => ({ id, name: t("pet_" + id.slice(8)), builtin: true })),
     ...(cfg.pets || []).map((p) => ({ ...p, builtin: false })),
   ];
-  return all.filter((p) => petPose(cfg, cfg.fx, p.id, !p.builtin).on);
+  return all.filter((p) => petPose(cfg, cfg.fx, p.id, false).on);
 }
 
 /** keep the file-pet iframes over the preview aligned with their poses */
@@ -652,7 +652,7 @@ function layoutPreviewPets() {
   }
   for (const pet of enabledPets()) {
     if (pet.builtin) continue;                          // builtins are drawn on the canvas
-    const pose = petPose(cfg, cfg.fx, pet.id);
+    const pose = petPose(cfg, cfg.fx, pet.id, false);
     const size = r.width * 0.2;
     const wrap = document.createElement("div");
     wrap.style.cssText = "position:absolute;pointer-events:none;" +
@@ -720,7 +720,7 @@ pvBox.addEventListener("mousedown", (e) => {
   const px = (e.clientX - r.left) / r.width * 100, py = (e.clientY - r.top) / r.height * 100;
   let best = null, bd = 14;
   for (const pet of enabledPets()) {
-    const pose = petPose(cfg, cfg.fx, pet.id, !pet.builtin);
+    const pose = petPose(cfg, cfg.fx, pet.id, false);
     const d = Math.hypot(px - pose.x, (py - pose.y) * (r.height / r.width));
     if (d < bd) { bd = d; best = { pet, pose }; }
   }
@@ -741,7 +741,7 @@ addEventListener("mouseup", () => { dragPet = null; });
 pvBox.addEventListener("wheel", (e) => {
   if (!dragPet && !pickPetAt(e)) return;
   const pet = dragPet || pickPetAt(e);
-  const pose = petPose(cfg, cfg.fx, pet.id, !pet.builtin);
+  const pose = petPose(cfg, cfg.fx, pet.id, false);
   e.preventDefault();
   if (e.altKey) pose.rot = (pose.rot + (e.deltaY > 0 ? 5 : -5) + 360) % 360;
   else pose.scale = Math.min(3, Math.max(0.2, pose.scale * (e.deltaY > 0 ? 0.95 : 1.05)));
@@ -751,7 +751,7 @@ pvBox.addEventListener("wheel", (e) => {
 pvBox.addEventListener("dblclick", (e) => {
   const hit = pickPetAt(e);
   if (!hit) return;
-  const pose = petPose(cfg, cfg.fx, hit.id, !hit.builtin);
+  const pose = petPose(cfg, cfg.fx, hit.id, false);
   pose.flip = !pose.flip;
   savePetPose(cfg.fx, hit.id, pose, true);
   layoutPreviewPets();
@@ -761,7 +761,7 @@ function pickPetAt(e) {
   const px = (e.clientX - r.left) / r.width * 100, py = (e.clientY - r.top) / r.height * 100;
   let best = null, bd = 14;
   for (const pet of enabledPets()) {
-    const pose = petPose(cfg, cfg.fx, pet.id, !pet.builtin);
+    const pose = petPose(cfg, cfg.fx, pet.id, false);
     const d = Math.hypot(px - pose.x, (py - pose.y) * (r.height / r.width));
     if (d < bd) { bd = d; best = pet; }
   }

@@ -9,10 +9,10 @@
 | --- | --- |
 | 版本（`version.mjs` 唯一源） | `1.0.0.0`（商店已提交待审） |
 | 下一次发行版本 | `1.0.1.0`（未定日期） |
-| 构建产物（2026-11-18 02:42 重建） | `PixelPalette.exe` 457.5 KB / `PixelPalette-Setup.exe` 744.5 KB / `4A5AB34E.62945D70D0F14_1.0.0.0_x64.msix` 0.8 MB / `app.zip` 589.8 KB |
-| 验证状态 | `build.mjs` **通过**；真机 **3D 壁纸跑通**（2026-11-18 02:45 实跑，`wallFrame ok:true`）；`verify.mjs` 上次通过于 02:06（本次未跑） |
+| 构建产物（2026-11-18 17:00 重建） | `PixelPalette.exe` 474 KB / `PixelPalette-Setup.exe` 782 KB / `4A5AB34E.62945D70D0F14_1.0.0.0_x64.msix` 0.8 MB / `app.ico` 62.8 KB |
+| 验证状态 | `build.mjs` **通过**；真机 3D 壁纸跑通（02:45）；真机宠物跟随壁纸 **通过**（17:01 自动轮换实跑：`dbg fx=weather/black-hole n=0`）；`verify.mjs` 上次通过于 02:06（本次未跑） |
 | WebView2 缓存（真机实测） | 新构建全新 profile 6 分钟后 **11.7 MB**（旧 profile 72.5 MB，降 84%） |
-| git HEAD | `b661820` 2026-11-18 feat(header): 顶部副标题改为商店 A 版文案（9 语言）（其后紧跟本次状态板提交） |
+| git HEAD | `4e01901` 2026-11-18 docs(collab): 交接机制加固（其后紧跟本次「新 logo + 宠物修复」提交） |
 
 ## 正在进行的改动（在飞）
 
@@ -24,7 +24,7 @@
 
 ## 最近 3 条
 
-1. 2026-11-18 · 本次提交 · 豆包 · 交接机制加固（吸收另一 Agent 方案的三点）：`HANDOVER.md` 新增「开工先跑 `git status`/`log`/`diff`」一节，`AGENTS.md` 第 0 条加 git 自查，journal 模板新增「高危面清单」（依赖/构建脚本/版本号/数据格式/WebView2 参数）
+1. 2026-11-18 · 本次提交 · 豆包 · 换新版 Logo（`app-icon.jpg` → `app.ico` 7 条目 + MSIX 5 张图标全部重生成）**并修复宠物不跟随壁纸**：`pets.js` 增 `renderFx` / `pixelFXPets.fx(id)`、宠物「无记录 = 关」、`cfg.petOn` 死开关生效；`runtime.js` 页内切场景（下一张/自动轮换/时段规则）通知宠物层；`settings.js` 五处默认值；`Program.cs` `ImportPet` 为当前壁纸写显式 `on`。真机 17:01 轮换实测 `n=1 → n=0`
 2. 2026-11-18 · `3e6adf2` · 豆包 · WebView2 缓存治理：`Program.cs` 注入 `--disk-cache-size=8388608` 等 7 段 flags 并在启动最早期按标记清 `webview` 目录；设置页加「清理缓存」按钮（`cacheBtn`/`cacheHint`/`cacheDone`/`cacheFail` × 9 语言）。真机：3D 照常渲染，profile **72.5 → 11.7 MB**
 3. 2026-11-18 · `b661820` · 豆包 · 顶部副标题改为商店 A 版文案：`appSub` 9 语言统一为「不到 1MB 的像素动态壁纸，还能养桌宠：免费开源、完全离线不联网，不收集任何信息；内置 AI 制作规范，一句话生成你的壁纸和桌宠。」
 
@@ -34,8 +34,7 @@
 - [ ] **人工验收 2**：设置 → 关于 → 点「复制制作提示词」→ 粘到记事本，应看到约 8 KB 完整规范
 - [ ] **人工验收 3**：托盘双击开设置窗 → 底部应显示「清理缓存」按钮与其上方一行"当前缓存 X MB"；点一下应变"已清理，重启应用后完全释放"；重启后 `%LOCALAPPDATA%\PixelPalette\webview` 应被清空再从 0 长
 - [ ] 商店字段：9 语言 Short description、Keywords、App features 录入 Partner Center（定稿在 `D:\AAAAA\ShiPin\1\about-prompt\商店短语-9语言与配套字段.md`）
-- [ ] 内容扩充：从引擎 244 个效果里挑选可当全屏壁纸的（nature / water / fire / scifi 优先）
-- [ ] 打赏：Microsoft Store 消耗型附加组件（¥6 / ¥18），等 1.0.0.0 过审后开工
+- [ ] 内容扩充：从引擎 244 个效果里挑选可当全屏壁纸的（nature / water / fire / scifi 优先）- [ ] 打赏：Microsoft Store 消耗型附加组件（¥6 / ¥18），等 1.0.0.0 过审后开工
 - [ ] 鼠标交互（雪随气流）：外壳 GetCursorPos 轮询 → 现有 Push 通道
 - [ ] Gitee 镜像：建成后填 `REPO_URLS.gitee`
 - [ ] 对外文档修正：README 副标题仍是旧文案「轻量像素动态壁纸 · 一键换色 · 可装自制壁纸和桌宠」；Setup 体积写 515 KB（实况 744.5 KB）、MSIX 写 0.4 MB（实况 772.6 KB）
@@ -44,6 +43,8 @@
 
 | 日期 | 事项 | 提出者 |
 | --- | --- | --- |
+| 2026-11-18 | 宠物语义变化：自制宠物此前「无记录 = 开」（会跟到每张壁纸），现改为「无记录 = 关」（只在自己启用过的壁纸出现）。要不要在升级时做一次性迁移，把当前壁纸上的宠物补成显式开启？ | 豆包 |
+| 2026-11-18 | 内部壁纸（引擎自绘场景）能用 `Ctrl+Alt+N` 切下一张，**外部壁纸（自制/导入的 HTML）下热键无效**（wallwrap 页不处理 `next`）。要不要补上这个短板 | 豆包 |
 | 2026-11-18 | 顶部副标题折成 2 行后是否接受；若要 1 行，是缩字号（`.sub` 11px → 10px）还是砍文案（例如去掉"不收集任何信息"或"还能养桌宠"） | 豆包 |
 | 2026-11-18 | `AGENTS.md` 目录所有权表仍是占位角色：谁当“内容方”（`src/scenes/`、`src/fx/`、`src/pets.js`）、谁当“外壳方”（`shell/`、`palette-wallpaper/*.mjs`） | 豆包 |
 | 2026-11-18 | 是否随下一次发行升版本到 `1.0.1.0` 并补 What's new（当前已有 3 个未发行改动） | 豆包 |
