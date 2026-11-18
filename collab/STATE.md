@@ -9,10 +9,10 @@
 | --- | --- |
 | 版本（`version.mjs` 唯一源） | `1.0.0.0`（商店已提交待审） |
 | 下一次发行版本 | `1.0.1.0`（未定日期） |
-| 构建产物（2026-11-18 21:46 重建） | `PixelPalette.exe` 500 KB / `PixelPalette-Setup.exe` 832 KB / `4A5AB34E.62945D70D0F14_1.0.0.0_x64.msix` 0.7 MB / `app.ico` 86 KB（32 色阶量化，四角 alpha=0） |
+| 构建产物（2026-11-18 23:25 重建） | `PixelPalette.exe` 502 KB / `PixelPalette-Setup.exe` 833 KB / `4A5AB34E.62945D70D0F14_1.0.0.0_x64.msix` 0.7 MB / `app.ico` 86 KB（32 色阶量化，四角 alpha=0） |
 | 验证状态 | `build.mjs` **通过**；真机 3D 壁纸跑通（02:45）；真机宠物跟随壁纸 **通过**（17:01 自动轮换实跑：`dbg fx=weather/black-hole n=0`）；设置页预览 3D→2D 宠物残留修复 17:30 浏览器实测**通过**（`#pvPetCv` 移除、`#pvPets` 清空、状态行跟随）；`verify.mjs` 上次通过于 02:06（本次未跑） |
 | WebView2 缓存（真机实测） | 新构建全新 profile 6 分钟后 **11.7 MB**（旧 profile 72.5 MB，降 84%） |
-| git HEAD | `be526d0` 2026-11-18 feat(rift): 重画时空裂缝 |
+| git HEAD | `be526d0` 2026-11-18 feat(rift): 重画时空裂缝（第二轮更凶化见 journal 2026-11-18-2325，已提交后本行由下次提交更新） |
 
 ## 正在进行的改动（在飞）
 
@@ -24,9 +24,9 @@
 
 ## 最近 3 条
 
-1. 2026-11-18 · 本次提交 · 豆包 · **重画「时空裂缝」**（`src/fx/rift.js`）：近黑唇线 + 手撕锯齿（读成"天上破了个洞"）、硬底高对比星云 + 贯穿暗尘沟、常驻丝状亮纹；新增 7 次/12s 不等间隔放电事件（`EV/env/surge/flick`）：分叉电弧横跨裂缝、脊线 runner、径向射线、火花拖尾、崩落碎屑、虚线圈状冲击波、中心热核。单帧 10 ms（比 waterfall 轻）。产物体积 500 / 832 KB
-2. 2026-11-18 · 本次提交 · 豆包 · 换新版 Logo（`app-icon.jpg` → `app.ico` 7 条目 + MSIX 5 张图标全部重生成）**并修复宠物不跟随壁纸**：`pets.js` 增 `renderFx` / `pixelFXPets.fx(id)`、宠物「无记录 = 关」、`cfg.petOn` 死开关生效；`runtime.js` 页内切场景（下一张/自动轮换/时段规则）通知宠物层；`settings.js` 五处默认值；`Program.cs` `ImportPet` 为当前壁纸写显式 `on`。真机 17:01 轮换实测 `n=1 → n=0`
-3. 2026-11-18 · 本次提交 · 豆包 · **图标黑边根治 + 3D→2D 宠物残留修复 + 副标题口径调整**：`app-icon.png`（RGBA 直转）→ `icon-assets.mjs` 手写 `decodePNG` / alpha 加权 `resized` / `encodePNG`(颜色类型 6) / `quantize(32)` → `app.ico` 7 条目四角真透明（86 KB），MSIX 5 张资产同步；`settings.js` `restartPreview()` 清 `#pvPets` 叠加层 + 两分支补 `updateState()`；`i18n.json` 9 语言 `appSub` 改「安装包不到 1MB」。浏览器实测：`ext:→palette/waterfall` 后 `#pvPetCv`/`#pvWall`/宠物节点全清，状态行由 `aurora-valley-3d` 变 `瀑布谷`
+1. 2026-11-18 · 本次提交 · 豆包 · **时空裂缝第二轮（按时气压更凶）**（`src/fx/rift.js`）：放电从"亮底泛白"改"暗底爆闪"（`SKY0 #04050c`、暗体积+细热芯 `spine/thread/wisp`、暗尘埃挖黑洞、`h += S*F*(0.16+…)`）；节奏改 10 次不等间隔（0.45–1.55 s）+ 主击后 0.2 s 二次 crackle；电弧改成从脊线起爆、几乎垂直裂缝**向外崩发** 2–3 道（分叉由点改实线）；形状用 `lobeA/lobeB/BURST` 打散成鼓包-掐细交替的不对称撕裂（宽度 5–15，鼓包处约 22）；配色换冷电紫蓝 `#05060f/#0a0f2e/#1a1660/#3322a8/#5b3fe0/#9b7bff/#e6e2ff`；顺手修掉 `edge(u)` 负值导致的**游离点状虚线**（`Math.max(1.5, edge(u))`）；删 `wanderer` 调用、射线缩短、冲击环缩到 96/104。单帧 11.2–12.1 ms（waterfall 26–31 ms）
+2. 2026-11-18 · 本次提交 · 豆包 · **重画「时空裂缝」第一版**（`src/fx/rift.js`）：近黑唇线 + 手撕锯齿、硬底高对比星云 + 贯穿暗尘沟、常驻丝状亮纹；7 次/12s 等间隔放电（`EV/env/surge/flick`）：分叉电弧横跨裂缝、脊线 runner、径向射线、火花拖尾、崩落碎屑、虚线圈状冲击波、中心热核。单帧 10 ms
+3. 2026-11-18 · 本次提交 · 豆包 · 换新版 Logo（`app-icon.jpg` → `app.ico` 7 条目 + MSIX 5 张图标全部重生成）**并修复宠物不跟随壁纸**：`pets.js` 增 `renderFx` / `pixelFXPets.fx(id)`、宠物「无记录 = 关」、`cfg.petOn` 死开关生效；`runtime.js` 页内切场景（下一张/自动轮换/时段规则）通知宠物层；`settings.js` 五处默认值；`Program.cs` `ImportPet` 为当前壁纸写显式 `on`。真机 17:01 轮换实测 `n=1 → n=0`
 
 ## 下一步（已拍板未开工）
 
