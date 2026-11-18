@@ -21,7 +21,7 @@ export const meta = {
   fps: 30,
   bg: "dark",
   options: {
-    nebula: ["#05060f", "#0a0f2e", "#1a1660", "#3322a8", "#5b3fe0", "#9b7bff", "#e6e2ff"],
+    nebula: ["#0d0518", "#22093f", "#451058", "#7a1780", "#b2319c", "#e768bb", "#ffc0e8"],
     density: 1,
     seed: 9,
   },
@@ -118,7 +118,7 @@ function at(u, v) {
 }
 
 // ---- the sky -------------------------------------------------------------------------------------------
-const SKY0 = hex("#04050c"), SKY1 = hex("#0d0f2a"), BLACK = hex("#000000");
+const SKY0 = hex("#06030c"), SKY1 = hex("#150a26"), BLACK = hex("#000000");
 function space(p, t, dn) {
   rows(p, meta, TOP, BOT, (y, R) => {
     for (let i = 0; i < W; i++) {
@@ -146,10 +146,10 @@ function space(p, t, dn) {
     const k = rand(19, i, 5);
     if (k < 0.6) q.dot(x, y, hex("#8f97c0"), 0.16 + 0.3 * Math.max(0, tw));
     else if (k < 0.88) q.dot(x, y, hex("#ccd2f4"), 0.28 + 0.45 * Math.max(0, tw));
-    else if (k < 0.97) (q.px(x, y, hex("#eef2ff")), q.glow(x, y, 2.5, hex("#9fb0ee"), 0.3 * Math.max(0, tw)));
+    else if (k < 0.97) (q.px(x, y, hex("#ffe9f8")), q.glow(x, y, 2.5, hex("#ff9ed4"), 0.3 * Math.max(0, tw)));
     else {
       q.px(x, y, hex("#cfd8ff"));
-      q.glow(x, y, 3, hex("#7f95ff"), 0.35 + 0.3 * tw);
+      q.glow(x, y, 3, hex("#ff8fd0"), 0.35 + 0.3 * tw);
     }
   }
 }
@@ -256,7 +256,7 @@ function rift(p, t, dn, NL) {
 function energy(p, t, o, NL) {
   const q = q2(p);
   const hot = NL[NL.length - 1], mid = NL[NL.length - 2] || hot, cold = NL[4] || mid;
-  const ARC = hex("#f6ffff"), ICE = hex("#b8dcff"), HALO = hex("#6a56ff");
+  const ARC = hex("#fff4ff"), ICE = hex("#ffd0ee"), HALO = hex("#b2319c");
   const S = surge(t);
   for (let i = 0; i < EV.length; i++) {
     const age = ageOf(t, i), s = env(age);
@@ -269,7 +269,7 @@ function energy(p, t, o, NL) {
 
     // 1) the bolts: a strike is born on the spine and blown outward, zig-zagging as it crosses the lip and
     // dies in open space; short forks peel off the trunk on the way out and fade faster
-    const nb = 2 + Math.floor(rand(313, i, 8) * 2);          // 2..3
+    const nb = 1 + (rand(313, i, 8) > 0.62 ? 1 : 0);          // 1..2 —— fewer, longer
     const [ox, oy] = at(u, (rand(313, i, 7) - 0.5) * hw * 0.35);
     const strike = (paths, thick) => {
       for (const path of paths) {
@@ -294,11 +294,11 @@ function energy(p, t, o, NL) {
     for (let b = 0; b < nb; b++) {
       const side = rand(317, i, b, 1) < 0.5 ? -1 : 1;
       const du = (rand(317, i, b, 5) - 0.5) * 0.08;
-      const reach = (b ? hw * 1.2 + 6 : hw * 1.7 + 12) + rand(317, i, b, 3) * 26;
+      const reach = (b ? hw * 2.4 + 22 : hw * 3.4 + 44) + rand(317, i, b, 3) * 62;
       const s1 = at(u + du, side * reach);
       strike(tree(new Rng(321 + i * 23 + b * 7), ox, oy, s1[0], s1[1], 0.3, 0.18), true);
       // one or two forks, shorter and dimmer
-      const nf = 1 + Math.floor(rand(323, i, b, 1) * 2);
+      const nf = rand(323, i, b, 1) > 0.45 ? 1 : 0;
       for (let g = 0; g < nf; g++) {
         const pf = 0.25 + rand(323, i, b, g + 2) * 0.45;
         const [fx, fy] = at(u + du * pf, side * (reach * pf + (rand(323, i, b, g + 4) - 0.3) * 14));
