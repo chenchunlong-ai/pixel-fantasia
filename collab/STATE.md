@@ -12,7 +12,7 @@
 | 构建产物（2026-11-18 21:46 重建） | `PixelPalette.exe` 500 KB / `PixelPalette-Setup.exe` 832 KB / `4A5AB34E.62945D70D0F14_1.0.0.0_x64.msix` 0.7 MB / `app.ico` 86 KB（32 色阶量化，四角 alpha=0） |
 | 验证状态 | `build.mjs` **通过**；真机 3D 壁纸跑通（02:45）；真机宠物跟随壁纸 **通过**（17:01 自动轮换实跑：`dbg fx=weather/black-hole n=0`）；设置页预览 3D→2D 宠物残留修复 17:30 浏览器实测**通过**（`#pvPetCv` 移除、`#pvPets` 清空、状态行跟随）；`verify.mjs` 上次通过于 02:06（本次未跑） |
 | WebView2 缓存（真机实测） | 新构建全新 profile 6 分钟后 **11.7 MB**（旧 profile 72.5 MB，降 84%） |
-| git HEAD | `4e01901` 2026-11-18 docs(collab): 交接机制加固（其后紧跟本次「新 logo + 宠物修复」提交） |
+| git HEAD | `be526d0` 2026-11-18 feat(rift): 重画时空裂缝 |
 
 ## 正在进行的改动（在飞）
 
