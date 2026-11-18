@@ -27,8 +27,6 @@ export const EFFECTS = [
   { id: "weather/otherworld-rift", key: "fxOtherworldRift", params: ["density", "speed"] },
   { id: "palette/gorgefall", key: "fxGorgefall", params: ["density", "speed"] },
   { id: "palette/heaven", key: "fxHeaven", params: ["density", "speed"] },
-  { id: "palette/hell", key: "fxHell", params: ["density", "speed"] },
-  { id: "palette/hell3d", key: "fxHell3d", params: ["density", "speed"] },
   { id: "weather/savanna-night", key: "fxSavanna", params: ["density", "speed"] },
   { id: "palette/waterfall", key: "fxWaterfall", params: ["density", "speed"] },
   { id: "palette/fire-tornado", key: "fxFireTornado", params: ["density", "speed"] },
@@ -112,6 +110,12 @@ export function normalize(cfg) {
   c.hiddenFx = Array.isArray(cfg && cfg.hiddenFx) ? cfg.hiddenFx.filter((x) => typeof x === "string") : [];
   c.hiddenWallpapers = Array.isArray(cfg && cfg.hiddenWallpapers) ? cfg.hiddenWallpapers.filter((x) => typeof x === "string") : [];
   c.petCfg = (cfg && cfg.petCfg && typeof cfg.petCfg === "object") ? cfg.petCfg : {};
+  // a scene that no longer ships must not leave the app pointing at nothing: fall back to the default and
+  // drop it from the rules and the rotation list
+  const known = (id) => EFFECT_IDS.includes(id) || isExt(id);
+  if (!known(c.fx)) c.fx = d.fx;
+  c.rules = c.rules.filter((r) => known(r.fx));
+  c.cycle.list = c.cycle.list.filter(known);
   if (!["sky", "black", "ground"].includes(c.bg)) c.bg = "sky";
   c.display = Object.assign({ mode: "fill", align: "center" }, cfg && cfg.display);
   if (!["fill", "contain", "cover"].includes(c.display.mode)) c.display.mode = "fill";

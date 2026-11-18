@@ -1,3 +1,5 @@
+// DRAFT — not shipped. Deregistered 2026-11-19 (user: the hell scene did not make the bar); kept for the
+// water/silhouette techniques that are still worth reusing. Add it back to effects.js + params.js + i18n to ship.
 // 地狱 · 黑水湖（3D） / Hell · The Black Lake, in perspective.
 //
 // The camera is real: it hangs above the water, drifts, and everything is projected into this 320x180 buffer.

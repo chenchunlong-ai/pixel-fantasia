@@ -1,3 +1,5 @@
+// DRAFT — not shipped. Deregistered 2026-11-19 (user: the hell scene did not make the bar); kept for the
+// water/silhouette techniques that are still worth reusing. Add it back to effects.js + params.js + i18n to ship.
 // 地狱 / Hell.
 // A dead black lake at dusk. The water is still until something moves under it: rings spread across the surface,
 // a long shadow drifts beneath and never breaks through. Dead trees stand on the far bank and in the foreground as
