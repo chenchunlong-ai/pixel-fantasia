@@ -24,6 +24,8 @@ const blackHole = slow(blackHoleBase, 0.3);
 const gargantua = slow(gargantuaBase, 0.3);
 import * as rift from "./fx/rift.js";
 import * as otherworld from "./fx/otherworld-rift.js";
+import * as heaven from "./fx/heaven.js";
+import * as hell from "./fx/hell.js";
 import * as savanna from "../../src/fx/weather/savanna-night.js";
 import waterfall from "./scenes/waterfall.js";
 
@@ -57,6 +59,8 @@ export const FX = {
   "weather/gargantua": gargantua,
   "weather/rift": rift,
   "weather/otherworld-rift": otherworld,
+  "palette/heaven": heaven,
+  "palette/hell": hell,
   "weather/savanna-night": savanna,
   "palette/waterfall": waterfall,
   // the tornado-framework wallpapers

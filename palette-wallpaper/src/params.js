@@ -25,6 +25,8 @@ export const EFFECTS = [
   { id: "weather/gargantua", key: "fxGargantua", params: ["density", "speed"] },
   { id: "weather/rift", key: "fxRift", params: ["density", "speed"] },
   { id: "weather/otherworld-rift", key: "fxOtherworldRift", params: ["density", "speed"] },
+  { id: "palette/heaven", key: "fxHeaven", params: ["density", "speed"] },
+  { id: "palette/hell", key: "fxHell", params: ["density", "speed"] },
   { id: "weather/savanna-night", key: "fxSavanna", params: ["density", "speed"] },
   { id: "palette/waterfall", key: "fxWaterfall", params: ["density", "speed"] },
   { id: "palette/fire-tornado", key: "fxFireTornado", params: ["density", "speed"] },
