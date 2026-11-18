@@ -26,7 +26,7 @@ export const meta = {
 
 const D = 14, W = 320, Y0 = -170, Y1 = 10;
 const BLACK = hex("#020103");
-const HZ = -34;                             // the waterline: the far bank sits on it, everything below is water
+const HZ = -78;                             // the waterline: the far bank sits on it, everything below is water
 const q2 = (p) => clip(p, meta);
 
 const BAY = new Float32Array(16);
@@ -172,7 +172,7 @@ function farTrees(q, t, NL) {
 function beneath(q, t, NL) {
   const u = (t / D) % 1;
   const cx = -200 + u * 400;                    // it crosses the frame once per loop
-  const cy = HZ + 32;
+  const cy = HZ + 44;
   const len = 120, hgt = 9;
   // a soft darkening of the water, no object outline: it should never resolve into a shape
   for (let x = Math.floor(cx - len * 0.5); x <= Math.floor(cx + len * 0.5); x++) {
@@ -195,7 +195,7 @@ function rings(q, t, NL, dn) {
   for (let k = 0; k < n; k++) {
     const R = (j) => rand(171, k, j);
     const cx = -130 + R(1) * 260 + 8 * Math.sin((TAU * t) / D + R(2) * TAU);
-    const cy = HZ + 14 + R(3) * 26;
+    const cy = HZ + 16 + R(3) * 44;
     const sp = 0.5 + R(4) * 0.7;
     const ph = ((t / D) * sp + R(5)) % 1;
     const r = 3 + ph * (30 + R(6) * 46);
