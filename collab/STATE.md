@@ -9,8 +9,8 @@
 | --- | --- |
 | 版本（`version.mjs` 唯一源） | `1.0.0.0`（商店已提交待审） |
 | 下一次发行版本 | `1.0.1.0`（未定日期） |
-| 构建产物（2026-11-18 17:00 重建） | `PixelPalette.exe` 474 KB / `PixelPalette-Setup.exe` 782 KB / `4A5AB34E.62945D70D0F14_1.0.0.0_x64.msix` 0.8 MB / `app.ico` 62.8 KB |
-| 验证状态 | `build.mjs` **通过**；真机 3D 壁纸跑通（02:45）；真机宠物跟随壁纸 **通过**（17:01 自动轮换实跑：`dbg fx=weather/black-hole n=0`）；`verify.mjs` 上次通过于 02:06（本次未跑） |
+| 构建产物（2026-11-18 17:29 重建） | `PixelPalette.exe` 498 KB / `PixelPalette-Setup.exe` 829 KB / `4A5AB34E.62945D70D0F14_1.0.0.0_x64.msix` 0.7 MB / `app.ico` 86 KB（32 色阶量化，四角 alpha=0） |
+| 验证状态 | `build.mjs` **通过**；真机 3D 壁纸跑通（02:45）；真机宠物跟随壁纸 **通过**（17:01 自动轮换实跑：`dbg fx=weather/black-hole n=0`）；设置页预览 3D→2D 宠物残留修复 17:30 浏览器实测**通过**（`#pvPetCv` 移除、`#pvPets` 清空、状态行跟随）；`verify.mjs` 上次通过于 02:06（本次未跑） |
 | WebView2 缓存（真机实测） | 新构建全新 profile 6 分钟后 **11.7 MB**（旧 profile 72.5 MB，降 84%） |
 | git HEAD | `4e01901` 2026-11-18 docs(collab): 交接机制加固（其后紧跟本次「新 logo + 宠物修复」提交） |
 
@@ -24,15 +24,16 @@
 
 ## 最近 3 条
 
-1. 2026-11-18 · 本次提交 · 豆包 · 换新版 Logo（`app-icon.jpg` → `app.ico` 7 条目 + MSIX 5 张图标全部重生成）**并修复宠物不跟随壁纸**：`pets.js` 增 `renderFx` / `pixelFXPets.fx(id)`、宠物「无记录 = 关」、`cfg.petOn` 死开关生效；`runtime.js` 页内切场景（下一张/自动轮换/时段规则）通知宠物层；`settings.js` 五处默认值；`Program.cs` `ImportPet` 为当前壁纸写显式 `on`。真机 17:01 轮换实测 `n=1 → n=0`
-2. 2026-11-18 · `3e6adf2` · 豆包 · WebView2 缓存治理：`Program.cs` 注入 `--disk-cache-size=8388608` 等 7 段 flags 并在启动最早期按标记清 `webview` 目录；设置页加「清理缓存」按钮（`cacheBtn`/`cacheHint`/`cacheDone`/`cacheFail` × 9 语言）。真机：3D 照常渲染，profile **72.5 → 11.7 MB**
-3. 2026-11-18 · `b661820` · 豆包 · 顶部副标题改为商店 A 版文案：`appSub` 9 语言统一为「不到 1MB 的像素动态壁纸，还能养桌宠：免费开源、完全离线不联网，不收集任何信息；内置 AI 制作规范，一句话生成你的壁纸和桌宠。」
+1. 2026-11-18 · 本次提交 · 豆包 · **图标黑边根治 + 3D→2D 宠物残留修复 + 副标题口径调整**：`app-icon.png`（RGBA 直转）→ `icon-assets.mjs` 手写 `decodePNG` / alpha 加权 `resized` / `encodePNG`(颜色类型 6) / `quantize(32)` → `app.ico` 7 条目四角真透明（86 KB），MSIX 5 张资产同步；`settings.js` `restartPreview()` 清 `#pvPets` 叠加层 + 两分支补 `updateState()`；`i18n.json` 9 语言 `appSub` 改「安装包不到 1MB」。浏览器实测：`ext:→palette/waterfall` 后 `#pvPetCv`/`#pvWall`/宠物节点全清，状态行由 `aurora-valley-3d` 变 `瀑布谷`
+2. 2026-11-18 · 本次提交 · 豆包 · 换新版 Logo（`app-icon.jpg` → `app.ico` 7 条目 + MSIX 5 张图标全部重生成）**并修复宠物不跟随壁纸**：`pets.js` 增 `renderFx` / `pixelFXPets.fx(id)`、宠物「无记录 = 关」、`cfg.petOn` 死开关生效；`runtime.js` 页内切场景（下一张/自动轮换/时段规则）通知宠物层；`settings.js` 五处默认值；`Program.cs` `ImportPet` 为当前壁纸写显式 `on`。真机 17:01 轮换实测 `n=1 → n=0`
+3. 2026-11-18 · `3e6adf2` · 豆包 · WebView2 缓存治理：`Program.cs` 注入 `--disk-cache-size=8388608` 等 7 段 flags 并在启动最早期按标记清 `webview` 目录；设置页加「清理缓存」按钮（`cacheBtn`/`cacheHint`/`cacheDone`/`cacheFail` × 9 语言）。真机：3D 照常渲染，profile **72.5 → 11.7 MB**
 
 ## 下一步（已拍板未开工）
 
 - [ ] **人工验收 1**：启动 `out\PixelPalette.exe` → 顶部副标题应显示 A 版文案，**预计折成 2 行**（11px × 66 字 ≈ 726px，可用宽约 620–660px）；确认下方内容没被挤压
 - [ ] **人工验收 2**：设置 → 关于 → 点「复制制作提示词」→ 粘到记事本，应看到约 8 KB 完整规范
 - [ ] **人工验收 3**：托盘双击开设置窗 → 底部应显示「清理缓存」按钮与其上方一行"当前缓存 X MB"；点一下应变"已清理，重启应用后完全释放"；重启后 `%LOCALAPPDATA%\PixelPalette\webview` 应被清空再从 0 长
+- [ ] **人工验收 4**（17:26 改动）：任务栏/标题栏图标四角应透出桌面、无深色方块（若仍显示旧图，执行 `ie4uinit.exe -show` 或重启资源管理器刷新图标缓存）；设置窗顶部小图标同源；副标题应为「安装包不到 1MB…」；设置页预览从 3D/自制壁纸切回 2D 场景，旧宠物不得残留、状态行应跟着改名
 - [ ] 商店字段：9 语言 Short description、Keywords、App features 录入 Partner Center（定稿在 `D:\AAAAA\ShiPin\1\about-prompt\商店短语-9语言与配套字段.md`）
 - [ ] 内容扩充：从引擎 244 个效果里挑选可当全屏壁纸的（nature / water / fire / scifi 优先）- [ ] 打赏：Microsoft Store 消耗型附加组件（¥6 / ¥18），等 1.0.0.0 过审后开工
 - [ ] 鼠标交互（雪随气流）：外壳 GetCursorPos 轮询 → 现有 Push 通道

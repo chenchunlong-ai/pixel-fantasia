@@ -1,21 +1,72 @@
-// App icon pipeline: decode app-icon.jpg (the user's logo), resize to every size the shell and
-// the Store need, and write the Windows .ico (PNG-compressed entries) and the MSIX asset PNGs.
+// App icon pipeline: decode the logo (app-icon.png preferred, app-icon.jpg as fallback), resize to
+// every size the shell and the Store need, and write the Windows .ico (32-bit PNG entries that keep
+// the alpha channel, so the rounded corners stay transparent) and the MSIX asset PNGs.
 //   build.mjs imports writeIco(); msix.mjs imports writeMsixAssets().
-import { writeFileSync } from "node:fs";
+import { writeFileSync, readFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
-import { deflateSync } from "node:zlib";
+import { deflateSync, inflateSync } from "node:zlib";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 const jpeg = require("jpeg-js"); // jpeg-js is in the repo's node_modules
 
-let BASE = null; // the 1024x1024 (or whatever) decoded logo, RGBA
+let BASE = null; // the decoded logo, RGBA
+
+// ---- PNG reader (8-bit, non-interlaced: that is what any exporter writes) -------------------------
+// Hand-rolled so the icon stays transparent without adding a dependency: a flattened JPEG logo
+// paints dark corners onto the taskbar, which is exactly what a logo must not do.
+function decodePNG(buf) {
+  let pos = 8, w = 0, h = 0, bd = 8, ct = 6, interlace = 0;
+  const idat = [];
+  while (pos + 8 <= buf.length) {
+    const len = buf.readUInt32BE(pos), type = buf.toString("ascii", pos + 4, pos + 8);
+    const data = buf.subarray(pos + 8, pos + 8 + len);
+    if (type === "IHDR") {
+      w = data.readUInt32BE(0); h = data.readUInt32BE(4);
+      bd = data[8]; ct = data[9]; interlace = data[12];
+    } else if (type === "IDAT") idat.push(data);
+    else if (type === "IEND") break;
+    pos += 12 + len;
+  }
+  if (bd !== 8 || interlace !== 0) throw new Error("PNG: only 8-bit non-interlaced is supported");
+  const ch = ct === 6 ? 4 : ct === 2 ? 3 : ct === 4 ? 2 : ct === 0 ? 1 : 0;
+  if (!ch) throw new Error("PNG: unsupported colour type " + ct);
+  const raw = inflateSync(Buffer.concat(idat));
+  const stride = w * ch, out = Buffer.alloc(w * h * 4);
+  let prev = Buffer.alloc(stride);
+  for (let y = 0; y < h; y++) {
+    const ft = raw[y * (stride + 1)];
+    const line = Buffer.from(raw.subarray(y * (stride + 1) + 1, (y + 1) * (stride + 1)));
+    for (let x = 0; x < stride; x++) {
+      const a = x >= ch ? line[x - ch] : 0, b = prev[x], c = x >= ch ? prev[x - ch] : 0;
+      let v = line[x];
+      if (ft === 1) v += a;
+      else if (ft === 2) v += b;
+      else if (ft === 3) v += (a + b) >> 1;
+      else if (ft === 4) {
+        const p = a + b - c, pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c);
+        v += pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
+      }
+      line[x] = v & 0xff;
+    }
+    for (let x = 0; x < w; x++) {
+      const si = x * ch, o = (y * w + x) * 4;
+      if (ch >= 3) { out[o] = line[si]; out[o + 1] = line[si + 1]; out[o + 2] = line[si + 2]; }
+      else { out[o] = out[o + 1] = out[o + 2] = line[si]; }
+      out[o + 3] = ch === 4 ? line[si + 3] : ch === 2 ? line[si + 1] : 255;
+    }
+    prev = line;
+  }
+  return { width: w, height: h, data: out };
+}
 
 function baseOf() {
   if (BASE) return BASE;
-  BASE = jpeg.decode(require("fs").readFileSync(join(HERE, "app-icon.jpg")), { useTArray: true, formatAsRGBA: true });
+  const png = join(HERE, "app-icon.png");
+  if (existsSync(png)) BASE = decodePNG(readFileSync(png));          // keeps transparency
+  else BASE = jpeg.decode(readFileSync(join(HERE, "app-icon.jpg")), { useTArray: true, formatAsRGBA: true });
   return BASE;
 }
 
@@ -33,10 +84,15 @@ export function resized(S) {
       for (let yy = y0; yy < y1; yy++)
         for (let xx = x0; xx < x1; xx++) {
           const i = (yy * SW + xx) * 4;
-          r += b.data[i]; g += b.data[i + 1]; bl += b.data[i + 2]; a += b.data[i + 3]; n++;
+          const av = b.data[i + 3];
+          // alpha-weighted: a transparent neighbour contributes its colour only in proportion to
+          // its opacity, otherwise the cut-out edges fringe dark against the tile behind them
+          r += b.data[i] * av; g += b.data[i + 1] * av; bl += b.data[i + 2] * av; a += av; n++;
         }
       const o = (y * S + x) * 4;
-      out[o] = r / n; out[o + 1] = g / n; out[o + 2] = bl / n; out[o + 3] = a / n;
+      const aa = a / n;
+      if (aa > 0) { out[o] = r / a; out[o + 1] = g / a; out[o + 2] = bl / a; }
+      out[o + 3] = aa;
     }
   }
   return out;
@@ -134,17 +190,36 @@ function palettePNG(rgba, w, h) {
   ]);
 }
 
-// ---- the Windows .ico: PNG-compressed entries, one per size ---------------------------------------
+// ---- 5-bit colour quantization -------------------------------------------------------------------
+// The neon logo is noisy, so a true-colour 256px PNG costs ~100 KB and a single ico would then be
+// 157 KB — and every byte of it rides inside the .exe and the installer. Snapping each channel to
+// 32 levels costs no visible quality at icon sizes and halves that. The alpha channel is untouched,
+// so the transparent corners stay transparent.
+function quantize(rgba, levels = 32) {
+  const step = 256 / levels;
+  const out = Buffer.from(rgba);
+  for (let i = 0; i < out.length; i += 4) {
+    for (let k = 0; k < 3; k++) {
+      const v = Math.round(out[i + k] / step) * step;
+      out[i + k] = v > 255 ? 255 : v;
+    }
+  }
+  return out;
+}
+
+// ---- the Windows .ico: 32-bit PNG-compressed entries, one per size ---------------------------------
+// True-colour + alpha (colour type 6). The old 256-colour path threw the alpha channel away, which
+// is what put square dark corners around a round logo in Explorer, the taskbar and the title bar.
 export function writeIco(path) {
   const sizes = [16, 24, 32, 48, 64, 128, 256];
-  const pngs = sizes.map((s) => palettePNG(resized(s), s, s));
+  const pngs = sizes.map((s) => encodePNG(quantize(resized(s)), s, s));
   const head = Buffer.alloc(6);
   head.writeUInt16LE(0, 0); head.writeUInt16LE(1, 2); head.writeUInt16LE(sizes.length, 4);
   const entries = []; let offset = 6 + 16 * sizes.length;
   sizes.forEach((s, i) => {
     const e = Buffer.alloc(16);
     e[0] = s === 256 ? 0 : s; e[1] = s === 256 ? 0 : s; // 256 is stored as 0
-    e[2] = 0; e[3] = 0;                                  // palette
+    e[2] = 0; e[3] = 0;                                  // no palette
     e.writeUInt16LE(1, 4); e.writeUInt16LE(32, 6);       // planes, bpp
     e.writeUInt32LE(pngs[i].length, 8);
     e.writeUInt32LE(offset, 12);
@@ -162,15 +237,14 @@ export function writeMsixAssets(assetsDir) {
     ["StoreLogo.scale-100.png", 50],
     ["Square44x44Logo.targetsize-256.png", 256],
   ];
-  for (const [name, s] of specs) writeFileSync(join(assetsDir, name), encodePNG(resized(s), s, s));
-  // wide tile: the logo centered on the app's dark tile colour
-  const W = 310, H = 150, logo = resized(150);
+  for (const [name, s] of specs) writeFileSync(join(assetsDir, name), encodePNG(quantize(resized(s)), s, s));
+  // wide tile: the logo centred on a transparent canvas — Windows paints the tile behind it
+  const W = 310, H = 150, logo = quantize(resized(150));
   const px = Buffer.alloc(W * H * 4);
-  for (let i = 0; i < W * H; i++) { px[i * 4] = 0x12; px[i * 4 + 1] = 0x14; px[i * 4 + 2] = 0x1c; px[i * 4 + 3] = 255; }
   for (let y = 0; y < 150; y++)
     for (let x = 0; x < 150; x++) {
       const si = (y * 150 + x) * 4, di = (y * W + (x + 80)) * 4;
-      px[di] = logo[si]; px[di + 1] = logo[si + 1]; px[di + 2] = logo[si + 2]; px[di + 3] = 255;
+      px[di] = logo[si]; px[di + 1] = logo[si + 1]; px[di + 2] = logo[si + 2]; px[di + 3] = logo[si + 3];
     }
   writeFileSync(join(assetsDir, "Wide310x150Logo.scale-100.png"), encodePNG(px, W, H));
 }

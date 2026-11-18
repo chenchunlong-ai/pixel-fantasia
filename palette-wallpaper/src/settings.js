@@ -287,9 +287,15 @@ function restartPreview() {
     }
     $("#pvName").textContent = nameOf(id);
     layoutPreviewPets();                                  // (re)build the pet overlay above the iframe
+    updateState();                                        // "running · <name>" must follow the new fx
     return;
   }
   if ($("#pvWall")) $("#pvWall").remove();
+  // the ext preview parked its pets on an overlay canvas (#pvPetCv) that is only repainted while
+  // an external wallpaper is showing — switching back to a scene must clear it, or the last
+  // external wallpaper's pets keep sitting on top of the new 2D preview (seen with 3D wallpapers)
+  const petOverlay = $("#pvPets");
+  if (petOverlay) petOverlay.innerHTML = "";
   const p = Object.assign(paramDefaults(id), cfg.params[id] || {}, { palette: cfg.palette, bg: cfg.bg, critters: cfg.critters });
   player = new Player(FX[id], p);
   // scene wallpapers are taller than 320 (e.g. 320x200): match the preview canvas to them
@@ -299,6 +305,7 @@ function restartPreview() {
     canvas.height = h;
   }
   $("#pvName").textContent = nameOf(id);
+  updateState();                                          // same here: internal scenes
 }
 
 function loop(now) {
