@@ -9,7 +9,7 @@
 | --- | --- |
 | 版本（`version.mjs` 唯一源） | `1.0.0.0`（商店已提交待审） |
 | 下一次发行版本 | `1.0.1.0`（未定日期） |
-| 构建产物（2026-11-18 17:29 重建） | `PixelPalette.exe` 498 KB / `PixelPalette-Setup.exe` 829 KB / `4A5AB34E.62945D70D0F14_1.0.0.0_x64.msix` 0.7 MB / `app.ico` 86 KB（32 色阶量化，四角 alpha=0） |
+| 构建产物（2026-11-18 21:46 重建） | `PixelPalette.exe` 500 KB / `PixelPalette-Setup.exe` 832 KB / `4A5AB34E.62945D70D0F14_1.0.0.0_x64.msix` 0.7 MB / `app.ico` 86 KB（32 色阶量化，四角 alpha=0） |
 | 验证状态 | `build.mjs` **通过**；真机 3D 壁纸跑通（02:45）；真机宠物跟随壁纸 **通过**（17:01 自动轮换实跑：`dbg fx=weather/black-hole n=0`）；设置页预览 3D→2D 宠物残留修复 17:30 浏览器实测**通过**（`#pvPetCv` 移除、`#pvPets` 清空、状态行跟随）；`verify.mjs` 上次通过于 02:06（本次未跑） |
 | WebView2 缓存（真机实测） | 新构建全新 profile 6 分钟后 **11.7 MB**（旧 profile 72.5 MB，降 84%） |
 | git HEAD | `4e01901` 2026-11-18 docs(collab): 交接机制加固（其后紧跟本次「新 logo + 宠物修复」提交） |
@@ -24,9 +24,9 @@
 
 ## 最近 3 条
 
-1. 2026-11-18 · 本次提交 · 豆包 · **图标黑边根治 + 3D→2D 宠物残留修复 + 副标题口径调整**：`app-icon.png`（RGBA 直转）→ `icon-assets.mjs` 手写 `decodePNG` / alpha 加权 `resized` / `encodePNG`(颜色类型 6) / `quantize(32)` → `app.ico` 7 条目四角真透明（86 KB），MSIX 5 张资产同步；`settings.js` `restartPreview()` 清 `#pvPets` 叠加层 + 两分支补 `updateState()`；`i18n.json` 9 语言 `appSub` 改「安装包不到 1MB」。浏览器实测：`ext:→palette/waterfall` 后 `#pvPetCv`/`#pvWall`/宠物节点全清，状态行由 `aurora-valley-3d` 变 `瀑布谷`
+1. 2026-11-18 · 本次提交 · 豆包 · **重画「时空裂缝」**（`src/fx/rift.js`）：近黑唇线 + 手撕锯齿（读成"天上破了个洞"）、硬底高对比星云 + 贯穿暗尘沟、常驻丝状亮纹；新增 7 次/12s 不等间隔放电事件（`EV/env/surge/flick`）：分叉电弧横跨裂缝、脊线 runner、径向射线、火花拖尾、崩落碎屑、虚线圈状冲击波、中心热核。单帧 10 ms（比 waterfall 轻）。产物体积 500 / 832 KB
 2. 2026-11-18 · 本次提交 · 豆包 · 换新版 Logo（`app-icon.jpg` → `app.ico` 7 条目 + MSIX 5 张图标全部重生成）**并修复宠物不跟随壁纸**：`pets.js` 增 `renderFx` / `pixelFXPets.fx(id)`、宠物「无记录 = 关」、`cfg.petOn` 死开关生效；`runtime.js` 页内切场景（下一张/自动轮换/时段规则）通知宠物层；`settings.js` 五处默认值；`Program.cs` `ImportPet` 为当前壁纸写显式 `on`。真机 17:01 轮换实测 `n=1 → n=0`
-3. 2026-11-18 · `3e6adf2` · 豆包 · WebView2 缓存治理：`Program.cs` 注入 `--disk-cache-size=8388608` 等 7 段 flags 并在启动最早期按标记清 `webview` 目录；设置页加「清理缓存」按钮（`cacheBtn`/`cacheHint`/`cacheDone`/`cacheFail` × 9 语言）。真机：3D 照常渲染，profile **72.5 → 11.7 MB**
+3. 2026-11-18 · 本次提交 · 豆包 · **图标黑边根治 + 3D→2D 宠物残留修复 + 副标题口径调整**：`app-icon.png`（RGBA 直转）→ `icon-assets.mjs` 手写 `decodePNG` / alpha 加权 `resized` / `encodePNG`(颜色类型 6) / `quantize(32)` → `app.ico` 7 条目四角真透明（86 KB），MSIX 5 张资产同步；`settings.js` `restartPreview()` 清 `#pvPets` 叠加层 + 两分支补 `updateState()`；`i18n.json` 9 语言 `appSub` 改「安装包不到 1MB」。浏览器实测：`ext:→palette/waterfall` 后 `#pvPetCv`/`#pvWall`/宠物节点全清，状态行由 `aurora-valley-3d` 变 `瀑布谷`
 
 ## 下一步（已拍板未开工）
 
