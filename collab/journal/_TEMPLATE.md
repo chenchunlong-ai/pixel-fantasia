@@ -10,5 +10,13 @@
 ## 影响
 （哪些构建产物要重跑；版本号要不要动；会不会影响商店包；有没有连带改动别人区域。）
 
+**是否动了这些高危面**（有就打勾并写一句改了什么，没有就写"未动"）：
+- [ ] 依赖（`package.json` / `package-lock.json` / 外部 DLL）
+- [ ] 构建与打包脚本（`*.mjs` / `msix.mjs` / `AppxManifest.xml`）
+- [ ] 版本号（`version.mjs`）
+- [ ] 用户数据格式（`settings.json` 字段、`wallpapers` / `pets` 目录结构）
+- [ ] WebView2 环境参数（`Program.cs` 里的 flags / 缓存目录）
+
 ## 验证
 （跑了什么：verify.mjs / build.mjs / 目检截图 / 都没跑。没跑就写"未跑 + 原因"，不要留空。）
+（有数字就写数字：体积 MB、文件数、耗时、通过/失败项数。"试了没问题"不算验证。）
