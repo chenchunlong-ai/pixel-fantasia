@@ -35,6 +35,7 @@ settings.json
 
 # --- published: cross-AI collaboration protocol ---
 !AGENTS.md
+!HANDOVER.md
 !collab/
 !collab/**
 # locks are transient state, never committed
