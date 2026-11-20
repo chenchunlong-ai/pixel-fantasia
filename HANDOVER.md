@@ -36,22 +36,21 @@ git diff --stat
 
 ---
 
-## 2. 现在在哪（2026-11-21 02:46）
+## 2. 现在在哪（2026-11-21 04:30）
 
-- git HEAD 在 `b1587da` 之上新增本次提交（wallMouse 鼠标交互外壳 + 1080P 范式入 skill），工作区干净。
-- 已构建部署的最新产物：`out\app\PixelPalette.exe` 573 KB（含 40ms 光标轮询，已部署到本机并重启）；MSIX 0.8 MB。**未跑 WACK**（外壳只加了 GetCursorPos，非进程启动类 API，理论不影响）。
+- git HEAD `2b34486`，工作区干净，文件锁已随提交释放。
+- 最新产物 `out\app\PixelPalette.exe` 577 KB **已部署本机**（未跑 WACK——新增 GetAsyncKeyState/GetCursorPos 轮询，非进程启动类）。
 - 最近改动（都有 journal）：
-  1. 本次 · ZCode · **wallMouse 鼠标交互**（外壳 40ms GetCursorPos→`window.wallMouse(nx,ny)`）+ **1080P WebGL 范式**入 skill/SKILL.md（新章节+范例 `skill/examples/daisy-pond-1080p.html`：三层行进水浪+经典迭代扭曲焦散+鼠标涟漪）。1080P 版雏菊水塘用户已上桌（ext 壁纸）并验收满意
-  2. `b1587da` ZCode · 内置 320×180 版雏菊水塘 `palette/daisypond`（verify 通过、无缝 0 差异；用户观感"水面不像"，已被 1080P 版取代其角色）
-  3. `ab8cc3a` 豆包 · 天堂星空银河 + 地狱下线 + 失效场景回退
+  1. `2b34486` · **外部壁纸自带调参**：壁纸声明 `window.wallParams` + 接收 `window.wallParam(k,v)`；wallwrap 读声明报外壳 → 设置页「此壁纸的参数」折叠子面板；值存 `cfg.params["ext:id"]`。雏菊水塘声明 3 参数（焦散/雏菊数/鼠标扰动）
+  2. `c49f731` · **外壳点击检测 wallClick**（GetAsyncKeyState 边沿）恢复桌面点击双环 + 暗斑减淡
+  3. `9264501`/`b1587da`/`c508c4d` · 雏菊水塘 1080P WebGL 版（用户已验收）+ wallMouse 交互链路 + 1080P 范式入 skill
 
 ## 3. 未完成 / 未验证
 
-- [ ] **鼠标涟漪真机手感验收**：用户在桌面滑动鼠标看雏菊水塘（ext 壁纸）的涟漪/尾迹，强度不满意改 `skill/examples/daisy-pond-1080p.html` 里的 fade/亮度系数（用户文件在 `%LOCALAPPDATA%\PixelPalette\wallpapers` 或重新加载工作副本 `D:\AAAAA\ShiPin\1\work\daisy-pond-1080p.html`）
-- [ ] 新 exe 未重跑 WACK（外壳加了 GetCursorPos 轮询；非进程启动类，理论无影响，下次商店更新前补跑）
-- [ ] 内置 320×180 版 daisypond 的角色待裁决：保留（像素风爱好者可切）还是下线留 DRAFT（1080P 版是其上位替代）
-- [ ] 旧验收项（副标题折行、复制提示词按钮、清理缓存按钮、图标透明、天堂星空、峡谷晨雾）全部待人工验收——见 `collab\STATE.md`「下一步」
-- [ ] 补 8 语言缺失文案（fxDaisyPond 9 语言已补，旧缺口 46 键仍在）
+- [ ] **真机验收**：桌面点击双环、湍流斑强度、设置页「此壁纸的参数」滑杆（拖动应实时改变桌面焦散/雏菊数/扰动强度）
+- [ ] 新 exe 未重跑 WACK（下次商店更新前补跑）
+- [ ] 旧验收项与 8 语言缺 46 键待办见 `collab\STATE.md`
+- [ ] 内置 320×180 版 daisypond 角色待裁决（保留 or 下线留 DRAFT）
 
 ---
 
