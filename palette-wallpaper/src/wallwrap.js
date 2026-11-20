@@ -46,6 +46,16 @@ globalThis.pixelFX = {
   command(name) { /* videos/gif need no commands; pause lives with the page itself */ },
 };
 
+/** forward cursor moves: the shell polls GetCursorPos and calls window.wallMouse on THIS page,
+    but the wallpaper lives in a srcdoc iframe — same-origin, so relay the call into it.
+    (Without this, interactive user wallpapers never see the mouse on the desktop.) */
+globalThis.wallMouse = (nx, ny) => {
+  try {
+    const w = wall.contentWindow;
+    if (w && typeof w.wallMouse === "function") w.wallMouse(nx, ny);
+  } catch (e) { /* frame not ready */ }
+};
+
 /** forward the global speed knob into the wallpaper page: srcdoc pages are same-origin so we
     call their optional wallSpeed() hook directly; cross-origin video wrappers get a message. */
 function fwdSpeed(cfg) {

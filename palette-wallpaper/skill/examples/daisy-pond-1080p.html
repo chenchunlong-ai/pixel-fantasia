@@ -38,6 +38,7 @@ uniform float T;     // seconds, advanced only while visible
 uniform float DPR;
 uniform vec3 uRip[10];  // interactive ripples: x, y (uv, y-up), age seconds (-9 = unused)
 uniform vec3 uMou;      // cursor: x, y (uv), agitation 0..1
+uniform sampler2D uWake; // the boat-wake persistence canvas (256x144, fades over time)
 
 float hash(vec2 q) {
   q = fract(q * vec2(234.34, 435.345));
@@ -180,16 +181,6 @@ void main() {
     col -= vec3(0.05, 0.08, 0.08) * exp(-pow(abs(mdd - r1) * 80.0, 2.0)) * fade * 0.6;
   }
 
-  // ---- mouse wake: a soft patch of agitation that follows the cursor while it moves ----------------
-  if (uMou.z > 0.02) {
-    vec2 wrel = (uv - uMou.xy) * vec2(R.x / R.y, 1.0);
-    float wd = length(wrel);
-    float wake = exp(-wd * 9.0) * uMou.z;
-    col += vec3(0.75, 0.94, 0.92) * wake * 0.28;
-    // agitation roughens the water locally: borrow extra caustic shimmer there
-    col += vec3(0.93, 0.99, 0.96) * caustic(uv * 9.0 + vec2(t * 0.4, t * 0.3), t * 2.0) * wake * 0.30;
-  }
-
   // ---- the daisies: SDF, drifting and bobbing on the swell ------------------------
   vec4 FL[6];
   FL[0] = vec4(0.16, 0.24, 0.052, 0.0);
@@ -218,6 +209,14 @@ void main() {
     col = mix(col, yolkCol, clamp(df.y, 0.0, 1.0) * step(0.001, df.x + df.y));
     col += vec3(1.0, 0.95, 0.75) * smoothstep(0.35, 0.0, length(rel / (F.z * 0.35))) * 0.10;
   }
+
+  // ---- mouse wake: the painted V arms from the persistence canvas, lifted into the water ----------
+  float wake = texture2D(uWake, vec2(uv.x, 1.0 - uv.y)).r;   // canvas row 0 is its top
+  // a wake disturbs the water both ways: a dark trough under the trail, bright crests on the arms
+  col *= 1.0 - wake * 0.18;
+  col += vec3(0.88, 0.99, 0.96) * wake * 0.42;
+  // the wake also roughens the water: extra caustic shimmer inside it
+  col += vec3(0.93, 0.99, 0.96) * caustic(uv * 9.0 + vec2(t * 0.4, t * 0.3), t * 2.0) * wake * 0.30;
 
   gl_FragColor = vec4(col, 1.0);
 }
@@ -251,28 +250,53 @@ const uDPR = gl.getUniformLocation(prog, "DPR");
 const uRip = gl.getUniformLocation(prog, "uRip");
 const uMou = gl.getUniformLocation(prog, "uMou");
 const ripBuf = new Float32Array(30);     // 10 × (x, y, age)
+// the wake texture (uploaded from the persistent 2D canvas each frame)
+const wakeTex = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, wakeTex);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+const uWake = gl.getUniformLocation(prog, "uWake");
 
 // ---- mouse interaction ---------------------------------------------------------------------
 // The app's shell polls the cursor (the wallpaper window itself never gets mouse events) and
 // calls window.wallMouse(nx, ny) with the position normalised to the window, y DOWN, 0..1.
-// Opening the file in a normal browser falls back to real mousemove events. Moving the mouse
-// spawns interactive ripple rings and leaves a fading wake on the water.
-const ripples = [];                      // { x, y (uv, y-up), born } — interactive rings
-const mouse = { x: -9, y: -9, energy: 0 };
+// Opening the file in a normal browser falls back to real mouse events. Moving the cursor
+// draws a boat-style wake (two diverging arms trailing behind the motion, painted onto a
+// persistent low-res canvas that fades over time — the V shape widens by itself as the arms
+// age). Clicking, or resuming after a pause, drops the classic double ripple ring instead.
+const ripples = [];                      // { x, y (uv, y-up), born } — dip/click rings
+const mouse = { x: -9, y: -9, energy: 0, lastMove: -9, moved: false };
+const trail = [];                        // recent cursor points: { x, y, a (heading), e, t }
 window.wallMouse = (nx, ny) => {
-  const x = Math.min(1, Math.max(0, nx)), y = 1 - Math.min(1, Math.max(0, ny));
-  const last = ripples.length ? ripples[ripples.length - 1] : null;
-  const d = last ? Math.hypot(x - last.x, y - last.y) : 1;
-  if (d > 0.04) {                        // one ring per ~4% of screen travelled
-    ripples.push({ x, y, born: t });
-    if (ripples.length > 10) ripples.shift();
-  }
-  mouse.energy = Math.min(1, mouse.energy + d * 6);
-  mouse.x = x; mouse.y = y;
+  nx = Math.min(1, Math.max(0, nx)); ny = Math.min(1, Math.max(0, ny));
+  const dx = nx - mouse.x, dy = ny - mouse.y, d = Math.hypot(dx, dy);
+  if (mouse.x < -1) { mouse.x = nx; mouse.y = ny; mouse.lastMove = t; return; }
+  if (d < 0.0015) return;
+  // resuming after a rest reads as a touch: drop the classic ring, like a click
+  if (t - mouse.lastMove > 0.6) { ripples.push({ x: nx, y: 1 - ny, born: t }); if (ripples.length > 10) ripples.shift(); }
+  trail.push({ x: nx, y: ny, a: Math.atan2(dy, dx), e: Math.min(1, mouse.energy + d * 5), t: t });
+  if (trail.length > 40) trail.shift();
+  mouse.energy = Math.min(1, mouse.energy + d * 5);
+  mouse.x = nx; mouse.y = ny; mouse.lastMove = t; mouse.moved = true;
 };
 addEventListener("mousemove", (e) => {   // fallback: real browsers (the app shell calls wallMouse instead)
+  if (window.__noMouseFallback) return;  // automated tests drive wallMouse directly
   window.wallMouse(e.clientX / innerWidth, e.clientY / innerHeight);
 });
+addEventListener("mousedown", (e) => {   // in a real browser a click is a touch on the water
+  ripples.push({ x: e.clientX / innerWidth, y: 1 - e.clientY / innerHeight, born: t });
+  if (ripples.length > 10) ripples.shift();
+});
+
+// the wake is painted onto a small persistent canvas (256x144, fades ~3 s) and uploaded as a
+// texture every frame — cheap, smooth, and the diverging arms give the boat-wake V for free
+const wakeCv = document.createElement("canvas");
+wakeCv.width = 512; wakeCv.height = 288;
+const wctx = wakeCv.getContext("2d");
+wctx.filter = "blur(2.2px)";           // soften every stroke: the wake reads as disturbed
+                                       // water, not pixel blocks
 
 function resize() {
   const dpr = Math.min(devicePixelRatio || 1, 1.5);   // perf redline: cap DPR
@@ -307,7 +331,38 @@ function frame(now) {
   }
   gl.uniform3fv(uRip, ripBuf);
   gl.uniform3f(uMou, mouse.x, mouse.y, mouse.energy);
+  // paint the boat wake: clear, then redraw the whole recent trail — many small diverging arm
+  // pairs along the path, arms longer and fainter the older the point, which composes into a
+  // continuous V-shaped wake that widens toward the tail
+  wctx.clearRect(0, 0, 512, 288);
+  wctx.lineCap = "round";
+  wctx.lineJoin = "round";
+  while (trail.length && t - trail[0].t > 4.0) trail.shift();
+  // the wake is a ribbon along the recent path: a stroked polyline that widens with age (the
+  // trailing end spreads out, the head is tight at the cursor — the boat-wake wedge for free)
+  for (let i = 1; i < trail.length; i++) {
+    const p0 = trail[i - 1], p1 = trail[i];
+    const age = t - p1.t, k = 1 - age / 4.0;
+    if (k <= 0) continue;
+    wctx.strokeStyle = "rgba(255,255,255," + 0.10 * k * Math.min(1, p1.e + 0.3) + ")";
+    wctx.lineWidth = 1.1 + age * 2.2;
+    wctx.beginPath();
+    wctx.moveTo(p0.x * 512, p0.y * 288);
+    wctx.lineTo(p1.x * 512, p1.y * 288);
+    wctx.stroke();
+  }
+  if (trail.length) {                                   // the bow: a soft bright dot at the cursor
+    const newest = trail[trail.length - 1];
+    wctx.beginPath();
+    wctx.arc(newest.x * 512, newest.y * 288, 2.4, 0, 6.283);
+    wctx.fillStyle = "rgba(255,255,255," + 0.14 * mouse.energy + ")";
+    wctx.fill();
+  }
   mouse.energy *= 0.965;                 // the wake fades when the cursor rests
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, wakeTex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, wakeCv);
+  gl.uniform1i(uWake, 0);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   if (!drew) { drew = 1; dbg({ gl: "first draw done", w: cvs.width, h: cvs.height }); }
 }
