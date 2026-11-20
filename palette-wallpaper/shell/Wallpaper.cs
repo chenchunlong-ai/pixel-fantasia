@@ -14,6 +14,8 @@ namespace PixelFX
         private readonly Rectangle area;
         private readonly WebView2 web;
         private readonly Timer watchdog;
+        private readonly Timer mousePoll;                 // cursor → window.wallMouse (see PollMouse)
+        private Point lastMouse;                          // last pushed cursor position (window px)
         private IntPtr worker = IntPtr.Zero;
         private bool ready;
         private bool hiddenForSession;
@@ -43,6 +45,32 @@ namespace PixelFX
             watchdog = new Timer();
             watchdog.Interval = 4000;
             watchdog.Tick += delegate { EnsureAttached(); };
+
+            // the wallpaper window sits under the icon layer and never receives mouse events itself;
+            // pages that want cursor interaction implement window.wallMouse(nx, ny) and we feed them
+            // here (only pushed while the cursor moves inside the wallpaper area, never logged)
+            mousePoll = new Timer();
+            mousePoll.Interval = 40;
+            mousePoll.Tick += delegate { PollMouse(); };
+        }
+
+        private void PollMouse()
+        {
+            if (!ready || web == null || web.CoreWebView2 == null) return;
+            Native.POINT p;
+            if (!Native.GetCursorPos(out p)) return;
+            int x = p.X - area.X, y = p.Y - area.Y;
+            if (x < 0 || y < 0 || x >= area.Width || y >= area.Height) return;
+            if (x == lastMouse.X && y == lastMouse.Y) return;   // no motion → no traffic
+            lastMouse = new Point(x, y);
+            float nx = x / (float)area.Width, ny = y / (float)area.Height;
+            try
+            {
+                web.CoreWebView2.ExecuteScriptAsync("window.wallMouse && window.wallMouse("
+                    + nx.ToString("0.0000", System.Globalization.CultureInfo.InvariantCulture) + ","
+                    + ny.ToString("0.0000", System.Globalization.CultureInfo.InvariantCulture) + ")");
+            }
+            catch { }
         }
 
         public async void Start(CoreWebView2Environment e)
@@ -109,6 +137,7 @@ namespace PixelFX
             repush.Start();
 
             watchdog.Start();
+            mousePoll.Start();
         }
 
         /// <summary>The sandbox: user-loaded HTML may draw, but it cannot reach the network, open
@@ -263,6 +292,7 @@ namespace PixelFX
                 return;
             }
             watchdog.Stop();
+            mousePoll.Stop();
             base.OnFormClosing(e);
         }
     

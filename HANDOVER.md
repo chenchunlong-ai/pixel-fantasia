@@ -36,22 +36,22 @@ git diff --stat
 
 ---
 
-## 2. 现在在哪（2026-11-21 02:00）
+## 2. 现在在哪（2026-11-21 02:46）
 
-- git HEAD 在 `b361813` 之上新增本次提交（新场景雏菊水塘），工作区干净，**文件锁空闲**（ZCode 的锁随 commit.ps1 释放）。
-- 已构建、已真机验证的最新产物：`out\msix`（缓存治理版，**不含 daisypond**——新场景要重建 exe 才能看到）。
+- git HEAD 在 `b1587da` 之上新增本次提交（wallMouse 鼠标交互外壳 + 1080P 范式入 skill），工作区干净。
+- 已构建部署的最新产物：`out\app\PixelPalette.exe` 573 KB（含 40ms 光标轮询，已部署到本机并重启）；MSIX 0.8 MB。**未跑 WACK**（外壳只加了 GetCursorPos，非进程启动类 API，理论不影响）。
 - 最近改动（都有 journal）：
-  1. 本次 · ZCode · **新场景「雏菊水塘」`palette/daisypond`**：俯视水面（Voronoi 焦散光网两瓦片滑动 + 雏菊 + 涟漪 + 星光）；verify 通过、无缝 0 差异、13.5ms/帧；**真机未验收**
-  2. `ab8cc3a` 豆包 · 天堂重做星空银河 + 地狱下线 + 失效场景自动回退
-  3. `5e01931` 豆包 · 峡谷晨雾（AI 底图 + 像素化 + 亮水掩膜）
-  4. `b361813` · 「社区壁纸仓 + 打赏」方案评估后**暂停**（六条原因，重启门槛在 `collab\ideas\`）
+  1. 本次 · ZCode · **wallMouse 鼠标交互**（外壳 40ms GetCursorPos→`window.wallMouse(nx,ny)`）+ **1080P WebGL 范式**入 skill/SKILL.md（新章节+范例 `skill/examples/daisy-pond-1080p.html`：三层行进水浪+经典迭代扭曲焦散+鼠标涟漪）。1080P 版雏菊水塘用户已上桌（ext 壁纸）并验收满意
+  2. `b1587da` ZCode · 内置 320×180 版雏菊水塘 `palette/daisypond`（verify 通过、无缝 0 差异；用户观感"水面不像"，已被 1080P 版取代其角色）
+  3. `ab8cc3a` 豆包 · 天堂星空银河 + 地狱下线 + 失效场景回退
 
 ## 3. 未完成 / 未验证
 
-- [ ] **daisypond 真机验收**：重建 `node palette-wallpaper/build.mjs` → `out\msix\PixelPalette.exe` → 设置里选「雏菊水塘」，看焦散网/雏菊/涟漪/换装
+- [ ] **鼠标涟漪真机手感验收**：用户在桌面滑动鼠标看雏菊水塘（ext 壁纸）的涟漪/尾迹，强度不满意改 `skill/examples/daisy-pond-1080p.html` 里的 fade/亮度系数（用户文件在 `%LOCALAPPDATA%\PixelPalette\wallpapers` 或重新加载工作副本 `D:\AAAAA\ShiPin\1\work\daisy-pond-1080p.html`）
+- [ ] 新 exe 未重跑 WACK（外壳加了 GetCursorPos 轮询；非进程启动类，理论无影响，下次商店更新前补跑）
+- [ ] 内置 320×180 版 daisypond 的角色待裁决：保留（像素风爱好者可切）还是下线留 DRAFT（1080P 版是其上位替代）
 - [ ] 旧验收项（副标题折行、复制提示词按钮、清理缓存按钮、图标透明、天堂星空、峡谷晨雾）全部待人工验收——见 `collab\STATE.md`「下一步」
 - [ ] 补 8 语言缺失文案（fxDaisyPond 9 语言已补，旧缺口 46 键仍在）
-- [ ] `GrShaderCache` 稳定在 4.6 MB，`--gpu-disk-cache-size-kb=8192` 是否真约束它未单独验证。
 
 ---
 

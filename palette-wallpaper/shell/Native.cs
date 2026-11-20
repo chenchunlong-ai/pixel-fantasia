@@ -46,6 +46,9 @@ namespace PixelFX
         public static extern bool IsWindow(IntPtr hWnd);
         [DllImport("user32.dll")]
         public static extern bool GetWindowRect(IntPtr hWnd, out RECT r);
+        public struct POINT { public int X; public int Y; }
+        [DllImport("user32.dll")]
+        public static extern bool GetCursorPos(out POINT p);
         [DllImport("user32.dll")]
         public static extern bool SetForegroundWindow(IntPtr hWnd);
 
