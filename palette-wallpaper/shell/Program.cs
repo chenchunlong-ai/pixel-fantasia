@@ -238,6 +238,13 @@ namespace PixelFX
                     }
                     return;
                 }
+                if (json.Contains("\"wallParams\""))
+                {
+                    // an ext wallpaper declared its own parameters (window.wallParams, relayed by
+                    // wallwrap) — hand them to the settings page so it can render the panel
+                    if (Settings != null && Settings.IsHandleCreated) Settings.PushExtParams(json);
+                    return;
+                }
                 if (json.Contains("\"state\""))
                 {
                     int i = json.IndexOf("\"fx\":\"");

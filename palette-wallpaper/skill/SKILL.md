@@ -101,6 +101,8 @@
 
 - `window.wallSpeed(v)` — 软件的"速度"滑杆会调用它（v=1.0 正常速度）。内部把你的时间累积乘以 v 即可（参考 `examples/aurora-valley-3d.html`）。**不实现也能用**，只是速度滑杆对你的壁纸无效；视频壁纸自动支持。
 - `window.wallMouse(nx, ny)` — 鼠标交互钩子。壁纸窗口在图标层之下收不到鼠标事件，**外壳每 40ms 轮询一次光标**（GetCursorPos），光标在壁纸区域内移动时调用 `window.wallMouse(nx, ny)`（nx/ny 已归一化到窗口 0..1，**y 向下**）。实现它就能做鼠标涟漪、跟随气流等交互；在普通浏览器里预览时自己再挂一个 `mousemove` 兜底（参考 `examples/daisy-pond-1080p.html`）。外壳只在光标移动时才推，静止时零流量。
+- `window.wallClick(nx, ny)` — 点击钩子：外壳检测到壁纸区域内的左键按下（GetAsyncKeyState 边沿）时调用，坐标同 wallMouse。浏览器里用 `mousedown` 兜底。注意它是全局输入——用户点别的应用也会触发，交互设计要容忍这点（比如只是溅一下水花）。
+- `window.wallParams` + `window.wallParam(key, value)` — **壁纸自带调参**。壁纸把参数清单放在 `window.wallParams`（数组：`{key, label, min, max, step, def}`，label 用作者自己的语言），实现 `window.wallParam(key, value)` 接收数值。设置页会出现「此壁纸的参数」子面板（每个声明一条滑杆，值按壁纸记忆），桌面与预览都会把值推送进来。范例见 `examples/daisy-pond-1080p.html`（焦散强度/雏菊数量/鼠标扰动）。无声明的壁纸只有全局速度滑杆，完全兼容。
 - 壁纸页面收不到任何鼠标/键盘事件，也不要指望 iframe 内向软件上报消息（宿主不接收）。
 
 ---

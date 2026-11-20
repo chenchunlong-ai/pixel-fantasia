@@ -81,5 +81,14 @@ namespace PixelFX
             try { web.CoreWebView2.ExecuteScriptAsync("window.pixelFXSettings && window.pixelFXSettings.state(" + json + ")"); }
             catch { }
         }
+
+        /// <summary>An ext wallpaper declared its own parameters (relayed from wallwrap) — the
+        /// settings page renders the "此壁纸的参数" panel from this declaration.</summary>
+        public void PushExtParams(string json)
+        {
+            if (web == null || web.CoreWebView2 == null || !ready) return;
+            try { web.CoreWebView2.ExecuteScriptAsync("window.pixelFXSettings && window.pixelFXSettings.extParams(" + json + ")"); }
+            catch { }
+        }
     }
 }

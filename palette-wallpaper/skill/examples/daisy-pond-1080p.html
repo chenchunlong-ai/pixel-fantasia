@@ -143,7 +143,7 @@ void main() {
   // a broad slow mask gives the net calm patches and busy patches instead of uniform coverage
   float calm = 0.40 + 0.60 * smoothstep(0.30, 0.62, fbm(suv * 1.4 + vec2(t * 0.02, 0.0)) + 0.25 * g);
   float cmask = (0.22 + 0.78 * smoothstep(0.12, 0.62, top)) * (1.0 - murk * 0.8) * (1.0 - 0.45 * g) * calm;
-  col += vec3(0.93, 0.99, 0.96) * caus * cmask * 0.60;
+  col += vec3(0.93, 0.99, 0.96) * caus * cmask * 0.60 * uOpt.x;
 
   // ---- glints: bright pixels where the wave surface tilts just right -------------
   vec2 gg = floor(gl_FragCoord.xy / DPR / 2.0);
@@ -172,7 +172,7 @@ void main() {
     float md = length(mrel);
     // the patch is a soft irregular blob, not a circle: noise modulates its edge
     float blob = exp(-md * 18.0) * (0.5 + 0.5 * noise(uv * 16.0 + t * 1.4));
-    float turb = blob * uMou.z;
+    float turb = blob * uMou.z * uOpt.y;
     // stirred-up water: fine bright/dark mottling, churning over time
     float churn = noise(uv * 30.0 + vec2(t * 2.6, -t * 2.0)) - noise(uv * 24.0 - vec2(t * 2.2, t * 1.5));
     col += vec3(0.90, 0.99, 0.96) * churn * turb * 0.9;
@@ -204,6 +204,7 @@ void main() {
   FL[4] = vec4(0.64, 0.82, 0.044, 4.0);
   FL[5] = vec4(0.90, 0.62, 0.036, 5.0);
   for (int i = 0; i < 6; i++) {
+    if (float(i) >= uOpt.z) continue;   // the wallpaper's daisy-count parameter
     vec4 F = FL[i];
     float fb = 1.0 + (t * 0.35 + F.w) ;
     vec2 fp = F.xy + vec2(sin(t * 0.22 + F.w * 1.7) * 0.012, cos(t * 0.31 + F.w * 2.3) * 0.008);
@@ -254,6 +255,7 @@ const uR = gl.getUniformLocation(prog, "R");
 const uT = gl.getUniformLocation(prog, "T");
 const uDPR = gl.getUniformLocation(prog, "DPR");
 const uMou = gl.getUniformLocation(prog, "uMou");
+const uOpt = gl.getUniformLocation(prog, "uOpt");
 const uRip = gl.getUniformLocation(prog, "uRip");
 const ripBuf = new Float32Array(30);     // 10 × (x, y, age)
 
@@ -293,6 +295,22 @@ window.wallClick = (nx, ny) => {
   mouse.y = 1 - Math.min(1, Math.max(0, ny));
 };
 
+// ---- the wallpaper's own parameters ---------------------------------------------------------
+// Declared here as window.wallParams, received through window.wallParam(key, value): the app's
+// settings page renders one slider per declaration ("此壁纸的参数" panel) and pushes values here.
+// No declaration = the wallpaper simply has no knobs beyond the global speed.
+const OPT = { caus: 1, daisies: 6, mouse: 1 };
+window.wallParams = [
+  { key: "caustics", label: "焦散强度", min: 0, max: 2, step: 0.05, def: 1 },
+  { key: "daisies", label: "雏菊数量", min: 0, max: 10, step: 1, def: 6 },
+  { key: "mouse", label: "鼠标扰动强度", min: 0, max: 2, step: 0.05, def: 1 },
+];
+window.wallParam = (k, v) => {
+  if (k === "caustics") OPT.caus = Math.max(0, +v || 0);
+  else if (k === "daisies") OPT.daisies = Math.round(+v || 0);
+  else if (k === "mouse") OPT.mouse = Math.max(0, +v || 0);
+};
+
 function resize() {
   const dpr = Math.min(devicePixelRatio || 1, 1.5);   // perf redline: cap DPR
   cvs.width = Math.round(innerWidth * dpr);
@@ -326,6 +344,7 @@ function frame(now) {
   }
   gl.uniform3fv(uRip, ripBuf);
   gl.uniform3f(uMou, mouse.x, mouse.y, mouse.energy);
+  gl.uniform3f(uOpt, OPT.caus, OPT.mouse, OPT.daisies);
   mouse.energy *= 0.985;                 // the disturbance settles when the cursor rests
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   if (!drew) { drew = 1; dbg({ gl: "first draw done", w: cvs.width, h: cvs.height }); }

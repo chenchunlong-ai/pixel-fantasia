@@ -145,8 +145,46 @@ function fillParams() {
   const title = document.createElement("div");
   title.className = "hint";
   title.style.margin = "0 0 4px";
-  title.textContent = e ? t("paramsOf", { name: t(e.key) }) : "";
+  // ext wallpapers declare their own parameters (window.wallParams, relayed by the shell):
+  // they get a collapsed "此壁纸的参数" panel instead of the built-in knob set
+  const declared = isExt(id) ? (extParams[extId(id)] || null) : null;
+  title.textContent = e ? t("paramsOf", { name: t(e.key) }) : (declared ? t("extParams") : nameOf(id));
   box.append(title);
+  if (declared) {
+    const vals0 = (cfg.params && cfg.params[id]) || {};
+    const btn = document.createElement("button");
+    btn.textContent = "▸ " + t("extParams");
+    const panel = document.createElement("div");
+    panel.style.display = "none";
+    btn.onclick = () => {
+      const open = panel.style.display === "none";
+      panel.style.display = open ? "" : "none";
+      btn.textContent = (open ? "▾ " : "▸ ") + t("extParams");
+    };
+    box.append(btn);
+    box.append(panel);
+    if (!declared.length) {
+      panel.append(Object.assign(document.createElement("div"), { className: "hint", textContent: t("paramsNone") }));
+      return;
+    }
+    for (const p of declared) {
+      const row = document.createElement("div");
+      row.className = "slider";
+      const v0 = vals0[p.key] != null ? vals0[p.key] : p.def;
+      row.innerHTML = `<label>${p.label || p.key}</label><input type="range" min="${p.min}" max="${p.max}" step="${p.step || 0.01}" value="${v0}"><output>${v0}</output>`;
+      const input = row.querySelector("input");
+      const out = row.querySelector("output");
+      input.oninput = () => {
+        const v = +input.value;
+        out.textContent = v;
+        cfg.params[id] = Object.assign({}, cfg.params[id] || {}, { [p.key]: v });
+        touch();
+        restartPreview();
+      };
+      panel.append(row);
+    }
+    return;
+  }
   const vals = Object.assign(paramDefaults(id), (cfg.params && cfg.params[id]) || {});
   for (const key of e ? e.params : []) {
     const def = PARAMS[key];
@@ -167,6 +205,9 @@ function fillParams() {
   if (!e || !e.params.length)
     box.append(Object.assign(document.createElement("div"), { className: "hint", textContent: t("paramsNone") }));
 }
+
+/** parameter declarations reported by ext wallpapers (window.wallParams → shell → here) */
+let extParams = {};
 
 function fillCycle() {
   $("#cycOn").checked = !!cfg.cycle.enabled;
@@ -277,6 +318,16 @@ function restartPreview() {
       }
       f.style.transform = cfg.mirror ? "scaleX(-1)" : "";
       if (f.getAttribute("srcdoc") !== html) f.setAttribute("srcdoc", html);
+      // forward the wallpaper's own parameter values into the preview (same hooks as the desktop)
+      const fwd = () => {
+        try {
+          const w = f.contentWindow;
+          const vals = (cfg.params[id]) || {};
+          if (w && typeof w.wallParam === "function") for (const k in vals) w.wallParam(k, vals[k]);
+        } catch (e) { /* frame not ready */ }
+      };
+      f.onload = fwd;
+      setTimeout(fwd, 400);
     } else {
       if (f) f.remove();
       canvas.width = 320; canvas.height = 180;
@@ -788,6 +839,13 @@ globalThis.pixelFXSettings = {
     restartPreview();
     updateFxControls();
     if (!raf) raf = requestAnimationFrame(loop);
+  },
+  extParams(json) {
+    const d = typeof json === "string" ? JSON.parse(json) : json;
+    if (d && d.id) {
+      extParams[d.id] = d.params || [];
+      fillParams();                              // refresh the panel for the current fx
+    }
   },
   state(json) {
     const s = typeof json === "string" ? JSON.parse(json) : json;

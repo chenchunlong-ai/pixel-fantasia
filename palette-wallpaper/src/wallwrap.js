@@ -26,7 +26,7 @@ globalThis.pixelFX = {
               // html wallpapers ride inline (srcdoc, no sandbox — the proven file-pet path;
               // the wp.local virtual host intermittently fails to render in WebView2)
               wall.removeAttribute("sandbox");
-              wall.onload = () => { say({ type: "wallFrame", ok: true, doc: "html" }); fwdSpeed(cfg); };
+              wall.onload = () => { say({ type: "wallFrame", ok: true, doc: "html" }); fwdSpeed(cfg); fwdExtParams(cfg); readExtParams(); };
               wall.srcdoc = html;
             } else {
               // video wrappers keep the folder mapping (their <video src> is relative)
@@ -36,7 +36,7 @@ globalThis.pixelFX = {
                 + "?v=" + Date.now();        // cache-bust: WebView2 caches wp.local aggressively
             }
           }
-        } else fwdSpeed(cfg);                  // same wallpaper: just forward the speed knob
+        } else { fwdSpeed(cfg); fwdExtParams(cfg); }   // same wallpaper: forward the knobs
       }
       globalThis.pixelFXPets.apply(json);
     } catch (e) {
@@ -64,6 +64,26 @@ globalThis.wallClick = (nx, ny) => {
     if (w && typeof w.wallClick === "function") w.wallClick(nx, ny);
   } catch (e) { /* frame not ready */ }
 };
+
+/** ext wallpapers that declare their own parameters (window.wallParams) get them reported to the
+    shell once per load, so the settings page can render the "此壁纸的参数" panel. */
+function readExtParams() {
+  try {
+    const ps = wall.contentWindow && wall.contentWindow.wallParams;
+    if (Array.isArray(ps) && ps.length && shownFile && shownFile.startsWith("ext:"))
+      say({ type: "wallParams", id: shownFile.slice(4), params: ps });
+  } catch (e) { /* frame not ready — retried on the next apply */ }
+}
+
+/** forward the ext wallpaper's own parameter values (settings sliders → window.wallParam). */
+function fwdExtParams(cfg) {
+  try {
+    const w = wall.contentWindow;
+    if (!w || typeof w.wallParam !== "function") return;
+    const vals = (cfg.params || {})[cfg.fx];
+    for (const k in vals || {}) w.wallParam(k, vals[k]);
+  } catch (e) { /* frame not ready */ }
+}
 
 /** forward the global speed knob into the wallpaper page: srcdoc pages are same-origin so we
     call their optional wallSpeed() hook directly; cross-origin video wrappers get a message. */
