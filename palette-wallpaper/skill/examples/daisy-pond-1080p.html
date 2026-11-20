@@ -170,13 +170,13 @@ void main() {
     vec2 mrel = (uv - uMou.xy) * vec2(R.x / R.y, 1.0);
     float md = length(mrel);
     // the patch is a soft irregular blob, not a circle: noise modulates its edge
-    float blob = exp(-md * 10.0) * (0.5 + 0.5 * noise(uv * 16.0 + t * 1.4));
+    float blob = exp(-md * 18.0) * (0.5 + 0.5 * noise(uv * 16.0 + t * 1.4));
     float turb = blob * uMou.z;
-    // stirred-up water: bright flecks and dark shadows at a fine scale, churning over time
-    float churn = noise(uv * 22.0 + vec2(t * 2.6, -t * 2.0)) - noise(uv * 17.0 - vec2(t * 2.2, t * 1.5));
-    col += vec3(0.90, 0.99, 0.96) * churn * turb * 2.0;
-    col -= vec3(0.10, 0.14, 0.14) * turb * 0.25;   // the surface sinks slightly where stirred
-    col += vec3(0.93, 0.99, 0.96) * caustic(uv * 10.0 + vec2(t * 1.4, t * 1.1), t * 2.2) * turb * 0.6;
+    // stirred-up water: fine bright/dark mottling, churning over time
+    float churn = noise(uv * 30.0 + vec2(t * 2.6, -t * 2.0)) - noise(uv * 24.0 - vec2(t * 2.2, t * 1.5));
+    col += vec3(0.90, 0.99, 0.96) * churn * turb * 1.1;
+    col -= vec3(0.10, 0.14, 0.14) * turb * 0.12;   // the surface sinks slightly where stirred
+    col += vec3(0.93, 0.99, 0.96) * caustic(uv * 10.0 + vec2(t * 1.4, t * 1.1), t * 2.2) * turb * 0.35;
   }
 
   // ---- the daisies: SDF, drifting and bobbing on the swell ------------------------
@@ -253,7 +253,9 @@ window.wallMouse = (nx, ny) => {
   if (mouse.x < -1) { mouse.x = nx; mouse.y = ny; mouse.lastMove = t; return; }
   if (d < 0.0015) return;
   mouse.energy = Math.min(1, mouse.energy + d * 5);
-  mouse.x = nx; mouse.y = ny; mouse.lastMove = t;
+  mouse.x = nx;
+  mouse.y = 1 - ny;                      // shader works in y-up uv; wallMouse receives y-down
+  mouse.lastMove = t;
 };
 addEventListener("mousemove", (e) => {   // fallback: real browsers (the app shell calls wallMouse instead)
   if (window.__noMouseFallback) return;  // automated tests drive wallMouse directly
