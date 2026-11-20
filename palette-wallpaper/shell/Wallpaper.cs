@@ -16,6 +16,7 @@ namespace PixelFX
         private readonly Timer watchdog;
         private readonly Timer mousePoll;                 // cursor → window.wallMouse (see PollMouse)
         private Point lastMouse;                          // last pushed cursor position (window px)
+        private bool lButtonDown;                         // previous poll's left-button state (edge detect)
         private IntPtr worker = IntPtr.Zero;
         private bool ready;
         private bool hiddenForSession;
@@ -61,6 +62,22 @@ namespace PixelFX
             if (!Native.GetCursorPos(out p)) return;
             int x = p.X - area.X, y = p.Y - area.Y;
             if (x < 0 || y < 0 || x >= area.Width || y >= area.Height) return;
+            // left-button press over the wallpaper → the page's window.wallClick(nx, ny).
+            // GetAsyncKeyState is global input: a click in another app also lands here — acceptable,
+            // the wallpaper is a background surface and a stray splash is harmless.
+            bool down = (Native.GetAsyncKeyState(Native.VK_LBUTTON) & 0x8000) != 0;
+            if (down && !lButtonDown)
+            {
+                float cx = x / (float)area.Width, cy = y / (float)area.Height;
+                try
+                {
+                    web.CoreWebView2.ExecuteScriptAsync("window.wallClick && window.wallClick("
+                        + cx.ToString("0.0000", System.Globalization.CultureInfo.InvariantCulture) + ","
+                        + cy.ToString("0.0000", System.Globalization.CultureInfo.InvariantCulture) + ")");
+                }
+                catch { }
+            }
+            lButtonDown = down;
             if (x == lastMouse.X && y == lastMouse.Y) return;   // no motion → no traffic
             lastMouse = new Point(x, y);
             float nx = x / (float)area.Width, ny = y / (float)area.Height;

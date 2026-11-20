@@ -49,6 +49,9 @@ namespace PixelFX
         public struct POINT { public int X; public int Y; }
         [DllImport("user32.dll")]
         public static extern bool GetCursorPos(out POINT p);
+        public const int VK_LBUTTON = 0x01;
+        [DllImport("user32.dll")]
+        public static extern short GetAsyncKeyState(int vKey);
         [DllImport("user32.dll")]
         public static extern bool SetForegroundWindow(IntPtr hWnd);
 

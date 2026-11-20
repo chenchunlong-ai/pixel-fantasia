@@ -56,6 +56,15 @@ globalThis.wallMouse = (nx, ny) => {
   } catch (e) { /* frame not ready */ }
 };
 
+/** forward clicks: the shell detects the left button over the wallpaper and calls window.wallClick
+    here; relay into the iframe just like wallMouse. */
+globalThis.wallClick = (nx, ny) => {
+  try {
+    const w = wall.contentWindow;
+    if (w && typeof w.wallClick === "function") w.wallClick(nx, ny);
+  } catch (e) { /* frame not ready */ }
+};
+
 /** forward the global speed knob into the wallpaper page: srcdoc pages are same-origin so we
     call their optional wallSpeed() hook directly; cross-origin video wrappers get a message. */
 function fwdSpeed(cfg) {
