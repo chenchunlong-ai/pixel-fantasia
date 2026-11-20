@@ -136,7 +136,6 @@ namespace PixelFX
                 { "fxRift", "时空裂缝" },
                 { "fxOtherworldRift", "异次元时空裂痕" },
                 { "fxHeaven", "天堂 · 云海之上" },
-                { "fxHell", "地狱 · 黑水湖" },
                 { "fxPagodaLive", "宝塔湖 · 原画动态" },
                 { "fxWaterfallValley2", "瀑布谷 2" },
                 { "paletteTitle", "调色板" },
@@ -233,7 +232,8 @@ namespace PixelFX
                 { "contactLabel", "联系方式" },
                 { "githubLabel", "GitHub 开源仓库" },
                 { "giteeLabel", "Gitee 镜像仓库" },
-                { "linkCopied", "链接已复制到剪贴板" }
+                { "linkCopied", "链接已复制到剪贴板" },
+                { "fxGorgefall", "峡谷晨雾" }
             } },
             { "en", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -357,7 +357,6 @@ namespace PixelFX
                 { "fxRift", "Spacetime rift" },
                 { "fxOtherworldRift", "Otherworld rift" },
                 { "fxHeaven", "Heaven · Above the Clouds" },
-                { "fxHell", "Hell · The Black Lake" },
                 { "fxPagodaLive", "Pagoda lake · living art" },
                 { "fxWaterfallValley2", "Waterfall valley 2" },
                 { "paletteTitle", "Palette" },
@@ -454,7 +453,8 @@ namespace PixelFX
                 { "contactLabel", "Contact" },
                 { "githubLabel", "GitHub repository" },
                 { "giteeLabel", "Gitee mirror" },
-                { "linkCopied", "Link copied to clipboard" }
+                { "linkCopied", "Link copied to clipboard" },
+                { "fxGorgefall", "Gorge at Dawn" }
             } },
             { "ja", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -578,7 +578,6 @@ namespace PixelFX
                 { "fxRift", "時空の裂け目" },
                 { "fxOtherworldRift", "異次元の裂け目" },
                 { "fxHeaven", "天国 · 雲海の上" },
-                { "fxHell", "地獄 · 黒い湖" },
                 { "fxPagodaLive", "原画動く絵 · 五重塔の湖" },
                 { "fxWaterfallValley2", "滝の谷 2" },
                 { "paletteTitle", "パレット" },
@@ -629,7 +628,8 @@ namespace PixelFX
                 { "contactLabel", "連絡先" },
                 { "githubLabel", "GitHub リポジトリ" },
                 { "giteeLabel", "Gitee ミラー" },
-                { "linkCopied", "リンクをクリップボードにコピーしました" }
+                { "linkCopied", "リンクをクリップボードにコピーしました" },
+                { "fxGorgefall", "峡谷の朝霧" }
             } },
             { "ko", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -753,7 +753,6 @@ namespace PixelFX
                 { "fxRift", "시공간 균열" },
                 { "fxOtherworldRift", "이계의 균열" },
                 { "fxHeaven", "천국 · 구름 바다 위" },
-                { "fxHell", "지옥 · 검은 호수" },
                 { "fxPagodaLive", "살아있는 원화 · 오층탑 호수" },
                 { "fxWaterfallValley2", "폭포 계곡 2" },
                 { "paletteTitle", "팔레트" },
@@ -804,7 +803,8 @@ namespace PixelFX
                 { "contactLabel", "연락처" },
                 { "githubLabel", "GitHub 저장소" },
                 { "giteeLabel", "Gitee 미러" },
-                { "linkCopied", "링크가 클립보드에 복사되었습니다" }
+                { "linkCopied", "링크가 클립보드에 복사되었습니다" },
+                { "fxGorgefall", "협곡의 아침 안개" }
             } },
             { "ru", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -928,7 +928,6 @@ namespace PixelFX
                 { "fxRift", "Разлом пространства" },
                 { "fxOtherworldRift", "Разлом иного мира" },
                 { "fxHeaven", "Рай · Над облаками" },
-                { "fxHell", "Ад · Чёрное озеро" },
                 { "fxPagodaLive", "Живая картина: пагода у озера" },
                 { "fxWaterfallValley2", "Долина водопадов 2" },
                 { "paletteTitle", "Палитра" },
@@ -979,7 +978,8 @@ namespace PixelFX
                 { "contactLabel", "Контакты" },
                 { "githubLabel", "Репозиторий GitHub" },
                 { "giteeLabel", "Зеркало Gitee" },
-                { "linkCopied", "Ссылка скопирована в буфер обмена" }
+                { "linkCopied", "Ссылка скопирована в буфер обмена" },
+                { "fxGorgefall", "Ущелье на рассвете" }
             } },
             { "es", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -1103,7 +1103,6 @@ namespace PixelFX
                 { "fxRift", "Rasgón espaciotemporal" },
                 { "fxOtherworldRift", "Grieta de otro mundo" },
                 { "fxHeaven", "Cielo · Sobre las nubes" },
-                { "fxHell", "Infierno · El lago negro" },
                 { "fxPagodaLive", "Lago y pagoda · cuadro vivo" },
                 { "fxWaterfallValley2", "Valle de cascadas 2" },
                 { "paletteTitle", "Paleta" },
@@ -1154,7 +1153,8 @@ namespace PixelFX
                 { "contactLabel", "Contacto" },
                 { "githubLabel", "Repositorio en GitHub" },
                 { "giteeLabel", "Espejo en Gitee" },
-                { "linkCopied", "Enlace copiado al portapapeles" }
+                { "linkCopied", "Enlace copiado al portapapeles" },
+                { "fxGorgefall", "Garganta al amanecer" }
             } },
             { "pt", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -1278,7 +1278,6 @@ namespace PixelFX
                 { "fxRift", "Fenda espaço-temporal" },
                 { "fxOtherworldRift", "Fenda de outro mundo" },
                 { "fxHeaven", "Céu · Acima das nuvens" },
-                { "fxHell", "Inferno · O lago negro" },
                 { "fxPagodaLive", "Quadro vivo · lago com pagode" },
                 { "fxWaterfallValley2", "Vale das cachoeiras 2" },
                 { "paletteTitle", "Paleta" },
@@ -1329,7 +1328,8 @@ namespace PixelFX
                 { "contactLabel", "Contato" },
                 { "githubLabel", "Repositório no GitHub" },
                 { "giteeLabel", "Espelho no Gitee" },
-                { "linkCopied", "Link copiado para a área de transferência" }
+                { "linkCopied", "Link copiado para a área de transferência" },
+                { "fxGorgefall", "Garganta ao amanhecer" }
             } },
             { "de", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -1453,7 +1453,6 @@ namespace PixelFX
                 { "fxRift", "Raumzeitriss" },
                 { "fxOtherworldRift", "Riss der anderen Welt" },
                 { "fxHeaven", "Himmel · Über den Wolken" },
-                { "fxHell", "Hölle · Der schwarze See" },
                 { "fxPagodaLive", "Pagodensee · lebendes Gemälde" },
                 { "fxWaterfallValley2", "Wasserfalltal 2" },
                 { "paletteTitle", "Palette" },
@@ -1504,7 +1503,8 @@ namespace PixelFX
                 { "contactLabel", "Kontakt" },
                 { "githubLabel", "GitHub-Repository" },
                 { "giteeLabel", "Gitee-Spiegel" },
-                { "linkCopied", "Link in die Zwischenablage kopiert" }
+                { "linkCopied", "Link in die Zwischenablage kopiert" },
+                { "fxGorgefall", "Schlucht im Morgengrauen" }
             } },
             { "fr", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -1628,7 +1628,6 @@ namespace PixelFX
                 { "fxRift", "Déchirure spatio-temporelle" },
                 { "fxOtherworldRift", "Faille de l'autre monde" },
                 { "fxHeaven", "Paradis · Au-dessus des nuages" },
-                { "fxHell", "Enfer · Le lac noir" },
                 { "fxPagodaLive", "Tableau vivant · lac et pagode" },
                 { "fxWaterfallValley2", "Vallée des cascades 2" },
                 { "paletteTitle", "Palette" },
@@ -1679,7 +1678,8 @@ namespace PixelFX
                 { "contactLabel", "Contact" },
                 { "githubLabel", "Dépôt GitHub" },
                 { "giteeLabel", "Miroir Gitee" },
-                { "linkCopied", "Lien copié dans le presse-papiers" }
+                { "linkCopied", "Lien copié dans le presse-papiers" },
+                { "fxGorgefall", "Gorges a l aube" }
             } }
             };
 
