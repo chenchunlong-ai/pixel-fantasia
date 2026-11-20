@@ -24,7 +24,8 @@
 
 ## 最近 3 条
 
-1. 2026-11-21 04:30 · 提交 `2b34486` · ZCode · **外部壁纸自带调参落地**：约定 `window.wallParams=[{key,label,min,max,step,def}]` 声明 + `window.wallParam(k,v)` 接收；wallwrap 读声明报外壳 → 设置页「此壁纸的参数」折叠子面板（滑杆动态渲染，值存 cfg.params["ext:id"] 全量回存）→ wallwrap 逐 key 转发桌面/预览；i18n extParams ×9；SKILL.md 钩子文档补全（wallClick/wallParams）。雏菊水塘声明 3 参数。真机滑杆待验收；跨区 src/shell/skill
+1. 2026-11-21 04:46 · 提交 `e82741c` · ZCode · **参数链路全通**：根因是雏菊水塘 GLSL 忘声明 `uniform vec3 uOpt` → 编译抛异常 → 壁纸脚本在钩子定义前死掉 → wallwrap 读不到 wallParams → 设置页面板空。修复后日志确认 wallParams 上报（id=27ea933241，3 参数）；浏览器确认 wallParam("daisies",3) 生效。**调试坑**：壁纸脚本死掉是无声的（error 只走 chrome.webview dbg），浏览器排查要把 error 写进 document.title 才能读；IAB 多标签时 tabs.list()[0] 可能是旧设置页——验错对象先看 url
+2. 2026-11-21 04:30 · 提交 `2b34486` · ZCode · **外部壁纸自带调参落地**：约定 `window.wallParams=[{key,label,min,max,step,def}]` 声明 + `window.wallParam(k,v)` 接收；wallwrap 读声明报外壳 → 设置页「此壁纸的参数」折叠子面板（滑杆动态渲染，值存 cfg.params["ext:id"] 全量回存）→ wallwrap 逐 key 转发桌面/预览；i18n extParams ×9；SKILL.md 钩子文档补全（wallClick/wallParams）。雏菊水塘声明 3 参数。真机滑杆待验收；跨区 src/shell/skill
 2. 2026-11-21 04:15 · 提交 `c49f731` · ZCode · **外壳检测点击 wallClick**（GetAsyncKeyState VK_LBUTTON 边沿→wallClick，全局输入可接受）恢复桌面点击双环 + 湍流斑暗部减淡（0.12→0.05）。真机点击待验收
 3. 2026-11-21 03:10 · 提交 `9264501` · ZCode · **wallwrap 转发 wallMouse（桌面交互根因：壁纸在 srcdoc iframe，外壳推顶层页落空）**
 2. 2026-11-21 02:46 · 提交 `c508c4d` · ZCode · **鼠标交互 wallMouse 钩子 + 1080P WebGL 范式入 skill**：外壳 40ms GetCursorPos 轮询→`window.wallMouse(nx,ny)`（移动才推）；SKILL.md 新增 1080P 范式章节+范例 `examples/daisy-pond-1080p.html`（16KB：三层行进水浪+经典迭代扭曲焦散+浑水暗斑+解析涟漪+SDF 雏菊+鼠标涟漪尾迹，坑：焦散省 `mod(uv*TAU,TAU)-250` 变均匀泛白、坡度系数>2 过曝全白、亮区焦散需随底色衰减）。用户判定 320×180 水面不像、1080P 版满意并已上桌（ext 壁纸）。跨区：shell+skill。真机鼠标手感待用户验收
