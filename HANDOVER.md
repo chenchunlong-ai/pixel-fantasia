@@ -36,22 +36,22 @@ git diff --stat
 
 ---
 
-## 2. 现在在哪（2026-11-18 03:15）
+## 2. 现在在哪（2026-11-21 02:00）
 
-- git HEAD `3e6adf2`，工作区干净，**文件锁全部空闲**，没有在飞改动。
-- 已构建、已真机验证的最新产物：`out\msix`（缓存治理版）。
-- 最后三次改动（都在 `palette-wallpaper`，都有 journal）：
-  1. `3e6adf2` **WebView2 缓存治理**：`Program.cs` 注入 `--disk-cache-size=8388608 --gpu-disk-cache-size-kb=8192 --disable-component-update --disable-features=...`；设置页加「清理缓存」；真机 3D 正常，**缓存目录 72.5 MB → 11.7 MB**
-  2. `b661820` 顶部副标题改商店 A 版文案（9 语言，`appSub`）
-  3. `fd48091` 关于页「复制制作提示词」按钮
-- 老坑已查清：旧缓存 72.5 MB 里约 60 MB 是 WebView2 自己下的组件（Widevine 21.9 / component_crx_cache 21.4 / Subresource Filter 12.3），**跟 3D 无关**；3D 真实占用约 6 MB。
+- git HEAD 在 `b361813` 之上新增本次提交（新场景雏菊水塘），工作区干净，**文件锁空闲**（ZCode 的锁随 commit.ps1 释放）。
+- 已构建、已真机验证的最新产物：`out\msix`（缓存治理版，**不含 daisypond**——新场景要重建 exe 才能看到）。
+- 最近改动（都有 journal）：
+  1. 本次 · ZCode · **新场景「雏菊水塘」`palette/daisypond`**：俯视水面（Voronoi 焦散光网两瓦片滑动 + 雏菊 + 涟漪 + 星光）；verify 通过、无缝 0 差异、13.5ms/帧；**真机未验收**
+  2. `ab8cc3a` 豆包 · 天堂重做星空银河 + 地狱下线 + 失效场景自动回退
+  3. `5e01931` 豆包 · 峡谷晨雾（AI 底图 + 像素化 + 亮水掩膜）
+  4. `b361813` · 「社区壁纸仓 + 打赏」方案评估后**暂停**（六条原因，重启门槛在 `collab\ideas\`）
 
 ## 3. 未完成 / 未验证
 
-- [ ] **「清理缓存」按钮的真实点击没验过**（设置窗只能托盘双击开）。期望：显示「当前缓存 X MB」→ 点后「已清理，重启应用后完全释放」→ 重启后 `webview` 目录清空。
-- [ ] `GrShaderCache` 稳定在 4.6 MB，`--gpu-disk-cache-size-kb=8192` 是否真约束它未单独验证；也未做小时级长时间观察。
-- [ ] 顶部副标题 66 字在 `.sub` 11px 下**折成 2 行**，是否接受待人类裁决。
-- [ ] 商店 Short description 是否把「不到 1MB」改成「安装包不到 1MB」待人类裁决。
+- [ ] **daisypond 真机验收**：重建 `node palette-wallpaper/build.mjs` → `out\msix\PixelPalette.exe` → 设置里选「雏菊水塘」，看焦散网/雏菊/涟漪/换装
+- [ ] 旧验收项（副标题折行、复制提示词按钮、清理缓存按钮、图标透明、天堂星空、峡谷晨雾）全部待人工验收——见 `collab\STATE.md`「下一步」
+- [ ] 补 8 语言缺失文案（fxDaisyPond 9 语言已补，旧缺口 46 键仍在）
+- [ ] `GrShaderCache` 稳定在 4.6 MB，`--gpu-disk-cache-size-kb=8192` 是否真约束它未单独验证。
 
 ---
 
