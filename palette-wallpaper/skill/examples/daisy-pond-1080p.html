@@ -37,6 +37,7 @@ uniform vec2 R;      // canvas resolution
 uniform float T;     // seconds, advanced only while visible
 uniform float DPR;
 uniform vec3 uMou;      // cursor: x, y (uv, y-up), agitation 0..1
+uniform vec3 uOpt;      // wallpaper parameters: caustics gain, mouse disturbance, daisy count
 uniform vec3 uRip[10];  // click ripples: x, y (uv, y-up), age seconds (-9 = unused)
 
 float hash(vec2 q) {
