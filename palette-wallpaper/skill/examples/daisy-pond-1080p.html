@@ -40,6 +40,7 @@ uniform vec3 uMou;      // cursor: x, y (uv, y-up), agitation 0..1
 uniform vec3 uOpt;      // wallpaper parameters: caustics gain, mouse disturbance, daisy count
 uniform vec3 uRip[10];  // click ripples: x, y (uv, y-up), age seconds (-9 = unused)
 uniform vec3 uSway[6];  // per-daisy sway: push x, push y (uv), unused — kicked by ripples and koi
+uniform float uNoD;     // 1 = the CPU layer above the koi draws the daisies, the shader must not
 
 float hash(vec2 q) {
   q = fract(q * vec2(234.34, 435.345));
@@ -198,6 +199,8 @@ void main() {
   }
 
   // ---- the daisies: SDF, drifting and bobbing on the swell ------------------------
+  // (skipped when uNoD = 1: the CPU koi layer draws them ABOVE the fish)
+  if (uNoD < 0.5) {
   vec4 FL[6];
   FL[0] = vec4(0.16, 0.24, 0.052, 0.0);
   FL[1] = vec4(0.46, 0.52, 0.040, 1.0);
@@ -226,6 +229,7 @@ void main() {
     vec3 yolkCol = mix(vec3(0.85, 0.60, 0.16), vec3(0.97, 0.79, 0.29), df.y);
     col = mix(col, yolkCol, clamp(df.y, 0.0, 1.0) * step(0.001, df.x + df.y));
     col += vec3(1.0, 0.95, 0.75) * smoothstep(0.35, 0.0, length(rel / (F.z * 0.35))) * 0.10;
+  }
   }
 
   gl_FragColor = vec4(col, 1.0);
@@ -261,10 +265,19 @@ const uMou = gl.getUniformLocation(prog, "uMou");
 const uOpt = gl.getUniformLocation(prog, "uOpt");
 const uRip = gl.getUniformLocation(prog, "uRip");
 const uSwa = gl.getUniformLocation(prog, "uSway");
+const uNoD = gl.getUniformLocation(prog, "uNoD");
 const ripBuf = new Float32Array(30);     // 10 × (x, y, age)
 const swBuf = new Float32Array(18);      // 6 × (push x, push y, unused) — the daisies' sway
-// the shader's daisy bases, mirrored here so the CPU can kick them (uv, y-up)
-const DAISY_POS = [[0.16, 0.24], [0.46, 0.52], [0.80, 0.30], [0.30, 0.72], [0.64, 0.82], [0.90, 0.62]];
+// the shader's daisy layout, mirrored here: [x, y, radius, phase] (uv, y-up) — the CPU
+// draws the daisies above the koi (the shader skips them when uNoD = 1)
+const DFL = [
+  { x: 0.16, y: 0.24, z: 0.052, w: 0.0 },
+  { x: 0.46, y: 0.52, z: 0.040, w: 1.0 },
+  { x: 0.80, y: 0.30, z: 0.046, w: 2.0 },
+  { x: 0.30, y: 0.72, z: 0.056, w: 3.0 },
+  { x: 0.64, y: 0.82, z: 0.044, w: 4.0 },
+  { x: 0.90, y: 0.62, z: 0.036, w: 5.0 },
+];
 
 // ---- mouse interaction ---------------------------------------------------------------------
 // The app's shell polls the cursor (the wallpaper window itself never gets mouse events) and
@@ -300,17 +313,10 @@ window.wallClick = (nx, ny) => {
   mouse.energy = 1;                      // a click also stirs the patch hard
   mouse.x = Math.min(1, Math.max(0, nx));
   mouse.y = 1 - Math.min(1, Math.max(0, ny));
-  // a click also drops a pellet of fish food where the water was slapped:
-  // the koi race for it, and the winner eats it and scoots off to the side.
-  // The pellet lands a little off the slap point (it rides the splash), otherwise
-  // the fish would keep fleeing the cursor parked right on top of their food.
-  const A0 = cvs.width / cvs.height;
-  const pa = Math.random() * Math.PI * 2;
-  food.push({
-    x: Math.min(1, Math.max(0, nx)) + Math.cos(pa) * 0.12 / A0,
-    y: 1 - Math.min(1, Math.max(0, ny)) + Math.sin(pa) * 0.12,
-    born: t,
-  });
+  // a click also drops a pellet of fish food exactly where the water was slapped:
+  // the slap scares the koi off, but once the cursor rests or moves away they come
+  // back for it — the nearest one eats it and scoots off to the side
+  food.push({ x: Math.min(1, Math.max(0, nx)), y: 1 - Math.min(1, Math.max(0, ny)), born: t });
   if (food.length > 6) food.shift();
 };
 const food = [];                         // pellets of fish food { x, y (uv, y-up), born }
@@ -427,7 +433,6 @@ function koiStep(dt, A) {
 
 function koiDraw() {
   oc.clearRect(0, 0, ov.width, ov.height);
-  if (!KOI.length) return;
   const W = ov.width, H = ov.height, A = W / H;
   for (const f of KOI) {
     const px = (f.x / A) * W, py = (1 - f.y) * H;
@@ -520,9 +525,53 @@ function koiDraw() {
     oc.fill();
   }
   oc.globalAlpha = 1;
+  drawDaisies(W, H, A2);
 }
 
-/** the body silhouette in fish-local coords (nose at +x, tail root at -0.55s) */
+/** the daisies on the CPU layer, ABOVE the koi: same drift/bob/spin/sway as the old
+ * shader flowers (the shader skips them while uNoD = 1) */
+function drawDaisies(W, H, A) {
+  const n = Math.max(0, Math.min(6, OPT.daisies | 0));
+  if (!n) return;
+  oc.globalAlpha = 0.95;
+  for (let i = 0; i < n; i++) {
+    const F = DFL[i];
+    const fx = F.x + Math.sin(t * 0.22 + F.w * 1.7) * 0.012 + swBuf[i * 3] * 0.022;
+    const fy = F.y + Math.cos(t * 0.31 + F.w * 2.3) * 0.008 + swBuf[i * 3 + 1] * 0.022;
+    const bob = 0.006 * Math.sin(t * 0.8 + F.w * 2.1);
+    const px = (fx / A) * W, py = (1 - (fy + bob)) * H;
+    const R = F.z * H;
+    const rot = (1 + t * 0.35 + F.w) * 0.35;
+    // shadow, a touch lower, not bobbing with the flower
+    oc.fillStyle = "rgba(6,20,26,0.18)";
+    oc.beginPath();
+    oc.ellipse(px + 0.006 * H, py + 0.010 * H, R * 1.12, R * 0.92, 0, 0, Math.PI * 2);
+    oc.fill();
+    oc.save();
+    oc.translate(px, py);
+    oc.rotate(-rot);                       // the slow spin (screen y is down)
+    for (let k = 0; k < 7; k++) {
+      const a = (k / 7) * Math.PI * 2;
+      oc.save();
+      oc.rotate(a);
+      oc.fillStyle = "#eef3f3";
+      oc.beginPath();
+      oc.ellipse(0.60 * R, 0, 0.42 * R, 0.17 * R, 0, 0, Math.PI * 2);
+      oc.fill();
+      oc.restore();
+    }
+    // the yolk: a warm dome with a bright centre
+    const yolk = oc.createRadialGradient(0.05 * R, -0.05 * R, 0.05 * R, 0, 0, 0.30 * R);
+    yolk.addColorStop(0, "#f7c94a");
+    yolk.addColorStop(1, "#d9992e");
+    oc.fillStyle = yolk;
+    oc.beginPath();
+    oc.arc(0, 0, 0.30 * R, 0, Math.PI * 2);
+    oc.fill();
+    oc.restore();
+  }
+  oc.globalAlpha = 1;
+}
 function fishPath(s, wag) {
   oc.beginPath();
   oc.moveTo(0.52 * s, 0);
@@ -575,7 +624,7 @@ function frame(now) {
   for (let i = 0; i < 6; i++) {
     const b = i * 3;
     swBuf[b] *= decay; swBuf[b + 1] *= decay;
-    const dx0 = DAISY_POS[i][0] * Asp, dy0 = DAISY_POS[i][1];
+    const dx0 = DFL[i].x * Asp, dy0 = DFL[i].y;
     for (const r of ripples) {
       const age = t - r.born;
       const rr = 0.02 + age * 0.13;
@@ -597,6 +646,7 @@ function frame(now) {
     if (m > 1) { swBuf[b] /= m; swBuf[b + 1] /= m; }
   }
   gl.uniform3fv(uSwa, swBuf);
+  gl.uniform1f(uNoD, 1);                 // the daisies live on the CPU layer now (above the koi)
   gl.uniform3f(uMou, mouse.x, mouse.y, mouse.energy);
   gl.uniform3f(uOpt, OPT.caus, OPT.mouse, OPT.daisies);
   mouse.energy *= 0.985;                 // the disturbance settles when the cursor rests
