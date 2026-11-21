@@ -52,12 +52,11 @@ const TH = {
     });
   },
   groundFront(p, q, t, S) {
-    // near-ground sand streams with bright heads ripping across the frame
+    // near-ground sand skimming across the frame: grains in a short trail, no straight lines
     trips(t, D, Math.round(22 * DEN), S * 31, 3, 5, (u, k, m, i) => {
       const j = ((k % m) + m) % m, R = (n) => rand(S * 37, i, j, n);
-      const y = -2 - R(1) * 26, x = -180 + 380 * u, L = 10 + R(2) * 18;
-      q.line(x - L, y, x, y, SAND[2 + Math.floor(R(3) * 2)], 0.7);
-      q.px(x, y, SAND[4]);
+      const y = -2 - R(1) * 26, x = -180 + 380 * u;
+      for (let g = 0; g < 4; g++) q.dot(x - g * 3 - R(2) * 2, y + Math.sin(g * 1.7 + R(3) * 6) * 1.5, SAND[2 + Math.floor(R(3) * 2)], 0.7 - g * 0.15);
       if (R(4) < 0.3) q.glow(x, y, 3, SAND[3], 0.1);
     });
   },
@@ -82,12 +81,14 @@ const TH = {
       q.disc(x + rx * 0.3, y - ry * 0.4, rx * 0.6, Dst[back ? 2 : 3], a * 0.6);
       if (!back) q.disc(x - rx * 0.2, y - ry * 0.5, rx * 0.4, Dst[4], a * 0.4);
     });
-    // sand streaks in the air: the body of the storm, far ones thin, near ones bright
+    // airborne sand: drifting grain trails instead of straight streaks (user: the straight
+    // lines read as scratches, not sand) — far ones sparse and faint, near ones denser
     trips(t, D, Math.round((back ? 34 : 20) * DEN), S * 29 + (back ? 0 : 1), 3, 5, (u, k, m, i) => {
       const j = ((k % m) + m) % m, R = (n) => rand(S * 41 + (back ? 0 : 1), i, j, n);
-      const y = -8 - R(1) * (back ? 110 : 70), x = -190 + 400 * u, L = (back ? 6 : 12) + R(2) * 14;
+      const y = -8 - R(1) * (back ? 110 : 70), x = -190 + 400 * u;
       const c = back ? SAND[1] : SAND[2 + Math.floor(R(3) * 2)];
-      q.line(x - L, y, x, y, c, back ? 0.4 : 0.7);
+      for (let g = 0; g < 5; g++)
+        q.dot(x - g * (back ? 2.5 : 4) - R(2) * 3, y + Math.sin(g * 2.1 + R(3) * 6) * 2, c, (back ? 0.4 : 0.7) * (1 - g * 0.17));
       if (!back && R(4) < 0.25) q.px(x, y, SAND[4]);
     });
     // gust swirls: little eddies of sand curling through the air

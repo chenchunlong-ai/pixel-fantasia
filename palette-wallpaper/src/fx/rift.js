@@ -12,7 +12,7 @@ import { clip, rows, field, sample, trips, wave, tree } from "../../../src/fx/we
 
 export const meta = {
   name: "Spacetime rift",
-  desc: "The sky is torn open: a ragged crack runs corner to corner, bulging and pinching like a wound that will not hold. Cold electric-violet gas churns inside it, cut by lanes of deep black, ringed by a near-black lip and a burning rim. Every second or so something detonates: bolts are born on the spine and blow outward through the lip into open space, forks peel away, sparks and chips fly off, a flattened ring of light races out — then everything falls back into the dark.",
+  desc: "The sky is torn open: a ragged crack runs corner to corner, bulging and pinching like a wound that will not hold. Cold electric-violet gas churns inside it, cut by lanes of deep black, ringed by a near-black lip and a burning rim. Every second or so the wound detonates: light bursts outward — rays, sparks and chips fly off the lip, a flattened ring races out — then everything falls back into the dark.",
   tags: ["weather", "scene", "rift", "nebula", "space", "stars", "violet", "blue", "energy", "discharge", "ambient", "loop"],
   size: [320, 180],
   origin: [160, 170],
@@ -267,62 +267,11 @@ function energy(p, t, o, NL) {
     const hw = edge(u);
     const [cx, cy] = at(u, 0);
 
-    // 1) the bolts: a strike is born on the spine and blown outward, zig-zagging as it crosses the lip and
-    // dies in open space; short forks peel off the trunk on the way out and fade faster
-    const nb = 1 + (rand(313, i, 8) > 0.62 ? 1 : 0);          // 1..2 —— fewer, longer
+    // (the lightning bolts are gone by user request — the discharge survives as light,
+    // not as strikes: rays, sparks, chips, lip flares and the shock ring below)
     const [ox, oy] = at(u, (rand(313, i, 7) - 0.5) * hw * 0.35);
-    const strike = (paths, thick) => {
-      for (const path of paths) {
-        const pts = path.pts, trunk = path.w >= 1;
-        for (let k = 0; k < pts.length - 1; k++) {
-          const [bx0, by0] = pts[k], [bx1, by1] = pts[k + 1];
-          const n = Math.max(1, Math.ceil(Math.hypot(bx1 - bx0, by1 - by0) * 1.8));
-          for (let m = 0; m <= n; m++) {
-            const f = m / n, X = bx0 + (bx1 - bx0) * f, Y = by0 + (by1 - by0) * f;
-            const along = (k + f) / (pts.length - 1);
-            const heat = 1 - 0.55 * along * along;                 // the tip cools as it leaves the wound
-            if (trunk) {
-              q.px(X, Y, a * heat > 0.4 ? ARC : ICE);
-              q.px(X, Y + 1, a * heat > 0.55 ? ARC : ICE);
-              if (thick && a * heat > 0.3) q.px(X + 1, Y, HALO);
-              if (a * heat > 0.32 && m % 3 === 0) q.light(X, Y, HALO, 0.36 * a * heat);
-            } else q.px(X, Y, a * heat > 0.5 ? ICE : HALO);
-          }
-        }
-      }
-    };
-    for (let b = 0; b < nb; b++) {
-      const side = rand(317, i, b, 1) < 0.5 ? -1 : 1;
-      const du = (rand(317, i, b, 5) - 0.5) * 0.08;
-      const reach = (b ? hw * 2.4 + 22 : hw * 3.4 + 44) + rand(317, i, b, 3) * 62;
-      const s1 = at(u + du, side * reach);
-      strike(tree(new Rng(321 + i * 23 + b * 7), ox, oy, s1[0], s1[1], 0.3, 0.18), true);
-      // one or two forks, shorter and dimmer
-      const nf = rand(323, i, b, 1) > 0.45 ? 1 : 0;
-      for (let g = 0; g < nf; g++) {
-        const pf = 0.25 + rand(323, i, b, g + 2) * 0.45;
-        const [fx, fy] = at(u + du * pf, side * (reach * pf + (rand(323, i, b, g + 4) - 0.3) * 14));
-        const tilt = (rand(327, i, b, g + 1) - 0.5) * 0.9;
-        strike(tree(new Rng(329 + i * 11 + b * 5 + g * 3), ox + (fx - ox) * 0.8, oy + (fy - oy) * 0.8, fx + tilt * VX * 6, fy + tilt * VY * 6, 0.26, 0.1), false);
-      }
-      q.glow(s1[0], s1[1], 3.5, ICE, 0.3 * a);
-    }
     q.glow(ox, oy, 8, HALO, 0.5 * a);
     q.glow(ox, oy, 3, ARC, 0.42 * a);
-    // 2) internal crackle: a short jagged bolt that never escapes the body
-    if (nb < 4) {
-      const ua = u + (rand(341, i, 1) - 0.5) * 0.2, ub = ua + (rand(341, i, 2) - 0.5) * 0.12;
-      const run = tree(new Rng(351 + i * 13), ...at(ua, (rand(341, i, 3) - 0.5) * hw * 0.5), ...at(ub, (rand(341, i, 4) - 0.5) * hw * 0.5), 0.42, 0.24);
-      for (const path of run)
-        for (let k = 0; k < path.pts.length - 1; k++) {
-          const [bx0, by0] = path.pts[k], [bx1, by1] = path.pts[k + 1];
-          const n = Math.max(1, Math.ceil(Math.hypot(bx1 - bx0, by1 - by0) * 1.3));
-          for (let m = 0; m <= n; m++) {
-            const f = m / n;
-            q.dot(bx0 + (bx1 - bx0) * f, by0 + (by1 - by0) * f, a > 0.55 ? ICE : cold, a * 0.85);
-          }
-        }
-    }
 
     // 3) rays: the core blows straight out, uneven spokes, short and sharp
     if (age2 < 0.42) {

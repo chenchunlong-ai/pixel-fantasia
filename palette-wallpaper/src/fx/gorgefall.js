@@ -1,3 +1,4 @@
+// DRAFT — not shipped. (下线于 2026-11-21：320×180 版被 1080P WebGL 版取代 / 用户点名下线)
 // 峡谷晨雾 / Gorge at Dawn — a painted gorge, baked to 16 colours, brought to life by the code.
 //
 // This one is not drawn procedurally. A painted plate was authored for the composition (old tree leaning in

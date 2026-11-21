@@ -137,7 +137,6 @@ namespace PixelFX
                 { "fxRift", "时空裂缝" },
                 { "fxOtherworldRift", "异次元时空裂痕" },
                 { "fxHeaven", "天堂 · 云海之上" },
-                { "fxDaisyPond", "雏菊水塘" },
                 { "fxPagodaLive", "宝塔湖 · 原画动态" },
                 { "fxWaterfallValley2", "瀑布谷 2" },
                 { "paletteTitle", "调色板" },
@@ -235,7 +234,6 @@ namespace PixelFX
                 { "githubLabel", "GitHub 开源仓库" },
                 { "giteeLabel", "Gitee 镜像仓库" },
                 { "linkCopied", "链接已复制到剪贴板" },
-                { "fxGorgefall", "峡谷晨雾" },
                 { "optSystem", "系统壁纸" },
                 { "renameBtn", "改名" },
                 { "renamePrompt", "壁纸名称（留空取消）：" }
@@ -363,7 +361,6 @@ namespace PixelFX
                 { "fxRift", "Spacetime rift" },
                 { "fxOtherworldRift", "Otherworld rift" },
                 { "fxHeaven", "Heaven · Above the Clouds" },
-                { "fxDaisyPond", "Daisy Pond" },
                 { "fxPagodaLive", "Pagoda lake · living art" },
                 { "fxWaterfallValley2", "Waterfall valley 2" },
                 { "paletteTitle", "Palette" },
@@ -461,7 +458,6 @@ namespace PixelFX
                 { "githubLabel", "GitHub repository" },
                 { "giteeLabel", "Gitee mirror" },
                 { "linkCopied", "Link copied to clipboard" },
-                { "fxGorgefall", "Gorge at Dawn" },
                 { "optSystem", "Built-in scenes" },
                 { "renameBtn", "Rename" },
                 { "renamePrompt", "Wallpaper name (empty to cancel):" }
@@ -589,7 +585,6 @@ namespace PixelFX
                 { "fxRift", "時空の裂け目" },
                 { "fxOtherworldRift", "異次元の裂け目" },
                 { "fxHeaven", "天国 · 雲海の上" },
-                { "fxDaisyPond", "ヒナギクの池" },
                 { "fxPagodaLive", "原画動く絵 · 五重塔の湖" },
                 { "fxWaterfallValley2", "滝の谷 2" },
                 { "paletteTitle", "パレット" },
@@ -641,7 +636,6 @@ namespace PixelFX
                 { "githubLabel", "GitHub リポジトリ" },
                 { "giteeLabel", "Gitee ミラー" },
                 { "linkCopied", "リンクをクリップボードにコピーしました" },
-                { "fxGorgefall", "峡谷の朝霧" },
                 { "optSystem", "システム壁紙" },
                 { "mineTitle", "ローカル壁紙" }
             } },
@@ -768,7 +762,6 @@ namespace PixelFX
                 { "fxRift", "시공간 균열" },
                 { "fxOtherworldRift", "이계의 균열" },
                 { "fxHeaven", "천국 · 구름 바다 위" },
-                { "fxDaisyPond", "데이지 연못" },
                 { "fxPagodaLive", "살아있는 원화 · 오층탑 호수" },
                 { "fxWaterfallValley2", "폭포 계곡 2" },
                 { "paletteTitle", "팔레트" },
@@ -820,7 +813,6 @@ namespace PixelFX
                 { "githubLabel", "GitHub 저장소" },
                 { "giteeLabel", "Gitee 미러" },
                 { "linkCopied", "링크가 클립보드에 복사되었습니다" },
-                { "fxGorgefall", "협곡의 아침 안개" },
                 { "optSystem", "시스템 배경화면" },
                 { "mineTitle", "로컬 배경화면" }
             } },
@@ -947,7 +939,6 @@ namespace PixelFX
                 { "fxRift", "Разлом пространства" },
                 { "fxOtherworldRift", "Разлом иного мира" },
                 { "fxHeaven", "Рай · Над облаками" },
-                { "fxDaisyPond", "Пруд с маргаритками" },
                 { "fxPagodaLive", "Живая картина: пагода у озера" },
                 { "fxWaterfallValley2", "Долина водопадов 2" },
                 { "paletteTitle", "Палитра" },
@@ -999,7 +990,6 @@ namespace PixelFX
                 { "githubLabel", "Репозиторий GitHub" },
                 { "giteeLabel", "Зеркало Gitee" },
                 { "linkCopied", "Ссылка скопирована в буфер обмена" },
-                { "fxGorgefall", "Ущелье на рассвете" },
                 { "optSystem", "Встроенные сцены" },
                 { "mineTitle", "Локальные обои" }
             } },
@@ -1126,7 +1116,6 @@ namespace PixelFX
                 { "fxRift", "Rasgón espaciotemporal" },
                 { "fxOtherworldRift", "Grieta de otro mundo" },
                 { "fxHeaven", "Cielo · Sobre las nubes" },
-                { "fxDaisyPond", "Estanque de margaritas" },
                 { "fxPagodaLive", "Lago y pagoda · cuadro vivo" },
                 { "fxWaterfallValley2", "Valle de cascadas 2" },
                 { "paletteTitle", "Paleta" },
@@ -1178,7 +1167,6 @@ namespace PixelFX
                 { "githubLabel", "Repositorio en GitHub" },
                 { "giteeLabel", "Espejo en Gitee" },
                 { "linkCopied", "Enlace copiado al portapapeles" },
-                { "fxGorgefall", "Garganta al amanecer" },
                 { "optSystem", "Escenas integradas" },
                 { "mineTitle", "Fondos locales" }
             } },
@@ -1305,7 +1293,6 @@ namespace PixelFX
                 { "fxRift", "Fenda espaço-temporal" },
                 { "fxOtherworldRift", "Fenda de outro mundo" },
                 { "fxHeaven", "Céu · Acima das nuvens" },
-                { "fxDaisyPond", "Lagoa de margaridas" },
                 { "fxPagodaLive", "Quadro vivo · lago com pagode" },
                 { "fxWaterfallValley2", "Vale das cachoeiras 2" },
                 { "paletteTitle", "Paleta" },
@@ -1357,7 +1344,6 @@ namespace PixelFX
                 { "githubLabel", "Repositório no GitHub" },
                 { "giteeLabel", "Espelho no Gitee" },
                 { "linkCopied", "Link copiado para a área de transferência" },
-                { "fxGorgefall", "Garganta ao amanhecer" },
                 { "optSystem", "Cenas integradas" },
                 { "mineTitle", "Papéis locais" }
             } },
@@ -1484,7 +1470,6 @@ namespace PixelFX
                 { "fxRift", "Raumzeitriss" },
                 { "fxOtherworldRift", "Riss der anderen Welt" },
                 { "fxHeaven", "Himmel · Über den Wolken" },
-                { "fxDaisyPond", "Gänseblümchenteich" },
                 { "fxPagodaLive", "Pagodensee · lebendes Gemälde" },
                 { "fxWaterfallValley2", "Wasserfalltal 2" },
                 { "paletteTitle", "Palette" },
@@ -1536,7 +1521,6 @@ namespace PixelFX
                 { "githubLabel", "GitHub-Repository" },
                 { "giteeLabel", "Gitee-Spiegel" },
                 { "linkCopied", "Link in die Zwischenablage kopiert" },
-                { "fxGorgefall", "Schlucht im Morgengrauen" },
                 { "optSystem", "Eingebaute Szenen" },
                 { "mineTitle", "Lokale Hintergründe" }
             } },
@@ -1663,7 +1647,6 @@ namespace PixelFX
                 { "fxRift", "Déchirure spatio-temporelle" },
                 { "fxOtherworldRift", "Faille de l'autre monde" },
                 { "fxHeaven", "Paradis · Au-dessus des nuages" },
-                { "fxDaisyPond", "Étang aux marguerites" },
                 { "fxPagodaLive", "Tableau vivant · lac et pagode" },
                 { "fxWaterfallValley2", "Vallée des cascades 2" },
                 { "paletteTitle", "Palette" },
@@ -1715,7 +1698,6 @@ namespace PixelFX
                 { "githubLabel", "Dépôt GitHub" },
                 { "giteeLabel", "Miroir Gitee" },
                 { "linkCopied", "Lien copié dans le presse-papiers" },
-                { "fxGorgefall", "Gorges a l aube" },
                 { "optSystem", "Scènes intégrées" },
                 { "mineTitle", "Fonds locaux" }
             } }

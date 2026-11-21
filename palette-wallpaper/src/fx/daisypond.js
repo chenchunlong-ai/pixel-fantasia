@@ -1,3 +1,4 @@
+// DRAFT — not shipped. (下线于 2026-11-21：320×180 版被 1080P WebGL 版取代 / 用户点名下线)
 // 雏菊水塘 / Daisy Pond — clear sunlit water, seen from above.
 //
 // The water is a baked gradient of teal depth with murky patches up top (static, painted once and copied
