@@ -18,6 +18,7 @@ namespace PixelFX
         public static readonly string SettingsHtml = Resource("settings.html.gz");
         public static readonly string WallWrapHtml = Resource("wallwrap.html.gz");
         public static readonly string SkillMd = Resource("SKILL.md.gz");
+        public static readonly string DaisyPondHtml = Resource("daisypond1080.html.gz");
 
         public static Settings Cfg = Store.Load();
         public static WallpaperWindow Wallpaper;
@@ -52,10 +53,33 @@ namespace PixelFX
             return "<html><body>missing resource: " + name + "</body></html>";
         }
 
+        /// <summary>The 3D daisy-pond wallpaper ships inside the exe: refresh its file and make
+        /// sure it is in the user's wallpaper list. If the user deleted it on purpose, respect
+        /// that (daisyPondGone) and never bring it back.</summary>
+        private static void EnsureBundledWallpaper()
+        {
+            try
+            {
+                const string bid = "daisypond1080";
+                if (Cfg.daisyPondGone) return;
+                Directory.CreateDirectory(Store.WallpaperDir);
+                string file = Path.Combine(Store.WallpaperDir, bid + ".html");
+                File.WriteAllText(file, App.DaisyPondHtml);          // every start: updates ride along
+                if (Cfg.wallpapers.Find((w) => w.id == bid) == null)
+                {
+                    Cfg.wallpapers.Add(new WallpaperFile { id = bid, name = "雏菊水塘 · 1080P", file = file, type = "html" });
+                    Store.Save(Cfg);
+                    Log("preinstalled bundled wallpaper " + bid);
+                }
+            }
+            catch (Exception ex) { Log("preinstall daisypond failed: " + ex.Message); }
+        }
+
         public static void Start()
         {
             Lang.Use(Cfg.lang);
             Log("start, fx=" + Cfg.fx + " packaged=" + Store.Packaged);
+            EnsureBundledWallpaper();
             if (Cfg.autoStart)
             {
                 Store.SetAutoStart(true);
@@ -509,6 +533,7 @@ namespace PixelFX
                 if (wf == null) return;
                 Cfg.wallpapers.Remove(wf);
                 Cfg.petCfg.Remove("ext:" + id);
+                if (id == "daisypond1080") { Cfg.daisyPondGone = true; Store.Save(Cfg); }   // deleted on purpose: never re-add
                 try { File.Delete(wf.file); } catch { }
                 // a video sits next to its wrapper page; sweep this wallpaper's leftovers only
                 foreach (string f in Directory.GetFiles(Store.WallpaperDir, wf.id + ".*"))

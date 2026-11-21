@@ -71,6 +71,7 @@ namespace PixelFX
         public bool mirror { get; set; }
         public bool? critters { get; set; } // null (old config) means on
         public List<WallpaperFile> wallpapers { get; set; }  // user-loaded wallpaper files
+        public bool daisyPondGone { get; set; }              // user deleted the bundled 1080P daisy pond: do not re-add it
         public List<string> hiddenFx { get; set; }           // internal scenes hidden from the list
         public List<string> hiddenWallpapers { get; set; }   // user wallpapers hidden from the list
         public bool petOn { get; set; }                      // the pet layer master switch

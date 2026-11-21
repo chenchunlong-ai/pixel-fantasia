@@ -565,11 +565,24 @@ function drawDaisies(W, H, A) {
     const px = fx * W, py = (1 - (fy + bob)) * H;   // fx/fy are uv: × W directly
     const R = F.z * H;
     const rot = (1 + t * 0.35 + F.w) * 0.35;
-    // shadow, a touch lower, not bobbing with the flower
+    // shadow, a touch lower, not bobbing with the flower — same petal silhouette as the flower
+    oc.save();
+    oc.translate(px + 0.006 * H, py + 0.010 * H);
+    oc.rotate(-rot);
     oc.fillStyle = "rgba(6,20,26,0.18)";
+    for (let k = 0; k < 7; k++) {
+      const a = (k / 7) * Math.PI * 2;
+      oc.save();
+      oc.rotate(a);
+      oc.beginPath();
+      oc.ellipse(0.60 * R, 0, 0.42 * R, 0.17 * R, 0, 0, Math.PI * 2);
+      oc.fill();
+      oc.restore();
+    }
     oc.beginPath();
-    oc.ellipse(px + 0.006 * H, py + 0.010 * H, R * 1.12, R * 0.92, 0, 0, Math.PI * 2);
+    oc.arc(0, 0, 0.34 * R, 0, Math.PI * 2);
     oc.fill();
+    oc.restore();
     oc.save();
     oc.translate(px, py);
     oc.rotate(-rot);                       // the slow spin (screen y is down)

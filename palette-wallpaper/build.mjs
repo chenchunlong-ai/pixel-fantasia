@@ -196,6 +196,9 @@ writeFileSync(join(OUT, "settings.html.gz"), gz(page("settings.html", "settings.
 writeFileSync(join(OUT, "wallwrap.html.gz"), gz(page("wallwrap.html", "wallwrap.js", wallwrapJs)));
 // the wallpaper-authoring skill ships inside the app (About menu → download)
 writeFileSync(join(OUT, "SKILL.md.gz"), gz(readFileSync(join(HERE, "skill", "SKILL.md"))));
+// the 3D daisy-pond wallpaper ships preinstalled (exe resource -> written into the user's
+// wallpaper list on start, see App.EnsureBundledWallpaper)
+writeFileSync(join(OUT, "daisypond1080.html.gz"), gz(readFileSync(join(HERE, "skill", "examples", "daisy-pond-1080p.html"))));
 console.log(`· 页面打包完成 runtime ${(runtimeJs.length / 1024).toFixed(0)} KB, settings ${(settingsJs.length / 1024).toFixed(0)} KB (gz 内嵌)`);
 
 const appExe = join(OUT, "PixelPalette.exe");
@@ -213,6 +216,7 @@ compile([
   "/resource:" + join(OUT, "settings.html.gz") + ",PixelPalette.settings.html.gz",
   "/resource:" + join(OUT, "wallwrap.html.gz") + ",PixelPalette.wallwrap.html.gz",
             "/resource:" + join(OUT, "SKILL.md.gz") + ",PixelPalette.SKILL.md.gz",
+  "/resource:" + join(OUT, "daisypond1080.html.gz") + ",PixelPalette.daisypond1080.html.gz",
   ...CS,
 ]);
 console.log(`· 主程序 ${(statSync(appExe).size / 1024).toFixed(0)} KB → palette-wallpaper/out/PixelPalette.exe`);

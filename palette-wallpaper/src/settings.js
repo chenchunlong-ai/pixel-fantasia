@@ -31,27 +31,28 @@ const nameOf = (id) => {
   const e = effectById(id);
   return e ? t(e.key) : id;
 };
-/** The scene dropdown: two groups — built-in scenes, then the user's wallpaper files. */
+/** The scene dropdown: two groups — the user's wallpaper files first (so imports are easy to
+    find), then the built-in scenes. */
 const effectOptions = (sel, value) => {
   sel.innerHTML = "";
   const g1 = document.createElement("optgroup");
-  g1.label = t("optSystem");
+  g1.label = t("mineTitle");
   sel.append(g1);
-  for (const e of EFFECTS) {
-    if ((cfg.hiddenFx || []).includes(e.id)) continue;
-    const o = document.createElement("option");
-    o.value = e.id;
-    o.textContent = t(e.key);
-    g1.append(o);
-  }
-  const g2 = document.createElement("optgroup");
-  g2.label = t("mineTitle");
-  sel.append(g2);
   for (const w of cfg.wallpapers || []) {
     if ((cfg.hiddenWallpapers || []).includes(w.id)) continue;
     const o = document.createElement("option");
     o.value = "ext:" + w.id;
     o.textContent = wallName(w);
+    g1.append(o);
+  }
+  const g2 = document.createElement("optgroup");
+  g2.label = t("optSystem");
+  sel.append(g2);
+  for (const e of EFFECTS) {
+    if ((cfg.hiddenFx || []).includes(e.id)) continue;
+    const o = document.createElement("option");
+    o.value = e.id;
+    o.textContent = t(e.key);
     g2.append(o);
   }
   const visible = [...sel.options].some((o) => o.value === value);

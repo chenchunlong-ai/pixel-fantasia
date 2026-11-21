@@ -29,25 +29,24 @@ git diff --stat
 | 仓库 | `D:\aaa\2D动效pixelfx`（引擎根）；产品在 `palette-wallpaper\` |
 | 人类工作目录 | `D:\AAAAA\ShiPin\1`（知识包 `skill\`、产物 `work\`、`about-prompt\`、`collab-kit\`） |
 | 商店 | Store ID `9NZV5LCNMW9F`，Identity `4A5AB34E.62945D70D0F14`，已提交待审 |
-| 版本 | `palette-wallpaper\version.mjs` = `1.0.0.0`（**唯一版本源**，只有发行才改） |
+| 版本 | `palette-wallpaper\version.mjs` = **`1.0.2.1`**（**唯一版本源**，只有发行才改） |
 | 构建 | `node palette-wallpaper/build.mjs` → 产物在 `out\`（exe/setup/msix/app.zip） |
 | 启动测试 | **`out\msix\PixelPalette.exe`**（`out\` 根缺 dll，从那里启动必崩） |
 | 数据目录 | `%LOCALAPPDATA%\PixelPalette`（`settings.json` / `wallpapers` / `pets` / `webview` / `log.txt`） |
 
 ---
 
-## 2. 现在在哪（2026-11-21 14:37）
+## 2. 现在在哪（2026-11-21 15:29）
 
-- git HEAD `308fbf5` 之后新增一轮（journal `collab/journal/2026-11-21-1437-ZCode-pellet-at-click-daisy-above-fish.md`），verify 全 ok、build 通过（exe 579 KB / Setup 910 KB / MSIX 0.8 MB）。
-- 本轮两项：**鱼食落在点击点正中**（受扰跑开→鼠标挪走/静止→回来吃，靠恐惧半径随 energy 衰减 + 距食 0.10 饥饿优先）；**雏菊图层移到鱼上方**（着色器雏菊 uNoD=1 关掉，CPU 画布顶层重画，公式逐项照搬；koiDraw 空鱼列表也要画花）。
-- 上一轮（`308fbf5`）：点击喂鱼抢食、打转 bug 修复（sin 门限连续注入）、雏菊受扰晃动（uSway[6]）、壁纸改名按钮。
-- 更早（`df6e1ca`）：预览即时显示（首推必须 Augment）+ 窗口 1600×1000 + 锦鲤层；`bd5ef68` 本地壁纸并入下拉。
+- **发行准备 1.0.2.1 已就绪**（journal `collab/journal/2026-11-21-1529-ZCode-release-1.0.2.1.md`）：雏菊阴影改花瓣形、下拉分组对调（本地在上）、**3D 雏菊水塘打包预装**（exe 资源 → 启动写 WallpaperDir + 注册，`daisyPondGone` 尊重用户删除）、version 1.0.2.1。产物：exe 591 KB / Setup 921 KB / `4A5AB34E.62945D70D0F14_1.0.2.1_x64.msix` 0.8 MB。
+- 本日早前：uv→像素 X 映射修复（鱼食漂移真根因，画布层 X 曾被压到 56%）+ 点击十字诊断标记；锦鲤/鱼食/雏菊晃动/改名全落地（见 journal 13:22~15:13 各条）。
+- **商店/GitHub 待执行**：用户在 Partner Center 上传 1.0.2.1 msix + 填 What's new；GitHub push（origin 已配 ssh）。
 
 ## 3. 未完成 / 未验证
 
-- [ ] **真机验收（本轮）**：点击正中落食、鱼跑开再回来吃；鱼从雏菊下穿过被花挡住；雏菊被点击/鱼路过会晃
-- [ ] 真机验收（遗留）：改名弹窗、预览即时显示、窗口 1600×1000、打转消失、桌面点击双环、调参滑杆
-- [ ] 新 exe 未重跑 WACK（下次商店更新前补跑）
+- [ ] **WACK 未重跑**（1.0.2.1 商店提交前建议补跑一次）
+- [ ] 真机验收：预装壁纸出现在"本地壁纸"组、删除后重启不复活、花瓣阴影、下拉分组顺序
+- [ ] 真机验收（遗留）：预览即时显示、窗口 1600×1000、锦鲤/鱼食/逃跑手感、改名弹窗、桌面点击双环、调参滑杆
 - [ ] 旧验收项与 8 语言缺 46 键待办见 `collab\STATE.md`
 - [ ] 内置 320×180 版 daisypond 角色待裁决（保留 or 下线留 DRAFT）
 
