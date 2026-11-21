@@ -39,6 +39,7 @@ uniform float DPR;
 uniform vec3 uMou;      // cursor: x, y (uv, y-up), agitation 0..1
 uniform vec3 uOpt;      // wallpaper parameters: caustics gain, mouse disturbance, daisy count
 uniform vec3 uRip[10];  // click ripples: x, y (uv, y-up), age seconds (-9 = unused)
+uniform vec3 uSway[6];  // per-daisy sway: push x, push y (uv), unused — kicked by ripples and koi
 
 float hash(vec2 q) {
   q = fract(q * vec2(234.34, 435.345));
@@ -209,6 +210,7 @@ void main() {
     vec4 F = FL[i];
     float fb = 1.0 + (t * 0.35 + F.w) ;
     vec2 fp = F.xy + vec2(sin(t * 0.22 + F.w * 1.7) * 0.012, cos(t * 0.31 + F.w * 2.3) * 0.008);
+    fp += uSway[i].xy * 0.022;          // a passing fish or ripple front rocks the flower
     // the bob: each flower rides its own swell phase
     float bob = 0.006 * sin(t * 0.8 + F.w * 2.1);
     vec2 rel = (uv - fp - vec2(0.0, -bob)) * vec2(R.x / R.y, 1.0);
@@ -258,7 +260,11 @@ const uDPR = gl.getUniformLocation(prog, "DPR");
 const uMou = gl.getUniformLocation(prog, "uMou");
 const uOpt = gl.getUniformLocation(prog, "uOpt");
 const uRip = gl.getUniformLocation(prog, "uRip");
+const uSwa = gl.getUniformLocation(prog, "uSway");
 const ripBuf = new Float32Array(30);     // 10 × (x, y, age)
+const swBuf = new Float32Array(18);      // 6 × (push x, push y, unused) — the daisies' sway
+// the shader's daisy bases, mirrored here so the CPU can kick them (uv, y-up)
+const DAISY_POS = [[0.16, 0.24], [0.46, 0.52], [0.80, 0.30], [0.30, 0.72], [0.64, 0.82], [0.90, 0.62]];
 
 // ---- mouse interaction ---------------------------------------------------------------------
 // The app's shell polls the cursor (the wallpaper window itself never gets mouse events) and
@@ -294,7 +300,20 @@ window.wallClick = (nx, ny) => {
   mouse.energy = 1;                      // a click also stirs the patch hard
   mouse.x = Math.min(1, Math.max(0, nx));
   mouse.y = 1 - Math.min(1, Math.max(0, ny));
+  // a click also drops a pellet of fish food where the water was slapped:
+  // the koi race for it, and the winner eats it and scoots off to the side.
+  // The pellet lands a little off the slap point (it rides the splash), otherwise
+  // the fish would keep fleeing the cursor parked right on top of their food.
+  const A0 = cvs.width / cvs.height;
+  const pa = Math.random() * Math.PI * 2;
+  food.push({
+    x: Math.min(1, Math.max(0, nx)) + Math.cos(pa) * 0.12 / A0,
+    y: 1 - Math.min(1, Math.max(0, ny)) + Math.sin(pa) * 0.12,
+    born: t,
+  });
+  if (food.length > 6) food.shift();
 };
+const food = [];                         // pellets of fish food { x, y (uv, y-up), born }
 
 // ---- the wallpaper's own parameters ---------------------------------------------------------
 // Declared here as window.wallParams, received through window.wallParam(key, value): the app's
@@ -335,6 +354,8 @@ function koiEnsure() {
       ph: Math.random() * 100,                                       // private wander phase
       spd: 0.010 + Math.random() * 0.012,                            // cruising speed (au/s)
       burst: 0, wig: Math.random() * Math.PI * 2,
+      imp: 3 + Math.random() * 6,                                    // next random-turn timer (s)
+      fed: 0,                                                        // seconds left of "just ate, not chasing"
       white: Math.random() < 0.45,                                   // kohaku-style white base
       seed: Math.random() * 1000,
     });
@@ -349,23 +370,55 @@ const turnToward = (from, to, max) => {
 
 function koiStep(dt, A) {
   if (KOI.length !== koiCount()) koiEnsure();
+  for (let i = food.length - 1; i >= 0; i--) if (t - food[i].born > 9) food.splice(i, 1);   // uneaten pellets sink away
   for (const f of KOI) {
-    // irregular wander: two slow sines with private phases + a fresh impulse now and then
+    // irregular wander: two slow sines with private phases + a scheduled one-shot impulse.
+    // (The old sin-gate re-fired every frame for ~0.5 s whenever it crossed, injecting random
+    // turns continuously — that was the "stuck spinning in place for a few seconds" bug.)
     f.hd += (Math.sin(t * 0.31 + f.ph) * 0.9 + Math.sin(t * 0.13 + f.ph * 2.3) * 0.6) * 0.55 * dt;
-    if (Math.sin(t * 0.053 + f.seed) > 0.994) f.hd += (Math.random() - 0.5) * 2.4;
-    // the cursor scares them: steer away hard and dart (burst decays over ~1 s)
+    f.imp -= dt;
+    if (f.imp <= 0) { f.hd += (Math.random() - 0.5) * 2.0; f.imp = 4 + Math.random() * 7; }
+    // the cursor scares them: steer away hard and dart (burst decays over ~1 s).
+    // The fear radius tracks how active the cursor is — a cursor that just moved or
+    // slapped the water is a big threat (0.14), one resting for a while shrinks to a
+    // small nudge (0.07), so parked cursors don't starve the fish out of their food.
     const mx = mouse.x * A, my = mouse.y;
     const dx = f.x - mx, dy = f.y - my, d = Math.hypot(dx, dy);
-    if (d < 0.14) {
+    let chasing = 0, target = null, td = 9;
+    if (f.fed <= 0) {
+      for (const p of food) {
+        const pd = Math.hypot(f.x - p.x * A, f.y - p.y);
+        if (pd < td) { td = pd; target = p; }
+      }
+    }
+    const fr = 0.07 + 0.07 * Math.min(1, mouse.energy) - (target && td < 0.3 ? 0.04 : 0);
+    if (target && td < 0.10) {
+      // grab it: hunger wins over fear when the food is right there (a cursor parked
+      // near the pellet must not keep the fish circling outside the flee radius)
+      if (td < 0.035) {
+        food.splice(food.indexOf(target), 1);
+        f.fed = 3;                                                     // full for a while: stops chasing
+        f.hd = turnToward(f.hd, Math.atan2(f.y - target.y, f.x - target.x * A), dt * 8);
+        f.burst = 0.9;                                                 // the winner runs off to the side
+      } else {
+        f.hd = turnToward(f.hd, Math.atan2(target.y - f.y, target.x * A - f.x), dt * 6);
+        chasing = 1;
+      }
+    } else if (d < fr) {
       f.hd = turnToward(f.hd, Math.atan2(dy, dx), dt * 8);
       if (f.burst < 0.2) ripples.push({ x: f.x / A, y: f.y, born: t });   // a small ring as it bolts
       f.burst = 1;
+    } else if (target && td < 0.6) {
+      // hungry koi make for the nearest pellet; the first one there eats it and scoots aside
+      f.hd = turnToward(f.hd, Math.atan2(target.y - f.y, target.x * A - f.x), dt * 4.5);
+      chasing = 1;                                                   // the race is on
     }
+    if (f.fed > 0) f.fed -= dt;
     f.burst *= Math.exp(-dt * 1.4);
     // stay off the walls
     const edge = Math.min(f.x, A - f.x, f.y, 1 - f.y);
     if (edge < 0.12) f.hd = turnToward(f.hd, Math.atan2(0.5 - f.y, 0.5 - f.x), dt * 3 * (0.12 - edge) / 0.12 + dt * 0.2);
-    const spd = f.spd * (1 + f.burst * 9);
+    const spd = f.spd * (1 + f.burst * 9 + chasing * 1.6);
     f.x = Math.min(A - 0.03, Math.max(0.03, f.x + Math.cos(f.hd) * spd * dt));
     f.y = Math.min(0.97, Math.max(0.03, f.y + Math.sin(f.hd) * spd * dt));
     f.wig += dt * (5 + spd * 60);
@@ -450,6 +503,23 @@ function koiDraw() {
     oc.stroke();
     oc.restore();
   }
+  // the pellets float on top of everything: small warm-brown crumbs that sink and fade
+  const A2 = W / H;
+  for (const p of food) {
+    const age = t - p.born;
+    const sink = Math.min(1, age / 7);
+    const px = (p.x / A2) * W, py = (1 - p.y) * H;
+    oc.globalAlpha = 0.92 * (1 - sink * 0.6);
+    oc.fillStyle = "#b5813a";
+    oc.beginPath();
+    oc.arc(px, py, H * 0.0065 * (1 - sink * 0.35), 0, Math.PI * 2);
+    oc.fill();
+    oc.fillStyle = "rgba(255,231,180,0.55)";
+    oc.beginPath();
+    oc.arc(px - H * 0.0018, py - H * 0.002, H * 0.0022, 0, Math.PI * 2);
+    oc.fill();
+  }
+  oc.globalAlpha = 1;
 }
 
 /** the body silhouette in fish-local coords (nose at +x, tail root at -0.55s) */
@@ -498,19 +568,49 @@ function frame(now) {
     ripBuf[i * 3 + 2] = r ? t - r.born : 0;
   }
   gl.uniform3fv(uRip, ripBuf);
+  // daisy sway: each flower holds a decaying push vector, kicked by ripple fronts sweeping
+  // past and by koi swimming through it (pushed along the fish's direction of travel)
+  const Asp = cvs.width / cvs.height;
+  const decay = Math.exp(-dts * 1.8);
+  for (let i = 0; i < 6; i++) {
+    const b = i * 3;
+    swBuf[b] *= decay; swBuf[b + 1] *= decay;
+    const dx0 = DAISY_POS[i][0] * Asp, dy0 = DAISY_POS[i][1];
+    for (const r of ripples) {
+      const age = t - r.born;
+      const rr = 0.02 + age * 0.13;
+      const ddx = dx0 - r.x * Asp, ddy = dy0 - r.y;
+      const dd = Math.hypot(ddx, ddy);
+      const kick = Math.exp(-Math.pow((dd - rr) * 9, 2)) * Math.exp(-age * 1.3) * 0.9;
+      if (kick > 0.01 && dd > 1e-4) { swBuf[b] += ddx / dd * kick; swBuf[b + 1] += ddy / dd * kick; }
+    }
+    for (const f of KOI) {
+      const dd = Math.hypot(dx0 - f.x, dy0 - f.y);
+      const rad = 0.055 + 0.07 * f.sz;
+      if (dd < rad) {
+        const kick = (1 - dd / rad) * (0.3 + f.burst) * (0.5 + f.sz);
+        swBuf[b] += Math.cos(f.hd) * kick;
+        swBuf[b + 1] += Math.sin(f.hd) * kick;
+      }
+    }
+    const m = Math.hypot(swBuf[b], swBuf[b + 1]);
+    if (m > 1) { swBuf[b] /= m; swBuf[b + 1] /= m; }
+  }
+  gl.uniform3fv(uSwa, swBuf);
   gl.uniform3f(uMou, mouse.x, mouse.y, mouse.energy);
   gl.uniform3f(uOpt, OPT.caus, OPT.mouse, OPT.daisies);
   mouse.energy *= 0.985;                 // the disturbance settles when the cursor rests
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   try {                                  // the koi ride on top of the water
-    koiStep(dts, cvs.width / cvs.height);
+    koiStep(dts, Asp);
     koiDraw();
   } catch (e) { dbg({ koi: String(e.message || e) }); }
   if (!drew) { drew = 1; dbg({ gl: "first draw done", w: cvs.width, h: cvs.height }); }
+  __wallTest.frames++;
 }
 requestAnimationFrame(frame);
 
-window.__wallTest = { ok: true, glError: null, koi: KOI };   // koi exposed for automated tests
+window.__wallTest = { ok: true, glError: null, koi: KOI, food, sway: swBuf, frames: 0 };   // exposed for automated tests
 dbg({ ready: 1 });
 </script>
 </body>

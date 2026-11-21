@@ -236,7 +236,9 @@ namespace PixelFX
                 { "giteeLabel", "Gitee 镜像仓库" },
                 { "linkCopied", "链接已复制到剪贴板" },
                 { "fxGorgefall", "峡谷晨雾" },
-                { "optSystem", "系统壁纸" }
+                { "optSystem", "系统壁纸" },
+                { "renameBtn", "改名" },
+                { "renamePrompt", "壁纸名称（留空取消）：" }
             } },
             { "en", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -460,7 +462,9 @@ namespace PixelFX
                 { "giteeLabel", "Gitee mirror" },
                 { "linkCopied", "Link copied to clipboard" },
                 { "fxGorgefall", "Gorge at Dawn" },
-                { "optSystem", "Built-in scenes" }
+                { "optSystem", "Built-in scenes" },
+                { "renameBtn", "Rename" },
+                { "renamePrompt", "Wallpaper name (empty to cancel):" }
             } },
             { "ja", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {

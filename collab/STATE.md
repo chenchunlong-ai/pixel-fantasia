@@ -12,7 +12,7 @@
 | 构建产物（2026-11-19 04:20 重建） | `PixelPalette.exe` 517 KB / `PixelPalette-Setup.exe` 850 KB / `4A5AB34E.62945D70D0F14_1.0.0.0_x64.msix` 0.8 MB / `app.ico` 86 KB（32 色阶量化，四角 alpha=0） |
 | 验证状态 |（地狱已下线，勿再验收） `build.mjs` **通过**；真机 3D 壁纸跑通（02:45）；真机宠物跟随壁纸 **通过**（17:01 自动轮换实跑：`dbg fx=weather/black-hole n=0`）；设置页预览 3D→2D 宠物残留修复 17:30 浏览器实测**通过**（`#pvPetCv` 移除、`#pvPets` 清空、状态行跟随）；新增两款主题在 harness 逐帧目检通过（天堂 14.3 ms / 地狱 9.2 ms），**真机切换与宠物跟随待人工验收**；`verify.mjs` 上次通过于 02:06（本次未跑） |
 | WebView2 缓存（真机实测） | 新构建全新 profile 6 分钟后 **11.7 MB**（旧 profile 72.5 MB，降 84%） |
-| git HEAD | （提交前）预览即时显示修复 + 窗口 1600×1000 + 锦鲤 2026-11-21 |
+| git HEAD | （提交前）鱼食+打转修复+雏菊晃动+改名 2026-11-21 |
 
 ## 正在进行的改动（在飞）
 
@@ -24,7 +24,8 @@
 
 ## 最近 3 条
 
-1. 2026-11-21 13:47 · ZCode · **预览即时显示修复（真根因）+ 窗口 1600×1000 + 雏菊水塘锦鲤**：外壳三处首推配置缺 wallHtmls（只有 Apply 走 Augment）→ ext 预览读不到 html；修后首推即带。锦鲤=水面叠透明 2D canvas（着色器不动），随机游动+鼠标逃跑（实测 1.2s 位移 0.15 au）+ fish 参数 0–8。浏览器实测通过、build 通过；已装用户需重新加载壁纸文件才有鱼。真机待人工
+1. 2026-11-21 14:23 · ZCode · **鱼食抢食 + 打转 bug 修复 + 雏菊晃动 + 壁纸改名**：打转根因=sin 门限让随机转向连续 ~0.5s 每帧注入；改计划式一次性脉冲。喂食调试坑：wallClick 把鼠标钉在点击点 → 恐惧圈挡住鱼食，修=恐惧半径随 mouse.energy 衰减 + 距食 0.10 内无视恐惧。泵帧实测 0.6s 吃掉、sway 峰值 1。IAB 遮挡时 rAF 停摆（自动化须泵帧）。改名走 renameWallpaper 消息。已装用户需重载壁纸文件。真机待人工
+2. 2026-11-21 13:47 · ZCode · **预览即时显示修复（真根因）+ 窗口 1600×1000 + 雏菊水塘锦鲤**：外壳三处首推配置缺 wallHtmls（只有 Apply 走 Augment）→ ext 预览读不到 html；修后首推即带。锦鲤=水面叠透明 2D canvas（着色器不动），随机游动+鼠标逃跑（实测 1.2s 位移 0.15 au）+ fish 参数 0–8。浏览器实测通过、build 通过；已装用户需重新加载壁纸文件才有鱼。真机待人工
 2. 2026-11-21 13:22 · ZCode · **设置页 UI 改版（用户点名）**：本地壁纸并入"当前壁纸"下拉（optgroup 系统壁纸/本地壁纸），原独立卡片换为 加载/删除（仅选中本地壁纸可用）/恢复（restoreHidden{wallpapers:true}，只恢复用户壁纸）；设置窗默认 1020×800 → 1152×648（16:9）；i18n 新增 optSystem ×9 + mineTitle 补 7 语种。verify 全 ok、build 通过（MSIX 0.8 MB）；真机目检待人工
 2. 2026-11-21 04:46 · 提交 `e82741c` · ZCode · **参数链路全通**：根因是雏菊水塘 GLSL 忘声明 `uniform vec3 uOpt` → 编译抛异常 → 壁纸脚本在钩子定义前死掉 → wallwrap 读不到 wallParams → 设置页面板空。修复后日志确认 wallParams 上报（id=27ea933241，3 参数）；浏览器确认 wallParam("daisies",3) 生效。**调试坑**：壁纸脚本死掉是无声的（error 只走 chrome.webview dbg），浏览器排查要把 error 写进 document.title 才能读；IAB 多标签时 tabs.list()[0] 可能是旧设置页——验错对象先看 url
 2. 2026-11-21 04:30 · 提交 `2b34486` · ZCode · **外部壁纸自带调参落地**：约定 `window.wallParams=[{key,label,min,max,step,def}]` 声明 + `window.wallParam(k,v)` 接收；wallwrap 读声明报外壳 → 设置页「此壁纸的参数」折叠子面板（滑杆动态渲染，值存 cfg.params["ext:id"] 全量回存）→ wallwrap 逐 key 转发桌面/预览；i18n extParams ×9；SKILL.md 钩子文档补全（wallClick/wallParams）。雏菊水塘声明 3 参数。真机滑杆待验收；跨区 src/shell/skill

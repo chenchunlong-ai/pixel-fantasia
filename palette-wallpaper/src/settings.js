@@ -507,6 +507,9 @@ function updateMineRow() {
   const del = $("#delWallpaper");
   del.disabled = !w;
   del.style.opacity = w ? "1" : "0.4";
+  const ren = $("#renameWallpaper");
+  ren.disabled = !w;
+  ren.style.opacity = w ? "1" : "0.4";
 }
 
 $("#delWallpaper").onclick = () => {
@@ -515,6 +518,15 @@ $("#delWallpaper").onclick = () => {
   if (!w) return;
   if (!confirm(t("deleteWallpaperConfirm", { name: w.name }))) return;
   say({ type: "removeWallpaper", id: w.id });
+};
+
+$("#renameWallpaper").onclick = () => {
+  const id = $("#fx").value;
+  const w = isExt(id) ? (cfg.wallpapers || []).find((x) => x.id === extId(id)) : null;
+  if (!w) return;
+  const cur = wallName(w);
+  const nm = prompt(t("renamePrompt", { name: cur }), cur);
+  if (nm && nm.trim() && nm.trim() !== cur) say({ type: "renameWallpaper", id: w.id, name: nm.trim() });
 };
 
 function fillPets() {

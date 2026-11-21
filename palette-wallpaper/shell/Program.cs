@@ -307,6 +307,7 @@ namespace PixelFX
                 else if (t == "getCacheInfo") PushCacheInfo();
                 else if (t == "clearCache") ClearCache();
                 else if (t == "removeWallpaper") RemoveWallpaper(d);
+                else if (t == "renameWallpaper") RenameWallpaper(d);
                 else if (t == "removePet") RemovePet(d);
                 else if (t == "restoreHidden") RestoreHidden(d);
             }
@@ -517,6 +518,22 @@ namespace PixelFX
                 Log("removed wallpaper " + id);
             }
             catch (Exception ex) { Log("remove wallpaper failed: " + ex.Message); }
+        }
+
+        private static void RenameWallpaper(Dictionary<string, object> d)
+        {
+            try
+            {
+                string id = d.ContainsKey("id") ? d["id"] as string : null;
+                string name = d.ContainsKey("name") ? d["name"] as string : null;
+                if (string.IsNullOrWhiteSpace(name)) return;
+                WallpaperFile wf = Cfg.wallpapers.Find((w) => w.id == id);
+                if (wf == null) return;
+                wf.name = name.Trim();
+                Apply(Cfg);                                       // persists and re-pushes (dropdown label updates)
+                Log("renamed wallpaper " + id);
+            }
+            catch (Exception ex) { Log("rename wallpaper failed: " + ex.Message); }
         }
 
         private static void RemovePet(Dictionary<string, object> d)
