@@ -589,7 +589,7 @@ namespace PixelFX
                 Store.SetAutoStart(Cfg.autoStart);
                 if (Store.Packaged) WinRt.ApplyStartupTask(Cfg.autoStart); // MSIX: StartupTask
                 Store.Save(Cfg);
-                if (Settings != null) Settings.Push(Store.Json(Cfg));
+                if (Settings != null) Settings.Push(Augment(Store.Json(Cfg)));   // keep wallHtmls: load() replaces the page's cfg wholesale
                 Tray.ShowBalloonTip(1200, "像素幻境", Lang.T(Cfg.autoStart ? "autostartOn" : "autostartOff"), ToolTipIcon.None);
             });
             menu.Items.Add(new ToolStripSeparator());
@@ -630,10 +630,10 @@ namespace PixelFX
                 Settings = new SettingsWindow();
                 Settings.Message += OnSettingsMessage;
                 Settings.FormClosed += delegate { Settings = null; };
-                Settings.Start(Env, Store.Json(Cfg));
+                Settings.Start(Env, Augment(Store.Json(Cfg)));   // wallHtmls must be in the first push, or the ext preview stays on its placeholder card
             }
             Settings.Show();
-            Settings.Push(Store.Json(Cfg));
+            Settings.Push(Augment(Store.Json(Cfg)));
             Settings.PushState("{\"paused\":" + (Cfg.paused ? "true" : "false") + ",\"fx\":\"" + Cfg.fx + "\",\"packaged\":" + (Store.Packaged ? "true" : "false") + "}");
             if (Settings.WindowState == FormWindowState.Minimized) Settings.WindowState = FormWindowState.Normal;
             Settings.Activate();

@@ -300,23 +300,176 @@ window.wallClick = (nx, ny) => {
 // Declared here as window.wallParams, received through window.wallParam(key, value): the app's
 // settings page renders one slider per declaration ("此壁纸的参数" panel) and pushes values here.
 // No declaration = the wallpaper simply has no knobs beyond the global speed.
-const OPT = { caus: 1, daisies: 6, mouse: 1 };
+const OPT = { caus: 1, daisies: 6, mouse: 1, fish: 5 };
 window.wallParams = [
   { key: "caustics", label: "焦散强度", min: 0, max: 2, step: 0.05, def: 1 },
   { key: "daisies", label: "雏菊数量", min: 0, max: 10, step: 1, def: 6 },
   { key: "mouse", label: "鼠标扰动强度", min: 0, max: 2, step: 0.05, def: 1 },
+  { key: "fish", label: "锦鲤数量", min: 0, max: 8, step: 1, def: 5 },
 ];
 window.wallParam = (k, v) => {
   if (k === "caustics") OPT.caus = Math.max(0, +v || 0);
   else if (k === "daisies") OPT.daisies = Math.round(+v || 0);
   else if (k === "mouse") OPT.mouse = Math.max(0, +v || 0);
+  else if (k === "fish") OPT.fish = Math.round(+v || 0);
 };
+
+// ---- the koi: a transparent 2D layer above the shader water ------------------
+// Red koi of different sizes wander without any repeating pattern (two slow
+// sines with private phases plus occasional random impulses steer the heading)
+// and dart away from the cursor when it comes close. They live on a canvas
+// overlay, so the water shader stays untouched; the count is a wallpaper knob.
+const ov = document.createElement("canvas");
+ov.style.cssText = "position:absolute;inset:0;width:100%;height:100%;pointer-events:none;";
+document.body.appendChild(ov);
+const oc = ov.getContext("2d");
+
+const KOI = [];
+const koiCount = () => Math.max(0, Math.min(8, OPT.fish | 0));
+function koiEnsure() {
+  while (KOI.length < koiCount())
+    KOI.push({
+      x: 0.2 + Math.random() * 1.4, y: 0.15 + Math.random() * 0.7,   // au coords (x aspect-corrected)
+      hd: Math.random() * Math.PI * 2,                               // heading (au space, y up)
+      sz: 0.55 + Math.random() * 0.8,                                // big and small fish
+      ph: Math.random() * 100,                                       // private wander phase
+      spd: 0.010 + Math.random() * 0.012,                            // cruising speed (au/s)
+      burst: 0, wig: Math.random() * Math.PI * 2,
+      white: Math.random() < 0.45,                                   // kohaku-style white base
+      seed: Math.random() * 1000,
+    });
+  if (KOI.length > koiCount()) KOI.length = koiCount();
+}
+const turnToward = (from, to, max) => {
+  let d = to - from;
+  while (d > Math.PI) d -= Math.PI * 2;
+  while (d < -Math.PI) d += Math.PI * 2;
+  return from + Math.max(-max, Math.min(max, d));
+};
+
+function koiStep(dt, A) {
+  if (KOI.length !== koiCount()) koiEnsure();
+  for (const f of KOI) {
+    // irregular wander: two slow sines with private phases + a fresh impulse now and then
+    f.hd += (Math.sin(t * 0.31 + f.ph) * 0.9 + Math.sin(t * 0.13 + f.ph * 2.3) * 0.6) * 0.55 * dt;
+    if (Math.sin(t * 0.053 + f.seed) > 0.994) f.hd += (Math.random() - 0.5) * 2.4;
+    // the cursor scares them: steer away hard and dart (burst decays over ~1 s)
+    const mx = mouse.x * A, my = mouse.y;
+    const dx = f.x - mx, dy = f.y - my, d = Math.hypot(dx, dy);
+    if (d < 0.14) {
+      f.hd = turnToward(f.hd, Math.atan2(dy, dx), dt * 8);
+      if (f.burst < 0.2) ripples.push({ x: f.x / A, y: f.y, born: t });   // a small ring as it bolts
+      f.burst = 1;
+    }
+    f.burst *= Math.exp(-dt * 1.4);
+    // stay off the walls
+    const edge = Math.min(f.x, A - f.x, f.y, 1 - f.y);
+    if (edge < 0.12) f.hd = turnToward(f.hd, Math.atan2(0.5 - f.y, 0.5 - f.x), dt * 3 * (0.12 - edge) / 0.12 + dt * 0.2);
+    const spd = f.spd * (1 + f.burst * 9);
+    f.x = Math.min(A - 0.03, Math.max(0.03, f.x + Math.cos(f.hd) * spd * dt));
+    f.y = Math.min(0.97, Math.max(0.03, f.y + Math.sin(f.hd) * spd * dt));
+    f.wig += dt * (5 + spd * 60);
+  }
+}
+
+function koiDraw() {
+  oc.clearRect(0, 0, ov.width, ov.height);
+  if (!KOI.length) return;
+  const W = ov.width, H = ov.height, A = W / H;
+  for (const f of KOI) {
+    const px = (f.x / A) * W, py = (1 - f.y) * H;
+    const s = H * 0.052 * f.sz;
+    oc.save();
+    oc.translate(px, py);
+    oc.rotate(-f.hd);                       // screen y is down, au y is up
+    oc.globalAlpha = 0.88;                  // the fish sits under the water film
+    const wag = Math.sin(f.wig);
+    // shadow (a touch lower, softer)
+    oc.save();
+    oc.translate(0.045 * s, 0.10 * s);
+    oc.scale(1, 1);
+    oc.fillStyle = "rgba(6,20,26,0.30)";
+    fishPath(s, wag);
+    oc.fill();
+    oc.restore();
+    // tail fin: a forked sweep that wags with the swim phase
+    oc.fillStyle = f.white ? "rgba(207,59,32,0.85)" : "rgba(200,52,28,0.92)";
+    oc.beginPath();
+    oc.moveTo(-0.52 * s, 0);
+    oc.quadraticCurveTo(-0.85 * s, wag * 0.45 * s, -1.08 * s, (wag * 0.6 - 0.34) * s);
+    oc.quadraticCurveTo(-0.82 * s, wag * 0.25 * s, -1.08 * s, (wag * 0.6 + 0.34) * s);
+    oc.closePath();
+    oc.fill();
+    // pectoral fins, rowing gently
+    for (const side of [1, -1]) {
+      oc.save();
+      oc.translate(0.16 * s, side * 0.24 * s);
+      oc.rotate(side * (0.9 + Math.sin(f.wig * 0.8 + (side > 0 ? 0 : Math.PI)) * 0.18));
+      oc.fillStyle = f.white ? "rgba(207,59,32,0.70)" : "rgba(214,60,32,0.78)";
+      oc.beginPath();
+      oc.ellipse(-0.12 * s, side * 0.06 * s, 0.22 * s, 0.09 * s, 0, 0, Math.PI * 2);
+      oc.fill();
+      oc.restore();
+    }
+    // body: rounded head, deep shoulders, taper to the tail root
+    const grad = oc.createLinearGradient(0.52 * s, 0, -0.55 * s, 0);
+    if (f.white) { grad.addColorStop(0, "#f2ede1"); grad.addColorStop(1, "#f6f1e5"); }
+    else { grad.addColorStop(0, "#e05a2e"); grad.addColorStop(1, "#cf3a1c"); }
+    oc.fillStyle = grad;
+    fishPath(s, wag);
+    oc.fill();
+    // red patches on the white koi (clipped inside the body)
+    if (f.white) {
+      oc.save();
+      fishPath(s, wag);
+      oc.clip();
+      oc.fillStyle = "#cf3a1c";
+      oc.beginPath(); oc.ellipse(0.18 * s, 0.07 * s, 0.20 * s, 0.13 * s, 0.3, 0, Math.PI * 2); oc.fill();
+      oc.beginPath(); oc.ellipse(-0.22 * s, -0.06 * s, 0.17 * s, 0.11 * s, -0.4, 0, Math.PI * 2); oc.fill();
+      oc.beginPath(); oc.ellipse(0.42 * s, -0.08 * s, 0.10 * s, 0.07 * s, 0.2, 0, Math.PI * 2); oc.fill();
+      oc.restore();
+    } else {
+      // a white blaze on the head of the plain red koi
+      oc.save();
+      fishPath(s, wag);
+      oc.clip();
+      oc.fillStyle = "rgba(244,239,229,0.9)";
+      oc.beginPath(); oc.ellipse(0.36 * s, 0.02 * s, 0.15 * s, 0.11 * s, 0, 0, Math.PI * 2); oc.fill();
+      oc.restore();
+    }
+    // eye dots
+    oc.fillStyle = "rgba(20,18,14,0.55)";
+    oc.beginPath(); oc.ellipse(0.40 * s, 0.115 * s, 0.028 * s, 0.030 * s, 0, 0, Math.PI * 2); oc.fill();
+    oc.beginPath(); oc.ellipse(0.40 * s, -0.115 * s, 0.028 * s, 0.030 * s, 0, 0, Math.PI * 2); oc.fill();
+    // back highlight so the fish reads as volume
+    oc.strokeStyle = "rgba(255,240,225,0.35)";
+    oc.lineWidth = 0.03 * s;
+    oc.beginPath();
+    oc.moveTo(0.30 * s, -0.02 * s);
+    oc.quadraticCurveTo(0.0, -0.14 * s, -0.42 * s, -0.03 * s);
+    oc.stroke();
+    oc.restore();
+  }
+}
+
+/** the body silhouette in fish-local coords (nose at +x, tail root at -0.55s) */
+function fishPath(s, wag) {
+  oc.beginPath();
+  oc.moveTo(0.52 * s, 0);
+  oc.bezierCurveTo(0.50 * s, 0.22 * s, 0.18 * s, 0.26 * s, -0.10 * s, 0.20 * s);
+  oc.bezierCurveTo(-0.35 * s, 0.145 * s, -0.50 * s, 0.07 * s, -0.55 * s, 0);
+  oc.bezierCurveTo(-0.50 * s, -0.07 * s, -0.35 * s, -0.145 * s, -0.10 * s, -0.20 * s);
+  oc.bezierCurveTo(0.18 * s, -0.26 * s, 0.50 * s, -0.22 * s, 0.52 * s, 0);
+  oc.closePath();
+}
 
 function resize() {
   const dpr = Math.min(devicePixelRatio || 1, 1.5);   // perf redline: cap DPR
   cvs.width = Math.round(innerWidth * dpr);
   cvs.height = Math.round(innerHeight * dpr);
   gl.viewport(0, 0, cvs.width, cvs.height);
+  ov.width = cvs.width;
+  ov.height = cvs.height;
 }
 addEventListener("resize", resize);
 resize();
@@ -330,7 +483,8 @@ function frame(now) {
   if (document.hidden) { frame.prev = 0; return; }     // pause when not visible
   if (now - last < FRAME) return;
   last = now;
-  t += (now - (frame.prev || now)) / 1000 * timeScale;  // clock excludes hidden time, scaled
+  const dts = Math.min(0.1, (now - (frame.prev || now)) / 1000);   // real seconds since the last drawn frame
+  t += dts * timeScale;                                 // clock excludes hidden time, scaled
   frame.prev = now;
   gl.uniform2f(uR, cvs.width, cvs.height);
   gl.uniform1f(uT, t);
@@ -348,11 +502,15 @@ function frame(now) {
   gl.uniform3f(uOpt, OPT.caus, OPT.mouse, OPT.daisies);
   mouse.energy *= 0.985;                 // the disturbance settles when the cursor rests
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  try {                                  // the koi ride on top of the water
+    koiStep(dts, cvs.width / cvs.height);
+    koiDraw();
+  } catch (e) { dbg({ koi: String(e.message || e) }); }
   if (!drew) { drew = 1; dbg({ gl: "first draw done", w: cvs.width, h: cvs.height }); }
 }
 requestAnimationFrame(frame);
 
-window.__wallTest = { ok: true, glError: null };
+window.__wallTest = { ok: true, glError: null, koi: KOI };   // koi exposed for automated tests
 dbg({ ready: 1 });
 </script>
 </body>

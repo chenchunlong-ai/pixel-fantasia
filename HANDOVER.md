@@ -36,20 +36,20 @@ git diff --stat
 
 ---
 
-## 2. 现在在哪（2026-11-21 13:22）
+## 2. 现在在哪（2026-11-21 13:47）
 
-- git HEAD `6f8cc17` 之后新增一轮设置页 UI 改版（journal 见 `collab/journal/2026-11-21-1322-ZCode-settings-local-wall-merge.md`），verify 全 ok、build 通过。
-- 最新产物 `out\4A5AB34E.62945D70D0F14_1.0.0.0_x64.msix` 0.8 MB（含本轮改动，未跑 WACK）。
-- 本轮改动：**本地壁纸并入"当前壁纸"下拉**（optgroup 系统壁纸/本地壁纸；加载/删除/恢复三按钮移入场景卡片，删除仅选中本地壁纸可用，恢复只恢复用户壁纸 `restoreHidden{wallpapers:true}`）；**设置窗默认 1152×648（16:9）**；i18n 新增 optSystem ×9、mineTitle 补齐 7 语种。
-- 之前改动（都有 journal）：
-  1. `2b34486` · **外部壁纸自带调参**：壁纸声明 `window.wallParams` + 接收 `window.wallParam(k,v)`；wallwrap 读声明报外壳 → 设置页「此壁纸的参数」折叠子面板；值存 `cfg.params["ext:id"]`。雏菊水塘声明 3 参数（焦散/雏菊数/鼠标扰动）
-  2. `c49f731` · **外壳点击检测 wallClick**（GetAsyncKeyState 边沿）恢复桌面点击双环 + 暗斑减淡
-  3. `9264501`/`b1587da`/`c508c4d` · 雏菊水塘 1080P WebGL 版（用户已验收）+ wallMouse 交互链路 + 1080P 范式入 skill
+- git HEAD `bd5ef68` 之后新增一轮（journal 见 `collab/journal/2026-11-21-1347-ZCode-settings-local-wall-merge.md` 同目录下 1347 条），verify 全 ok、build 通过（exe 578 KB / Setup 910 KB / MSIX 0.8 MB）。
+- 本轮三项：
+  1. **预览即时显示修复（真根因）**：`Program.cs` 三处首推设置页的配置走 `Store.Json` 不带 `wallHtmls`（只有 Apply 才 `Augment`），ext 预览永远落在占位卡；已全部改 `Augment(Store.Json(Cfg))`。**教训：load() 整体替换页面 cfg，任何 Push 都必须带 Augment**。
+  2. **设置窗默认 1600×1000**（用户嫌 1152×648 不够大，16:9 只执行了一轮就被推翻）。
+  3. **雏菊水塘 1080P 加锦鲤**：水面叠透明 2D canvas 画红锦鲤（白斑变种、大小不一、双正弦+随机脉冲游走、鼠标靠近 ×10 burst 逃跑并起涟漪），着色器未动；`fish` 参数 0–8 默认 5；skill/examples 已同步。**已装用户要重新加载壁纸文件才有鱼**。
+- 上一轮：本地壁纸并入"当前壁纸"下拉（optgroup 两组 + 加载/删除/恢复）；journal `2026-11-21-1322-ZCode-settings-local-wall-merge.md`。
+- 更早：`2b34486` 外部壁纸自带调参；`c49f731` wallClick 双环；雏菊水塘 1080P 版用户已验收。
 
 ## 3. 未完成 / 未验证
 
-- [ ] **真机验收（本轮 UI 改版）**：`out\msix\PixelPalette.exe` 启动 → 设置窗默认 16:9（1152×648）且预览在右；"当前壁纸"下拉分两组；选本地壁纸时"删除"可点、"删除/恢复/加载"行为正确
-- [ ] 真机验收（上轮遗留）：桌面点击双环、设置页「此壁纸的参数」滑杆
+- [ ] **真机验收（本轮）**：打开设置 → 选本地壁纸预览应立即出画面（不用按保存）；窗口默认 1600×1000；雏菊水塘有 5 条锦鲤游动、鼠标靠近会跑、设置页"锦鲤数量"滑杆可用
+- [ ] 真机验收（遗留）：桌面点击双环、「此壁纸的参数」滑杆、本地壁纸删除/恢复按钮
 - [ ] 新 exe 未重跑 WACK（下次商店更新前补跑）
 - [ ] 旧验收项与 8 语言缺 46 键待办见 `collab\STATE.md`
 - [ ] 内置 320×180 版 daisypond 角色待裁决（保留 or 下线留 DRAFT）
