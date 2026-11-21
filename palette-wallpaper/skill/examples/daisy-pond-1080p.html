@@ -516,11 +516,10 @@ function koiDraw() {
     oc.restore();
   }
   // the pellets float on top of everything: small warm-brown crumbs that sink and fade
-  const A2 = W / H;
   for (const p of food) {
     const age = t - p.born;
     const sink = Math.min(1, age / 7);
-    const px = (p.x / A2) * W, py = (1 - p.y) * H;
+    const px = p.x * W, py = (1 - p.y) * H;   // p.x is uv across the WIDTH: × W, not × H!
     oc.globalAlpha = 0.92 * (1 - sink * 0.6);
     oc.fillStyle = "#b5813a";
     oc.beginPath();
@@ -536,7 +535,7 @@ function koiDraw() {
   for (let i = marks.length - 1; i >= 0; i--) if (t - marks[i].born > 1.5) marks.splice(i, 1);
   for (const m of marks) {
     const age = t - m.born;
-    const px = (m.x / A2) * W, py = (1 - m.y) * H;
+    const px = m.x * W, py = (1 - m.y) * H;
     const fade = 1 - age / 1.5;
     oc.globalAlpha = 0.85 * fade;
     oc.strokeStyle = "#ffffff";
@@ -549,7 +548,7 @@ function koiDraw() {
     oc.arc(px, py, 3.5, 0, Math.PI * 2);
     oc.stroke();
   }
-  drawDaisies(W, H, A2);
+  drawDaisies(W, H, W / H);
 }
 
 /** the daisies on the CPU layer, ABOVE the koi: same drift/bob/spin/sway as the old
@@ -563,7 +562,7 @@ function drawDaisies(W, H, A) {
     const fx = F.x + Math.sin(t * 0.22 + F.w * 1.7) * 0.012 + swBuf[i * 3] * 0.022;
     const fy = F.y + Math.cos(t * 0.31 + F.w * 2.3) * 0.008 + swBuf[i * 3 + 1] * 0.022;
     const bob = 0.006 * Math.sin(t * 0.8 + F.w * 2.1);
-    const px = (fx / A) * W, py = (1 - (fy + bob)) * H;
+    const px = fx * W, py = (1 - (fy + bob)) * H;   // fx/fy are uv: × W directly
     const R = F.z * H;
     const rot = (1 + t * 0.35 + F.w) * 0.35;
     // shadow, a touch lower, not bobbing with the flower
