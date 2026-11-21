@@ -36,18 +36,20 @@ git diff --stat
 
 ---
 
-## 2. 现在在哪（2026-11-21 04:30）
+## 2. 现在在哪（2026-11-21 13:22）
 
-- git HEAD `2b34486`，工作区干净，文件锁已随提交释放。
-- 最新产物 `out\app\PixelPalette.exe` 577 KB **已部署本机**（未跑 WACK——新增 GetAsyncKeyState/GetCursorPos 轮询，非进程启动类）。
-- 最近改动（都有 journal）：
+- git HEAD `6f8cc17` 之后新增一轮设置页 UI 改版（journal 见 `collab/journal/2026-11-21-1322-ZCode-settings-local-wall-merge.md`），verify 全 ok、build 通过。
+- 最新产物 `out\4A5AB34E.62945D70D0F14_1.0.0.0_x64.msix` 0.8 MB（含本轮改动，未跑 WACK）。
+- 本轮改动：**本地壁纸并入"当前壁纸"下拉**（optgroup 系统壁纸/本地壁纸；加载/删除/恢复三按钮移入场景卡片，删除仅选中本地壁纸可用，恢复只恢复用户壁纸 `restoreHidden{wallpapers:true}`）；**设置窗默认 1152×648（16:9）**；i18n 新增 optSystem ×9、mineTitle 补齐 7 语种。
+- 之前改动（都有 journal）：
   1. `2b34486` · **外部壁纸自带调参**：壁纸声明 `window.wallParams` + 接收 `window.wallParam(k,v)`；wallwrap 读声明报外壳 → 设置页「此壁纸的参数」折叠子面板；值存 `cfg.params["ext:id"]`。雏菊水塘声明 3 参数（焦散/雏菊数/鼠标扰动）
   2. `c49f731` · **外壳点击检测 wallClick**（GetAsyncKeyState 边沿）恢复桌面点击双环 + 暗斑减淡
   3. `9264501`/`b1587da`/`c508c4d` · 雏菊水塘 1080P WebGL 版（用户已验收）+ wallMouse 交互链路 + 1080P 范式入 skill
 
 ## 3. 未完成 / 未验证
 
-- [ ] **真机验收**：桌面点击双环、湍流斑强度、设置页「此壁纸的参数」滑杆（拖动应实时改变桌面焦散/雏菊数/扰动强度）
+- [ ] **真机验收（本轮 UI 改版）**：`out\msix\PixelPalette.exe` 启动 → 设置窗默认 16:9（1152×648）且预览在右；"当前壁纸"下拉分两组；选本地壁纸时"删除"可点、"删除/恢复/加载"行为正确
+- [ ] 真机验收（上轮遗留）：桌面点击双环、设置页「此壁纸的参数」滑杆
 - [ ] 新 exe 未重跑 WACK（下次商店更新前补跑）
 - [ ] 旧验收项与 8 语言缺 46 键待办见 `collab\STATE.md`
 - [ ] 内置 320×180 版 daisypond 角色待裁决（保留 or 下线留 DRAFT）

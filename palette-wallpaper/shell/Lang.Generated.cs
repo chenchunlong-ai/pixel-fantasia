@@ -235,7 +235,8 @@ namespace PixelFX
                 { "githubLabel", "GitHub 开源仓库" },
                 { "giteeLabel", "Gitee 镜像仓库" },
                 { "linkCopied", "链接已复制到剪贴板" },
-                { "fxGorgefall", "峡谷晨雾" }
+                { "fxGorgefall", "峡谷晨雾" },
+                { "optSystem", "系统壁纸" }
             } },
             { "en", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -458,7 +459,8 @@ namespace PixelFX
                 { "githubLabel", "GitHub repository" },
                 { "giteeLabel", "Gitee mirror" },
                 { "linkCopied", "Link copied to clipboard" },
-                { "fxGorgefall", "Gorge at Dawn" }
+                { "fxGorgefall", "Gorge at Dawn" },
+                { "optSystem", "Built-in scenes" }
             } },
             { "ja", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -635,7 +637,9 @@ namespace PixelFX
                 { "githubLabel", "GitHub リポジトリ" },
                 { "giteeLabel", "Gitee ミラー" },
                 { "linkCopied", "リンクをクリップボードにコピーしました" },
-                { "fxGorgefall", "峡谷の朝霧" }
+                { "fxGorgefall", "峡谷の朝霧" },
+                { "optSystem", "システム壁紙" },
+                { "mineTitle", "ローカル壁紙" }
             } },
             { "ko", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -812,7 +816,9 @@ namespace PixelFX
                 { "githubLabel", "GitHub 저장소" },
                 { "giteeLabel", "Gitee 미러" },
                 { "linkCopied", "링크가 클립보드에 복사되었습니다" },
-                { "fxGorgefall", "협곡의 아침 안개" }
+                { "fxGorgefall", "협곡의 아침 안개" },
+                { "optSystem", "시스템 배경화면" },
+                { "mineTitle", "로컬 배경화면" }
             } },
             { "ru", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -989,7 +995,9 @@ namespace PixelFX
                 { "githubLabel", "Репозиторий GitHub" },
                 { "giteeLabel", "Зеркало Gitee" },
                 { "linkCopied", "Ссылка скопирована в буфер обмена" },
-                { "fxGorgefall", "Ущелье на рассвете" }
+                { "fxGorgefall", "Ущелье на рассвете" },
+                { "optSystem", "Встроенные сцены" },
+                { "mineTitle", "Локальные обои" }
             } },
             { "es", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -1166,7 +1174,9 @@ namespace PixelFX
                 { "githubLabel", "Repositorio en GitHub" },
                 { "giteeLabel", "Espejo en Gitee" },
                 { "linkCopied", "Enlace copiado al portapapeles" },
-                { "fxGorgefall", "Garganta al amanecer" }
+                { "fxGorgefall", "Garganta al amanecer" },
+                { "optSystem", "Escenas integradas" },
+                { "mineTitle", "Fondos locales" }
             } },
             { "pt", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -1343,7 +1353,9 @@ namespace PixelFX
                 { "githubLabel", "Repositório no GitHub" },
                 { "giteeLabel", "Espelho no Gitee" },
                 { "linkCopied", "Link copiado para a área de transferência" },
-                { "fxGorgefall", "Garganta ao amanhecer" }
+                { "fxGorgefall", "Garganta ao amanhecer" },
+                { "optSystem", "Cenas integradas" },
+                { "mineTitle", "Papéis locais" }
             } },
             { "de", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -1520,7 +1532,9 @@ namespace PixelFX
                 { "githubLabel", "GitHub-Repository" },
                 { "giteeLabel", "Gitee-Spiegel" },
                 { "linkCopied", "Link in die Zwischenablage kopiert" },
-                { "fxGorgefall", "Schlucht im Morgengrauen" }
+                { "fxGorgefall", "Schlucht im Morgengrauen" },
+                { "optSystem", "Eingebaute Szenen" },
+                { "mineTitle", "Lokale Hintergründe" }
             } },
             { "fr", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -1697,7 +1711,9 @@ namespace PixelFX
                 { "githubLabel", "Dépôt GitHub" },
                 { "giteeLabel", "Miroir Gitee" },
                 { "linkCopied", "Lien copié dans le presse-papiers" },
-                { "fxGorgefall", "Gorges a l aube" }
+                { "fxGorgefall", "Gorges a l aube" },
+                { "optSystem", "Scènes intégrées" },
+                { "mineTitle", "Fonds locaux" }
             } }
             };
 

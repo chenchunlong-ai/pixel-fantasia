@@ -179,6 +179,13 @@
         <select id="fx" style="flex:1"></select>
         <button id="pause" class="tiny"></button>
       </div>
+      <div class="row" id="mineRow" style="margin-top:0">
+        <label data-i18n="mineTitle"></label>
+        <button id="importWallpaper" class="tiny primary" data-i18n="importWallpaper"></button>
+        <button id="delWallpaper" class="tiny" data-i18n="deleteBtn"></button>
+        <button id="restoreAll" class="tiny ghost" data-i18n="restoreAll"></button>
+      </div>
+      <div class="hint" id="mineHint" style="margin:0 0 4px 98px" data-i18n="importHint"></div>
       <div class="slider"><label data-i18n="speed"></label><input id="speed" type="range" min="0.2" max="3" step="0.1"><output id="speedV"></output></div>
       <div class="slider"><label data-i18n="fps"></label><input id="fps" type="range" min="15" max="60" step="15"><output id="fpsV"></output></div>
       <div class="hint" data-i18n="fpsHint"></div>
@@ -208,17 +215,6 @@
 
 <h2 data-i18n="paramsTitle"></h2>
 <div class="card" id="params"></div>
-
-<h2 data-i18n="mineTitle"></h2>
-<div class="card">
-  <div class="row" style="margin-top:0">
-    <button id="importWallpaper" class="primary" data-i18n="importWallpaper"></button>
-    <button id="restoreAll" class="tiny ghost" data-i18n="restoreAll"></button>
-    <span class="hint" style="margin:0" data-i18n="importHint"></span>
-  </div>
-  <div class="mine" id="myWallpapers"></div>
-  <div class="hint" id="hiddenNote" style="margin-top:6px"></div>
-</div>
 
 <h2 data-i18n="petsTitle"></h2>
 <div class="card">

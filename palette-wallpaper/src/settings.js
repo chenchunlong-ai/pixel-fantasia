@@ -31,22 +31,28 @@ const nameOf = (id) => {
   const e = effectById(id);
   return e ? t(e.key) : id;
 };
-/** The scene dropdown: internal scenes (minus hidden ones) plus the user's wallpaper files. */
+/** The scene dropdown: two groups — built-in scenes, then the user's wallpaper files. */
 const effectOptions = (sel, value) => {
   sel.innerHTML = "";
+  const g1 = document.createElement("optgroup");
+  g1.label = t("optSystem");
+  sel.append(g1);
   for (const e of EFFECTS) {
     if ((cfg.hiddenFx || []).includes(e.id)) continue;
     const o = document.createElement("option");
     o.value = e.id;
     o.textContent = t(e.key);
-    sel.append(o);
+    g1.append(o);
   }
+  const g2 = document.createElement("optgroup");
+  g2.label = t("mineTitle");
+  sel.append(g2);
   for (const w of cfg.wallpapers || []) {
     if ((cfg.hiddenWallpapers || []).includes(w.id)) continue;
     const o = document.createElement("option");
     o.value = "ext:" + w.id;
     o.textContent = wallName(w);
-    sel.append(o);
+    g2.append(o);
   }
   const visible = [...sel.options].some((o) => o.value === value);
   sel.value = visible ? value : sel.options[0].value;
@@ -275,7 +281,7 @@ function fillAll() {
   fillSwatches();
   fillCycle();
   fillRules();
-  fillMine();
+  updateMineRow();
   fillPets();
   fillParams();
   $("#pvName").textContent = nameOf(cfg.fx);
@@ -374,6 +380,7 @@ $("#fx").onchange = () => {
   cfg.fx = $("#fx").value;
   touch();
   fillParams();
+  updateMineRow();
   restartPreview();
   updateFxControls();
 };
@@ -493,56 +500,22 @@ addEventListener("keydown", (e) => {
 
 // ---- the container: my wallpapers, my pets ----------------------------------------------------
 
-/** One row in the wallpaper list: name + use / hide-or-restore / delete. */
-function wallRow(w, hidden) {
-  const row = document.createElement("div");
-  row.className = "item" + (hidden ? " hiddenOne" : "");
-  const nm = document.createElement("div");
-  nm.className = "nm";
-  nm.textContent = wallName(w);
-  row.append(nm);
-  const use = document.createElement("button");
-  use.className = "tiny primary";
-  use.textContent = t("useBtn");
-  use.onclick = () => {
-    cfg.fx = "ext:" + w.id;
-    touch();
-    fillAll();
-    restartPreview();
-  };
-  row.append(use);
-  const hb = document.createElement("button");
-  hb.className = "tiny";
-  hb.textContent = hidden ? t("unhideBtn") : t("hideBtn");
-  hb.onclick = () => {
-    const list = cfg.hiddenWallpapers;
-    const i = list.indexOf(w.id);
-    if (i >= 0) list.splice(i, 1); else list.push(w.id);
-    touch();
-    fillMine();
-    effectOptions($("#fx"), cfg.fx);
-  };
-  row.append(hb);
-  const del = document.createElement("button");
-  del.className = "tiny ghost";
-  del.textContent = t("deleteBtn");
-  del.onclick = () => {
-    if (!confirm(t("deleteWallpaperConfirm", { name: w.name }))) return;
-    say({ type: "removeWallpaper", id: w.id });
-  };
-  row.append(del);
-  return row;
+/** 本地壁纸的三件事，就在"当前壁纸"旁边：加载 / 删除（当前选中的） / 恢复（取消隐藏全部） */
+function updateMineRow() {
+  const ext = isExt($("#fx").value);
+  const w = ext ? (cfg.wallpapers || []).find((x) => x.id === extId($("#fx").value)) : null;
+  const del = $("#delWallpaper");
+  del.disabled = !w;
+  del.style.opacity = w ? "1" : "0.4";
 }
 
-function fillMine() {
-  const box = $("#myWallpapers");
-  box.innerHTML = "";
-  const hidden = cfg.hiddenWallpapers || [];
-  for (const w of cfg.wallpapers || []) box.append(wallRow(w, hidden.includes(w.id)));
-  const nHiddenFx = (cfg.hiddenFx || []).length;
-  const nHiddenW = hidden.length;
-  $("#hiddenNote").textContent = nHiddenFx + nHiddenW ? t("hiddenNote", { n: nHiddenFx + nHiddenW }) : "";
-}
+$("#delWallpaper").onclick = () => {
+  const id = $("#fx").value;
+  const w = isExt(id) ? (cfg.wallpapers || []).find((x) => x.id === extId(id)) : null;
+  if (!w) return;
+  if (!confirm(t("deleteWallpaperConfirm", { name: w.name }))) return;
+  say({ type: "removeWallpaper", id: w.id });
+};
 
 function fillPets() {
   // compact: enabled pets as chips, the full catalogue hidden behind a toggle
@@ -678,7 +651,7 @@ $("#filePet").onchange = () => {
   };
   rd.readAsArrayBuffer(f);
 };
-$("#restoreAll").onclick = () => say({ type: "restoreHidden", all: true });
+$("#restoreAll").onclick = () => say({ type: "restoreHidden", wallpapers: true });
 
 
 // ---- pets in the preview: live placement ------------------------------------------------

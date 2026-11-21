@@ -19,7 +19,7 @@ namespace PixelFX
         {
             Text = Lang.T("settingsTitle");
             StartPosition = FormStartPosition.CenterScreen;
-            Size = new Size(1020, 800);
+            Size = new Size(1152, 648);
             MinimumSize = new Size(820, 620);
             BackColor = Color.FromArgb(13, 12, 20);
             ShowInTaskbar = true;

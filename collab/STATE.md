@@ -12,7 +12,7 @@
 | 构建产物（2026-11-19 04:20 重建） | `PixelPalette.exe` 517 KB / `PixelPalette-Setup.exe` 850 KB / `4A5AB34E.62945D70D0F14_1.0.0.0_x64.msix` 0.8 MB / `app.ico` 86 KB（32 色阶量化，四角 alpha=0） |
 | 验证状态 |（地狱已下线，勿再验收） `build.mjs` **通过**；真机 3D 壁纸跑通（02:45）；真机宠物跟随壁纸 **通过**（17:01 自动轮换实跑：`dbg fx=weather/black-hole n=0`）；设置页预览 3D→2D 宠物残留修复 17:30 浏览器实测**通过**（`#pvPetCv` 移除、`#pvPets` 清空、状态行跟随）；新增两款主题在 harness 逐帧目检通过（天堂 14.3 ms / 地狱 9.2 ms），**真机切换与宠物跟随待人工验收**；`verify.mjs` 上次通过于 02:06（本次未跑） |
 | WebView2 缓存（真机实测） | 新构建全新 profile 6 分钟后 **11.7 MB**（旧 profile 72.5 MB，降 84%） |
-| git HEAD | （提交前）daisypond 待提交：新场景雏菊水塘 2026-11-21 |
+| git HEAD | （提交前）设置页 UI 改版待提交：本地壁纸并入当前壁纸 + 窗口 16:9 2026-11-21 |
 
 ## 正在进行的改动（在飞）
 
@@ -24,7 +24,8 @@
 
 ## 最近 3 条
 
-1. 2026-11-21 04:46 · 提交 `e82741c` · ZCode · **参数链路全通**：根因是雏菊水塘 GLSL 忘声明 `uniform vec3 uOpt` → 编译抛异常 → 壁纸脚本在钩子定义前死掉 → wallwrap 读不到 wallParams → 设置页面板空。修复后日志确认 wallParams 上报（id=27ea933241，3 参数）；浏览器确认 wallParam("daisies",3) 生效。**调试坑**：壁纸脚本死掉是无声的（error 只走 chrome.webview dbg），浏览器排查要把 error 写进 document.title 才能读；IAB 多标签时 tabs.list()[0] 可能是旧设置页——验错对象先看 url
+1. 2026-11-21 13:22 · ZCode · **设置页 UI 改版（用户点名）**：本地壁纸并入"当前壁纸"下拉（optgroup 系统壁纸/本地壁纸），原独立卡片换为 加载/删除（仅选中本地壁纸可用）/恢复（restoreHidden{wallpapers:true}，只恢复用户壁纸）；设置窗默认 1020×800 → 1152×648（16:9）；i18n 新增 optSystem ×9 + mineTitle 补 7 语种。verify 全 ok、build 通过（MSIX 0.8 MB）；真机目检待人工
+2. 2026-11-21 04:46 · 提交 `e82741c` · ZCode · **参数链路全通**：根因是雏菊水塘 GLSL 忘声明 `uniform vec3 uOpt` → 编译抛异常 → 壁纸脚本在钩子定义前死掉 → wallwrap 读不到 wallParams → 设置页面板空。修复后日志确认 wallParams 上报（id=27ea933241，3 参数）；浏览器确认 wallParam("daisies",3) 生效。**调试坑**：壁纸脚本死掉是无声的（error 只走 chrome.webview dbg），浏览器排查要把 error 写进 document.title 才能读；IAB 多标签时 tabs.list()[0] 可能是旧设置页——验错对象先看 url
 2. 2026-11-21 04:30 · 提交 `2b34486` · ZCode · **外部壁纸自带调参落地**：约定 `window.wallParams=[{key,label,min,max,step,def}]` 声明 + `window.wallParam(k,v)` 接收；wallwrap 读声明报外壳 → 设置页「此壁纸的参数」折叠子面板（滑杆动态渲染，值存 cfg.params["ext:id"] 全量回存）→ wallwrap 逐 key 转发桌面/预览；i18n extParams ×9；SKILL.md 钩子文档补全（wallClick/wallParams）。雏菊水塘声明 3 参数。真机滑杆待验收；跨区 src/shell/skill
 2. 2026-11-21 04:15 · 提交 `c49f731` · ZCode · **外壳检测点击 wallClick**（GetAsyncKeyState VK_LBUTTON 边沿→wallClick，全局输入可接受）恢复桌面点击双环 + 湍流斑暗部减淡（0.12→0.05）。真机点击待验收
 3. 2026-11-21 03:10 · 提交 `9264501` · ZCode · **wallwrap 转发 wallMouse（桌面交互根因：壁纸在 srcdoc iframe，外壳推顶层页落空）**
