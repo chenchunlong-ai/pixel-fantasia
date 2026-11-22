@@ -215,6 +215,7 @@ function deck(p, TH, t, S, front, srcs) {
 // the wind itself: long streaks crossing the whole scene, fast, sparse — far ones dim, near ones
 // with a bright head, so the air visibly rushes past the funnel
 function wind(q, t, S, TH, near) {
+  if (TH.noWind) return;   // themes that must not carry streaks (the sandstorm: no flying lines)
   const C = TH.C, sd = S * 27 + near;
   trips(t, TH.D, Math.round((near ? 14 : 22)), sd, 3, 5, (u, k, m, i) => {
     const j = wrap(k, m), R = (n) => rand(sd, i, j, n);

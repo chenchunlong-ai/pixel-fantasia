@@ -9,8 +9,8 @@ import { setMeta, makeTornado } from "./_tornado.js";
 
 export const meta = {
   name: "Sandstorm",
-  desc: "A sandstorm under a black sky: dust banks roll across the plain, sand sifts down and grains hop off the ground as the storm deck churns overhead.",
-  tags: ["weather", "sandstorm", "desert", "sand", "wind", "storm", "ambient", "loop"],
+  desc: "A sandstorm under a black sky: dust banks roll across the plain, thick sand sifts down and grains hop off the ground as the storm deck churns overhead.",
+  tags: ["weather", "sandstorm", "desert", "sand", "dust", "storm", "ambient", "loop"],
   size: [320, 180],
   origin: [160, 170],
   duration: 10,
@@ -30,6 +30,7 @@ const TH = {
   D, FH, C, Dst,
   noFunnel: true, // the storm, not a funnel: the framework draws deck, wind and hooks only
   noBolt: true,   // user: no lightning in the sandstorm
+  noWind: true,   // user: the wind streaks read as straight flying lines — gone
   bolt: "#e8d8a8", boltHot: "#ffffff", footGlow: hex("#a8906c"),
   sky(p) {
     // pure black — the lit deck and the flying sand carry the frame
@@ -56,7 +57,7 @@ const TH = {
   fall(p, q, t, S, near) {
     // sand sifting down out of the deck everywhere, thicker near the ground
     const sd = S * 47 + near;
-    trips(t, D, Math.round((near ? 40 : 70) * DEN), sd, 4, 6, (u, k, m, i) => {
+    trips(t, D, Math.round((near ? 60 : 105) * DEN), sd, 4, 6, (u, k, m, i) => {   // more falling dust (user)
       const j = ((k % m) + m) % m, R = (c) => rand(sd, i, j, c);
       const x = -170 + R(1) * 340 + Math.sin(u * TAU * (1 + R(2)) + R(3) * 6) * 7;
       const y = -172 + 170 * u, drift = 26 * u;

@@ -44,27 +44,37 @@ const F2 = field(53, 160, 96, [2, 4, 8, 16]);     // fine grain
 // with a thinner scatter everywhere else and the odd bright one with a glint.
 const STARS = [];
 {
-  for (let i = 0; i < 1050; i++) {
+  // tiers are quantised at build time (user's spec): 3 sizes, 5 brightness levels, 5 twinkle
+  // frequencies, and a slight blue/violet tint on roughly a third of the stars — the craft is
+  // the shooting-stars scene's: dim dots, plain px, px+glow, and a rare cross-glint
+  const tier = (r) => (r < 0.6 ? 0 : r < 0.92 ? 1 : r < 0.985 ? 2 : 3);   // dot / mid / bright+halo / glint (few of the loud ones)
+  const tint = (r) => (r < 0.2 ? "#b9c8ff" : r < 0.35 ? "#c4b8ff" : "#dfe6ff");   // a little blue/violet
+  const push = (x, y, near, rr, ri) => {
+    if (y < -169 || y > HZ - 20) return;
+    const m = starMag(near, rr);
+    STARS.push({
+      x: Math.round(x), y: Math.round(y),
+      m: 0.18 + 0.18 * Math.floor(Math.min(1, m) * 4.999),              // 5 brightness levels
+      tier: tier(rand(801, ri, 9)),
+      w: 1 + Math.floor(rand(801, ri, 5) * 4.999),                      // 5 twinkle frequencies
+      p: rand(801, ri, 6) * TAU,
+      col: tint(rand(801, ri, 10)),
+      g: rand(801, ri, 7) < 0.05,
+    });
+  };
+  for (let i = 0; i < 340; i++) {
     const x = -160 + rand(801, i, 1) * 320;
     const u = rand(801, i, 2) - 0.5;
     // two thirds hug the spine within +-26 px, the rest fan out to +-55
     const spread = rand(801, i, 8) < 0.66 ? 26 : 55;
     const y = spineX(x) + u * 2 * spread * (1 + 0.12 * Math.sin(x * 0.05));
-    if (y < -169 || y > HZ - 20) continue;
-    const near = 1 - Math.min(1, Math.abs(y - spineX(x)) / 40);
-    STARS.push({
-      x: Math.round(x), y: Math.round(y),
-      m: starMag(near, rand(801, i, 4)),
-      w: 0.7 + rand(801, i, 5) * 3.1,
-      p: rand(801, i, 6) * TAU,
-      g: rand(801, i, 7) < 0.05,
-    });
+    push(x, y, 1 - Math.min(1, Math.abs(y - spineX(x)) / 40), rand(801, i, 4), i);
   }
-  for (let i = 0; i < 340; i++) {
+  for (let i = 0; i < 120; i++) {
     const x = -160 + rand(861, i, 1) * 320;
     const y = -169 + rand(861, i, 2) * 121;
     if (Math.abs(y - spineX(x)) < 34) continue;
-    STARS.push({ x: Math.round(x), y: Math.round(y), m: 0.12 + rand(861, i, 3) * 0.35, w: 0.6 + rand(861, i, 4) * 2.6, p: rand(861, i, 5) * TAU, g: rand(861, i, 6) < 0.01 });
+    push(x, y, 0.15, rand(861, i, 3), 1000 + i);
   }
 }
 
@@ -171,8 +181,8 @@ function milky(R, i, x, y, ph) {
     // granulation: single-pixel flecks of light inside the band, so the glow has grain instead of reading as haze
     const hx = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
     const f = hx - Math.floor(hx);
-    if (f > 0.72) R.c[i] = mix(R.c[i], MW_CORE, 0.05 + 0.12 * nz);
-    R.k[i] = 0.1 * core * knot;
+    if (f > 0.9) R.c[i] = mix(R.c[i], MW_CORE, 0.04 + 0.08 * nz);   // far fewer, far dimmer flecks (user: too bright, too many)
+    R.k[i] = 0.04 * core * knot;                                    // the bloom was blowing the band out white
     R.l[i] = MW_CORE;
   }
 }
@@ -180,17 +190,27 @@ function milky(R, i, x, y, ph) {
 function milkyStars(q, ph, NL) {
   for (let i = 0; i < STARS.length; i++) {
     const S = STARS[i];
-    const tw = 0.62 + 0.38 * Math.sin(ph * S.w + S.p);
+    const tw = 0.62 + 0.38 * Math.sin(ph * S.w + S.p);   // w is an integer 1..5: five twinkle rates
     if (tw < 0.3) continue;
     const a = S.m * tw;
-    q.px(S.x, S.y, mix(hex("#dfe6ff"), MW_CORE, clamp(S.m, 0, 1)));
-    if (S.m > 0.6) q.glow(S.x, S.y, 2.4, MW_CORE, 0.14 * a);
-    if (S.g && tw > 0.75) {
-      q.px(S.x - 1, S.y, mix(NL[5], MW_CORE, 0.5));
-      q.px(S.x + 1, S.y, mix(NL[5], MW_CORE, 0.5));
-      q.px(S.x, S.y - 1, mix(NL[5], MW_CORE, 0.5));
-      q.px(S.x, S.y + 1, mix(NL[6], MW_CORE, 0.4));
-      q.glow(S.x, S.y, 5, MW_CORE, 0.2 * a);
+    const col = mix(hex(S.col), MW_CORE, clamp(S.m * 0.6, 0, 0.6));
+    // brightness MUST ride on q.dot alpha: q.px is solid and would flatten the five levels
+    // into identical bright blobs (looked like snow)
+    if (S.tier === 0) {                                   // dim speck
+      q.dot(S.x, S.y, col, a * 0.6);
+    } else if (S.tier === 1) {                            // mid star
+      q.dot(S.x, S.y, col, a);
+    } else if (S.tier === 2) {                            // bright star + soft halo
+      q.dot(S.x, S.y, col, Math.min(1, a * 1.15));
+      q.glow(S.x, S.y, 2.4, col, 0.13 * a);
+    } else {                                              // the rare bright one: cross glint
+      q.px(S.x, S.y, mix(col, "#ffffff", 0.45));
+      q.glow(S.x, S.y, 3, col, 0.16 * a);
+      if (S.g && tw > 0.75) {
+        q.px(S.x - 1, S.y, col); q.px(S.x + 1, S.y, col);
+        q.px(S.x, S.y - 1, col); q.px(S.x, S.y + 1, col);
+        q.glow(S.x, S.y, 5, MW_CORE, 0.2 * a);
+      }
     }
   }
 }
