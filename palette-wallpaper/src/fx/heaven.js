@@ -7,6 +7,7 @@
 // light of dawn still burning along the horizon underneath.
 import { clamp, fit, rand, hex, smooth, TAU, mix } from "../../../src/core/index.js";
 import { clip, rows, field, sample } from "../../../src/fx/weather/_lib.js";
+import { drawMeteors } from "./meteors.js";
 
 export const meta = {
   name: "Heaven",
@@ -48,7 +49,7 @@ const STARS = [];
   // frequencies, and a slight blue/violet tint on roughly a third of the stars — the craft is
   // the shooting-stars scene's: dim dots, plain px, px+glow, and a rare cross-glint
   const tier = (r) => (r < 0.6 ? 0 : r < 0.92 ? 1 : r < 0.985 ? 2 : 3);   // dot / mid / bright+halo / glint (few of the loud ones)
-  const tint = (r) => (r < 0.2 ? "#b9c8ff" : r < 0.35 ? "#c4b8ff" : "#dfe6ff");   // a little blue/violet
+  const tint = (r) => (r < 0.2 ? "#b9c8ff" : r < 0.35 ? "#c4b8ff" : r < 0.45 ? "#ffe2c8" : "#dfe6ff");   // a little blue/violet/warm
   const push = (x, y, near, rr, ri) => {
     if (y < -169 || y > HZ - 20) return;
     const m = starMag(near, rr);
@@ -56,7 +57,7 @@ const STARS = [];
       x: Math.round(x), y: Math.round(y),
       m: 0.18 + 0.18 * Math.floor(Math.min(1, m) * 4.999),              // 5 brightness levels
       tier: tier(rand(801, ri, 9)),
-      w: 1 + Math.floor(rand(801, ri, 5) * 4.999),                      // 5 twinkle frequencies
+      w: (1 + Math.floor(rand(801, ri, 5) * 4.999)) / 1.6,              // 5 twinkle frequencies, slowed
       p: rand(801, ri, 6) * TAU,
       col: tint(rand(801, ri, 10)),
       g: rand(801, ri, 7) < 0.05,
@@ -147,7 +148,7 @@ export function drawBack(p, t, o) {
   sea(q, t, ph, NL, dn);
   far(q, t, ph, NL, dn);
 
-  meteor(q, t);
+  drawMeteors(q, t, D, 71);      // the shared upgraded meteor system (8 a loop, all different)
   motes(q, t, NL, dn);
 }
 
@@ -193,19 +194,19 @@ function milkyStars(q, ph, NL) {
     const tw = 0.62 + 0.38 * Math.sin(ph * S.w + S.p);   // w is an integer 1..5: five twinkle rates
     if (tw < 0.3) continue;
     const a = S.m * tw;
-    const col = mix(hex(S.col), MW_CORE, clamp(S.m * 0.6, 0, 0.6));
+    const col = mix(hex(S.col), MW_CORE, clamp(S.m * 0.3, 0, 0.3));   // keep the tint visible
     // brightness MUST ride on q.dot alpha: q.px is solid and would flatten the five levels
     // into identical bright blobs (looked like snow)
     if (S.tier === 0) {                                   // dim speck
       q.dot(S.x, S.y, col, a * 0.6);
     } else if (S.tier === 1) {                            // mid star
       q.dot(S.x, S.y, col, a);
-    } else if (S.tier === 2) {                            // bright star + soft halo
-      q.dot(S.x, S.y, col, Math.min(1, a * 1.15));
-      q.glow(S.x, S.y, 2.4, col, 0.13 * a);
-    } else {                                              // the rare bright one: cross glint
-      q.px(S.x, S.y, mix(col, "#ffffff", 0.45));
-      q.glow(S.x, S.y, 3, col, 0.16 * a);
+    } else if (S.tier === 2) {                            // bright star: a real 2-3 px disc + halo
+      q.circle(S.x, S.y, 1.1, col);
+      q.glow(S.x, S.y, 2.8, col, 0.14 * a);
+    } else {                                              // the rare bright one: big disc + cross glint
+      q.circle(S.x, S.y, 1.5, mix(col, "#ffffff", 0.35));
+      q.glow(S.x, S.y, 3.5, col, 0.18 * a);
       if (S.g && tw > 0.75) {
         q.px(S.x - 1, S.y, col); q.px(S.x + 1, S.y, col);
         q.px(S.x, S.y - 1, col); q.px(S.x, S.y + 1, col);
@@ -302,19 +303,6 @@ function far(q, t, ph, NL, dn) {
         if (v < 0.25) q.light(x, y, NL[6], 0.18);
       }
     }
-  }
-}
-
-// one meteor per loop, in the upper sky, gone in under a second
-function meteor(q, t) {
-  const u = (t / D) % 1;
-  if (u < 0.06 || u > 0.115) return;
-  const k = (u - 0.06) / 0.055;
-  const hx = -140 + k * 180, hy = -166 + k * 34;
-  for (let i = 0; i < 9; i++) {
-    const a = 1 - i / 9;
-    q.px(hx - i * 1.6, hy - i * 0.3, mix(MW_EDGE, hex("#ffffff"), a));
-    if (i < 3) q.glow(hx - i * 1.6, hy - i * 0.3, 3, MW_CORE, 0.16 * a);
   }
 }
 

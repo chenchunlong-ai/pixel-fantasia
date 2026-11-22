@@ -7,12 +7,12 @@
 
 | 项 | 值 |
 | --- | --- |
-| 版本（`version.mjs` 唯一源） | **`1.0.2.1`（2026-11-21 起，未提交商店）** |
+| 版本（`version.mjs` 唯一源） | **`1.0.2.8`（2026-11-22 起，未提交商店）** |
 | 下一次发行版本 | `1.0.2.1` 就是本次发行 |
-| 构建产物（2026-11-21 15:25 重建） | `PixelPalette.exe` 591 KB / `PixelPalette-Setup.exe` 921 KB / `4A5AB34E.62945D70D0F14_1.0.2.1_x64.msix` 0.8 MB |
+| 构建产物（2026-11-21 15:25 重建） | `PixelPalette.exe` 591 KB / `PixelPalette-Setup.exe` 921 KB / `4A5AB34E.62945D70D0F14_1.0.2.8_x64.msix` 0.8 MB |
 | 验证状态 |（地狱/2D雏菊水塘/峡谷晨雾均已下线，勿再验收） `build.mjs` **通过**；真机 3D 壁纸跑通（02:45）；真机宠物跟随壁纸 **通过**（17:01 自动轮换实跑：`dbg fx=weather/black-hole n=0`）；设置页预览 3D→2D 宠物残留修复 17:30 浏览器实测**通过**（`#pvPetCv` 移除、`#pvPets` 清空、状态行跟随）；新增两款主题在 harness 逐帧目检通过（天堂 14.3 ms / 地狱 9.2 ms），**真机切换与宠物跟随待人工验收**；`verify.mjs` 上次通过于 02:06（本次未跑） |
 | WebView2 缓存（真机实测） | 新构建全新 profile 6 分钟后 **11.7 MB**（旧 profile 72.5 MB，降 84%） |
-| git HEAD | （提交前）sandstorm风线补刀+heaven星空重做 待提交 2026-11-22 |
+| git HEAD | （提交前）星星档位可见化+共享流星系统+版本1.0.2.8 待提交 2026-11-22 |
 
 ## 正在进行的改动（在飞）
 
@@ -24,7 +24,8 @@
 
 ## 最近 3 条
 
-1. 2026-11-22 23:20 · ZCode · **sandstorm 风线补刀 + heaven 星空按流星壁纸工艺重做**：上轮漏了 _tornado wind() 全屏线条（加 noWind）；落沙加量；heaven 星表量化分层（3 大小/5 亮度/5 闪烁频率/蓝紫色偏，1390→460 颗，亮度走 q.dot alpha——q.px 实心会压平分层像下雪）；银河 granulation/bloom 减半（白茫主因）。**重大教训：out/_harness.bundle.js 是旧产物，上轮 rift 目检渲染的是缓存旧代码；harness 目检必须重建 bundle+唯一文件名防缓存（本次用 _h2/_h3 重验通过）**。真机待人工
+1. 2026-11-22 23:39 · ZCode · **星星档位可见化 + 共享流星系统 + 1.0.2.8**：heaven 星星亮星改 q.circle 圆盘、颜色只压 0.3 保留蓝紫/暖调、闪烁除 1.6 放慢；新共享模块 src/fx/meteors.js（shooting-stars 工艺移植+循环分数调度，8 颗/循环全不同）接入 heaven/rift/otherworld-rift。verify 抓到两处接线错误（rift draw 无 q、otherworld import 漏挂）。像素采样+目检通过；MSIX 1.0.2.8 已产出。真机待人工
+2. 2026-11-22 23:20 · ZCode · **sandstorm 风线补刀 + heaven 星空按流星壁纸工艺重做**：上轮漏了 _tornado wind() 全屏线条（加 noWind）；落沙加量；heaven 星表量化分层（3 大小/5 亮度/5 闪烁频率/蓝紫色偏，1390→460 颗，亮度走 q.dot alpha——q.px 实心会压平分层像下雪）；银河 granulation/bloom 减半（白茫主因）。**重大教训：out/_harness.bundle.js 是旧产物，上轮 rift 目检渲染的是缓存旧代码；harness 目检必须重建 bundle+唯一文件名防缓存（本次用 _h2/_h3 重验通过）**。真机待人工
 2. 2026-11-22 22:49 · ZCode · **GPL-3.0 + rift 雷暴闪电三样式 + sandstorm 收尾 + heaven 四修**：LICENSE 换 GPLv3（README/NOTICE 同步，商店许可条款字段需用户手动同步）；rift 闪电用 _tornado 三层 stroke 工艺重做（strike out/fork burst/along-spine arc，harness 抽帧目检通过）；sandstorm noBolt+删拖尾/圆环只剩沙丘落沙跳粒；heaven 纯黑天空+银河减淡45%+星1050+循环卡顿修复（far() 裸 t 线性漂移回绕跳 9px→周期项）。真机待人工
 2. 2026-11-21 15:55 · ZCode · **下线 2D 雏菊水塘/峡谷晨雾 + 参数面板挪进场景卡片 + rift 去闪电 + sandstorm 去直线**：场景 25→23（源文件留 DRAFT，旧配置自动回退 snow）；沙线改点状拖尾；裂缝放电保留光效去螺栓。exe 532 KB。真机目检待用户
 2. 2026-11-21 15:29 · ZCode · **发行准备 1.0.2.1**：雏菊阴影改花瓣形；下拉分组对调（本地在上）；**3D 雏菊水塘打包预装**（exe 资源 → 启动时写 WallpaperDir 并注册，daisyPondGone 尊重删除）；版本 1.0.0.0 → 1.0.2.1。MSIX 已产出 1.0.2.1。WACK 未重跑；商店上传/GitHub 推送待执行

@@ -38,6 +38,7 @@ git diff --stat
 
 ## 2. 现在在哪（2026-11-21 15:29）
 
+- **2026-11-22 深夜二**：新共享模块 `src/fx/meteors.js`（流星系统，shooting-stars 工艺移植+循环分数调度，8 颗/循环全不同）接入 heaven/rift/otherworld-rift；heaven 星星亮星改 q.circle 圆盘、色调保留、闪烁放慢。版本 1.0.2.8，MSIX 已产出。**教训：harness 目检必须 fresh bundle+唯一文件名（见 23:20 journal）**
 - **2026-11-22 深夜**：sandstorm 飞线补刀（_tornado wind() 加 noWind，上轮漏网）+落沙加量；heaven 星空按流星壁纸工艺重做（3 大小/5 亮度/5 闪烁频率档 + 蓝紫色偏 + 460 颗 + 亮度走 q.dot alpha）+银河 bloom/granulation 减半。**教训：out/_harness.bundle.js 会过期，目检前必须重建并用唯一文件名防浏览器缓存（_h2/_h3 方式）**
 - **2026-11-22**：LICENSE 改 **GPL-3.0**（README/NOTICE 同步；商店许可条款字段待用户同步）；rift 闪电重做（雷暴三层 stroke 工艺，三样式：贯穿雷击/叉状爆发/沿缝电弧）；sandstorm noBolt+删拖尾圆环；heaven 纯黑天空+银河减淡+循环卡顿修复（far() 裸 t 回绕跳 9px）。已推 GitHub。
 - **发行准备 1.0.2.1 已就绪**（journal `collab/journal/2026-11-21-1529-ZCode-release-1.0.2.1.md`）：雏菊阴影改花瓣形、下拉分组对调（本地在上）、**3D 雏菊水塘打包预装**（exe 资源 → 启动写 WallpaperDir + 注册，`daisyPondGone` 尊重用户删除）、version 1.0.2.1。产物：exe 591 KB / Setup 921 KB / `4A5AB34E.62945D70D0F14_1.0.2.1_x64.msix` 0.8 MB。

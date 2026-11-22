@@ -11,6 +11,7 @@
 // Every pixel is a pure function of t; the geometry is baked once into a distance field.
 import { clamp, fit, rand, hex, smooth, TAU, mix } from "../../../src/core/index.js";
 import { clip, rows, field, sample, wave, trips } from "../../../src/fx/weather/_lib.js";
+import { drawMeteors } from "./meteors.js";
 
 export const meta = {
   name: "Otherworld rift",
@@ -346,9 +347,11 @@ export function drawBack(p, t, o) {
 }
 export function draw(p, t, o) {
   if (!DF) bake();
+  const q = q2(p);
 
   otherStars(p, t, o.density);
   bigStars(p, t);
+  drawMeteors(q, t, D, 97);   // the shared meteor system: 8 a loop, each different
   fragments(p, t, o.density);
   ribbons(p, t, o.density);
 }

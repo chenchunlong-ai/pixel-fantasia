@@ -9,6 +9,7 @@
 // Every pixel is computed from t; nothing accumulates.
 import { clamp, fit, rand, hex, smooth, TAU, mix, Rng } from "../../../src/core/index.js";
 import { clip, rows, field, sample, trips, wave, tree } from "../../../src/fx/weather/_lib.js";
+import { drawMeteors } from "./meteors.js";
 
 export const meta = {
   name: "Spacetime rift",
@@ -435,7 +436,8 @@ export function drawBack(p, t, o) {
   rift(p, t, o.density, NL);
 }
 export function draw(p, t, o) {
-  const NL = fit(o.nebula, 7);
+  const q = q2(p), NL = fit(o.nebula, 7);
   bigStars(p, t);
+  drawMeteors(q, t, D, 83);   // the shared meteor system: 8 a loop, each different
   energy(p, t, o, NL);
 }
