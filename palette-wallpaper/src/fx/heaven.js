@@ -114,7 +114,7 @@ export function drawBack(p, t, o) {
   sea(q, t, ph, NL, dn);
   far(q, t, ph, NL, dn);
 
-  drawMeteors(q, t, D, 71);      // the shared upgraded meteor system (8 a loop, all different)
+  drawMeteors(q, t, D, 71, 10);   // dy+10: heaven's origin y is 170, the meteors were tuned for 180
   motes(q, t, NL, dn);
 }
 
@@ -157,13 +157,15 @@ function milky(R, i, x, y, ph) {
 function milkyStars(q, t, NL) {
   const S = 71, D = 16, K = STARCOL;
   // the shooting-stars star loop, verbatim
-  for (let i = 0; i < 130; i++) {
+  for (let i = 0; i < 320; i++) {
     const x = -160 + rand(S, i, 1) * 320, y = -180 + rand(S, i, 2) * 178, r = rand(S, i, 3), c = 1 + Math.floor(rand(S, i, 4) * 4);
     if (y > HZ - 14) continue;                       // heaven-only guard: stars stay above the cloud sea
     const tw = 0.5 + 0.5 * Math.sin((TAU * c * t) / D + rand(S, i, 5) * TAU);
-    if (r < 0.6) q.dot(x, y, K[3], 0.35 + 0.5 * tw);
-    else if (r < 0.94) (q.px(x, y, r < 0.8 ? K[4] : WHITE), q.glow(x + 0.5, y + 0.5, 3, K[3], 0.22 * tw));
-    else sparkle(q, x, y, 1 + Math.round(tw * 2), K[4], K[3], 0.3 * tw);
+    // white-on-dark so every star reads (the light violet of the original washed out on the
+    // bright Milky Way band); ~10% get the cross glint, with longer arms than the original
+    if (r < 0.55) q.dot(x, y, K[4], 0.4 + 0.5 * tw);
+    else if (r < 0.9) (q.px(x, y, WHITE), q.glow(x + 0.5, y + 0.5, 3, K[3], 0.24 * tw));
+    else sparkle(q, x, y, 2 + Math.round(tw * 3), WHITE, K[3], 0.4 * tw);
   }
 }
 

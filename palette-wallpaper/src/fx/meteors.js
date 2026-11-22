@@ -3,7 +3,7 @@
 // flare + fragments for the big ones, glowing twisting train), ported onto a schedule in loop
 // fractions so it fits any duration. Eight meteors a loop, and every one of them differs —
 // its own start, angle, speed, length, size, colours and moment (user's spec).
-import { rand, TAU, WHITE, sparkle, at } from "../../../src/core/index.js";
+import { rand, TAU, WHITE, sparkle, at, hex } from "../../../src/core/index.js";
 
 const TRAIN = 1.6;
 // every meteor carries a FULL 6-colour ramp like the shooting-stars original (dark sheath, mid,
@@ -21,10 +21,14 @@ const LIST = [
   { t0: 0.79, x: 20, y: -160, a: 2.5, v: 280, life: 0.5, s: 0.6, C: C0 },
   { t0: 0.92, x: -10, y: -176, a: 2.28, v: 230, life: 0.8, s: 1.0, flare: true, C: C0 },
 ];
+// the painter only accepts PACKED colours (hex()); the raw "#rrggbb" strings would render
+// as black — that was the "black smoke" trail
+for (const m of LIST) m.C = m.C.map(hex);
+
 
 /** draw all meteors onto q; t is the scene clock, D the scene's loop duration, seed varies per scene */
 export function drawMeteors(q, t, D, seed) {
-  for (let i = 0; i < LIST.length; i++) {
+    for (let i = 0; i < LIST.length; i++) {
     const m = LIST[i];
     const age = (((t / D - m.t0) % 1) + 1) % 1 * D;   // seconds since this meteor lit (once a loop)
     if (age > m.life + (m.flare ? 0.5 : 0) + TRAIN) continue;
@@ -45,8 +49,11 @@ function meteor(q, age, m, i, S) {
       if (passed < 0.08) continue;
       const g = trainK * Math.min(1, (passed - 0.08) * 4) * (0.35 + 0.65 * Math.sin((Math.PI * d) / len)) * m.s, tw = Math.sin(d * 0.09 + passed * 1.7) * Math.min(4, passed * 3);
       const x = m.x + ca * d + nx * tw + passed * 4, y = m.y + sa * d + ny * tw;
-      q.dot(x, y, passed < 0.6 ? C[2] : C[1], g * 0.75);
-      if (d % 6 === 0) q.glow(x, y, 6 + passed * 4, C[1], 0.12 * g);
+      // the trail must stay BRIGHT on a dark sky (user saw the old purple tail as black smoke):
+      // pale gold near the head, orange mid, rose at the far end — a bright-to-warm gradient
+      const tc = passed < 0.4 ? C[4] : passed < 0.75 ? C[3] : C[2];
+      q.dot(x, y, tc, Math.min(1, g * 0.9));
+      if (d % 4 === 0) q.glow(x, y, 6 + passed * 4, C[2], 0.16 * g);
     }
   }
   if (age > m.life + (m.flare ? 0.5 : 0)) return;
@@ -60,6 +67,7 @@ function meteor(q, age, m, i, S) {
       if (m.s > 0.9 && v < 0.4) q.dot(x - sa * 0.9, y + ca * 0.9, v < 0.15 ? C[4] : C[3], k * (1 - v / 0.4));
     }
     q.px(hx, hy, WHITE);
+    try { document.title = "hx=" + hx.toFixed(1) + " hy=" + hy.toFixed(1) + " probe=(" + (Math.round(hx)+2) + "," + Math.round(hy) + ")"; } catch (e) {}
     if (m.s > 0.9) (q.px(hx + 1, hy, WHITE), q.px(hx, hy + 1, C[4]));
     q.glow(hx, hy, 8 + 10 * m.s, C[4], 0.45 * k);
     q.glow(hx - ca * L * 0.3, hy - sa * L * 0.3, 10 + 8 * m.s, C[3], 0.2 * k);

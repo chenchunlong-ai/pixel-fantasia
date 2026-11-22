@@ -12,7 +12,7 @@
 | 构建产物（2026-11-21 15:25 重建） | `PixelPalette.exe` 591 KB / `PixelPalette-Setup.exe` 921 KB / `4A5AB34E.62945D70D0F14_1.0.2.8_x64.msix` 0.8 MB |
 | 验证状态 |（地狱/2D雏菊水塘/峡谷晨雾均已下线，勿再验收） `build.mjs` **通过**；真机 3D 壁纸跑通（02:45）；真机宠物跟随壁纸 **通过**（17:01 自动轮换实跑：`dbg fx=weather/black-hole n=0`）；设置页预览 3D→2D 宠物残留修复 17:30 浏览器实测**通过**（`#pvPetCv` 移除、`#pvPets` 清空、状态行跟随）；新增两款主题在 harness 逐帧目检通过（天堂 14.3 ms / 地狱 9.2 ms），**真机切换与宠物跟随待人工验收**；`verify.mjs` 上次通过于 02:06（本次未跑） |
 | WebView2 缓存（真机实测） | 新构建全新 profile 6 分钟后 **11.7 MB**（旧 profile 72.5 MB，降 84%） |
-| git HEAD | （提交前）逐字复刻流星壁纸星星与流星 待提交 2026-11-23 |
+| git HEAD | （提交前）painter 字符串色真根因修复 待提交 2026-11-23 |
 
 ## 正在进行的改动（在飞）
 
@@ -24,7 +24,8 @@
 
 ## 最近 3 条
 
-1. 2026-11-23 00:41 · ZCode · **逐字复刻流星壁纸**：meteors.js 调度/调色板整个换回 shooting-stars 原版（7 颗参数逐字保留）；heaven 星空删自造档位、逐字复刻其 130 颗星循环（唯一改动=星色调亮——原版紫灰星在天堂亮银河带上是暗斑）。云海/月亮未动。真机待人工
+1. 2026-11-23 03:15 · ZCode · **引擎级真根因：painter 不收字符串颜色**——meteors.js 把 "#rrggbb" 字符串直接传 q.dot/px/glow → 全画成黑（黑色拖尾/看不见）；原版场景过 fit() 打包所以没事。修=LIST 后统一 m.C.map(hex)；另修 heaven origin y=170 vs 流星表 180 的 10px 裁切（drawMeteors 加 dy 参数，heaven 传 +10）；星星 130→300。**多轮无效修复的教训：换色系/换档位都不如先查颜色格式；"rift 流星可见"是粉色伤口误报**。harness 目检（_h18 fresh）流星金头彩尾确认。真机待人工
+2. 2026-11-23 00:41 · ZCode · **逐字复刻流星壁纸**：meteors.js 调度/调色板整个换回 shooting-stars 原版（7 颗参数逐字保留）；heaven 星空删自造档位、逐字复刻其 130 颗星循环（唯一改动=星色调亮——原版紫灰星在天堂亮银河带上是暗斑）。云海/月亮未动。真机待人工
 2. 2026-11-23 00:27 · ZCode · **流星黑烟修复（6 色 ramp）+ 星星精确档位**：黑烟根因=流星配色只给 4 色而工艺用 C[4]→undefined 画成黑；全换 shooting-stars 原版式 6 色 ramp（5 色系）。星星按用户精确档位：tier0 单方块 3 亮度阶梯 / tier1 十字 5 块中心恒亮臂 3 阶 / tier2 十字 9 块阶梯外扩波。过程切坏 heaven（drawBack/draw 丢失，verify 抓到）git 恢复后用唯一锚点重做——**大段替换别拿首次出现字符串当切割点**。真机待人工
 2. 2026-11-22 23:39 · ZCode · **星星档位可见化 + 共享流星系统 + 1.0.2.8**：heaven 星星亮星改 q.circle 圆盘、颜色只压 0.3 保留蓝紫/暖调、闪烁除 1.6 放慢；新共享模块 src/fx/meteors.js（shooting-stars 工艺移植+循环分数调度，8 颗/循环全不同）接入 heaven/rift/otherworld-rift。verify 抓到两处接线错误（rift draw 无 q、otherworld import 漏挂）。像素采样+目检通过；MSIX 1.0.2.8 已产出。真机待人工
 2. 2026-11-22 23:20 · ZCode · **sandstorm 风线补刀 + heaven 星空按流星壁纸工艺重做**：上轮漏了 _tornado wind() 全屏线条（加 noWind）；落沙加量；heaven 星表量化分层（3 大小/5 亮度/5 闪烁频率/蓝紫色偏，1390→460 颗，亮度走 q.dot alpha——q.px 实心会压平分层像下雪）；银河 granulation/bloom 减半（白茫主因）。**重大教训：out/_harness.bundle.js 是旧产物，上轮 rift 目检渲染的是缓存旧代码；harness 目检必须重建 bundle+唯一文件名防缓存（本次用 _h2/_h3 重验通过）**。真机待人工
