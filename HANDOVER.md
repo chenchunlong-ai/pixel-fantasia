@@ -38,6 +38,7 @@ git diff --stat
 
 ## 2. 现在在哪（2026-11-21 15:29）
 
+- **2026-11-23 四**：**WACK 通过**——1.0.2.8 msix 24/24 全 PASS、OVERALL PASS（appcert 需管理员权限，用 Start-Process -Verb RunAs + cmd 重定向跑的，报告 out/_wack_result/report.xml）。商店提交就绪：上传 msix + What's new + 许可条款改 GPL-3.0
 - **2026-11-23 三**：**引擎级根因=painter 只收 hex() 打包数值色，字符串渲染成黑**——meteors.js 全部颜色 m.C.map(hex)；drawMeteors 加 dy（heaven origin 170 vs 流星表 180 的裁切）；heaven 星 130→300。多轮无效修复（换色/换档/复刻）皆因没查颜色格式
 - **2026-11-23 二**：heaven 星空/流星逐字复刻 shooting-stars（用户点名"直接抄"）：meteors.js 换原版 7 颗参数+原版 6 色 ramp；heaven 星空=其 130 颗星循环逐字拷贝（星色调亮适配亮银河带，加 HZ-14 守卫）。云海/月亮未动
 - **2026-11-23**：流星黑烟根因=配色数组缺 C[4]（工艺代码用到）→undefined 画成黑；全换 6 色 ramp。星星按用户精确档位重做（1 块 3 阶 / 十字 5 块臂 3 阶 / 十字 9 块外扩波）。**教训：大段索引替换切坏过 heaven（drawBack/draw 丢失），verify 抓到后 git 恢复+唯一锚点重做**
@@ -50,7 +51,6 @@ git diff --stat
 
 ## 3. 未完成 / 未验证
 
-- [ ] **WACK 未重跑**（1.0.2.1 商店提交前建议补跑一次）
 - [ ] 真机验收：预装壁纸出现在"本地壁纸"组、删除后重启不复活、花瓣阴影、下拉分组顺序
 - [ ] 真机验收（遗留）：预览即时显示、窗口 1600×1000、锦鲤/鱼食/逃跑手感、改名弹窗、桌面点击双环、调参滑杆
 - [ ] 旧验收项与 8 语言缺 46 键待办见 `collab\STATE.md`

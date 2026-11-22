@@ -10,6 +10,7 @@
 | 版本（`version.mjs` 唯一源） | **`1.0.2.8`（2026-11-22 起，未提交商店）** |
 | 下一次发行版本 | `1.0.2.1` 就是本次发行 |
 | 构建产物（2026-11-21 15:25 重建） | `PixelPalette.exe` 591 KB / `PixelPalette-Setup.exe` 921 KB / `4A5AB34E.62945D70D0F14_1.0.2.8_x64.msix` 0.8 MB |
+| WACK（2026-11-23） | **1.0.2.8 msix 24/24 全 PASS，OVERALL PASS**（报告 out/_wack_result/report.xml） |
 | 验证状态 |（地狱/2D雏菊水塘/峡谷晨雾均已下线，勿再验收） `build.mjs` **通过**；真机 3D 壁纸跑通（02:45）；真机宠物跟随壁纸 **通过**（17:01 自动轮换实跑：`dbg fx=weather/black-hole n=0`）；设置页预览 3D→2D 宠物残留修复 17:30 浏览器实测**通过**（`#pvPetCv` 移除、`#pvPets` 清空、状态行跟随）；新增两款主题在 harness 逐帧目检通过（天堂 14.3 ms / 地狱 9.2 ms），**真机切换与宠物跟随待人工验收**；`verify.mjs` 上次通过于 02:06（本次未跑） |
 | WebView2 缓存（真机实测） | 新构建全新 profile 6 分钟后 **11.7 MB**（旧 profile 72.5 MB，降 84%） |
 | git HEAD | （提交前）painter 字符串色真根因修复 待提交 2026-11-23 |
