@@ -5,7 +5,7 @@
 // crosses it as a spine with a bright core, dust lanes and a fine grain of stars, a crescent moon hangs clear of
 // it, and the cloud sea below is moonlit silver at the back and deepening to navy at the bottom, with the first
 // light of dawn still burning along the horizon underneath.
-import { clamp, fit, rand, hex, smooth, TAU, mix } from "../../../src/core/index.js";
+import { clamp, fit, rand, hex, smooth, TAU, mix, WHITE, sparkle } from "../../../src/core/index.js";
 import { clip, rows, field, sample } from "../../../src/fx/weather/_lib.js";
 import { drawMeteors } from "./meteors.js";
 
@@ -31,6 +31,10 @@ const BLACK = hex("#02040a");
 const GLOWPALE = hex("#ffeed4");    // the dawn still burning under the cloud sea
 const MOON = hex("#f4f2ea");
 const MW_CORE = hex("#eff1ff");
+// the shooting-stars scene's star colours, verbatim (K[3] soft violet, K[4] near white)
+// heaven's Milky Way band is BRIGHT, so the copied star colours were lightened: on the
+// original's dark sky the violet greys read as light points, here they read as dark flecks
+const STARCOL = ["#1c1c38", "#32325a", "#5c5c94", "#e8e8ff", "#ffffff"];
 const MW_EDGE = hex("#9199e0");
 const DUST = hex("#070c1c");
 const q2 = (p) => clip(p, meta);
@@ -43,46 +47,9 @@ const F2 = field(53, 160, 96, [2, 4, 8, 16]);     // fine grain
 // stars are decided once, not per frame: a fixed sky is what makes it read as a sky and not as static.
 // Most of them lie along the band — that is what the Milky Way actually is at this scale, a river of stars —
 // with a thinner scatter everywhere else and the odd bright one with a glint.
-const STARS = [];
-{
-  // tiers are quantised at build time (user's spec): 3 sizes, 5 brightness levels, 5 twinkle
-  // frequencies, and a slight blue/violet tint on roughly a third of the stars — the craft is
-  // the shooting-stars scene's: dim dots, plain px, px+glow, and a rare cross-glint
-  const tier = (r) => (r < 0.6 ? 0 : r < 0.9 ? 1 : 2);   // user's spec: 1-block / 5-block plus / 9-block plus
-  const tint = (r) => (r < 0.2 ? "#b9c8ff" : r < 0.35 ? "#c4b8ff" : "#dfe6ff");   // a little blue/violet
-  const push = (x, y, near, rr, ri) => {
-    if (y < -169 || y > HZ - 20) return;
-    const m = starMag(near, rr);
-    STARS.push({
-      x: Math.round(x), y: Math.round(y),
-      b: 0.35 + 0.275 * Math.floor(Math.min(1, m) * 2.999),             // 3 brightness steps
-      tier: tier(rand(801, ri, 9)),
-      w: (1 + Math.floor(rand(801, ri, 5) * 4.999)) / 1.6,              // 5 twinkle frequencies, slowed
-      p: rand(801, ri, 6) * TAU,
-      col: tint(rand(801, ri, 10)),
-    });
-  };
-  for (let i = 0; i < 340; i++) {
-    const x = -160 + rand(801, i, 1) * 320;
-    const u = rand(801, i, 2) - 0.5;
-    // two thirds hug the spine within +-26 px, the rest fan out to +-55
-    const spread = rand(801, i, 8) < 0.66 ? 26 : 55;
-    const y = spineX(x) + u * 2 * spread * (1 + 0.12 * Math.sin(x * 0.05));
-    push(x, y, 1 - Math.min(1, Math.abs(y - spineX(x)) / 40), rand(801, i, 4), i);
-  }
-  for (let i = 0; i < 120; i++) {
-    const x = -160 + rand(861, i, 1) * 320;
-    const y = -169 + rand(861, i, 2) * 121;
-    if (Math.abs(y - spineX(x)) < 34) continue;
-    push(x, y, 0.15, rand(861, i, 3), 1000 + i);
-  }
-}
-
-// brighter the closer a star sits to the spine; hoisted so the table above can call it
-function starMag(near, r) {
-  const base = 0.18 + 0.55 * near + r * 0.35;
-  return base > 1 ? 1 : base;
-}
+// the shooting-stars scene's star field, verbatim: 130 stars in three visual kinds — dim
+// dots, plain pixels (some with a soft halo), and the rare cross-glint sparkle — twinkling on
+// four different frequencies (user: copy the meteor wallpaper's stars exactly)
 const MOONX = 96, MOONY = -137, MOONR = 7;
 const SKYROWS = Y1 - Y0 + 1;
 let SKYC = null, SKYK = null, SKYL = null, SKYREADY = false, SKYKEY = "";
@@ -142,7 +109,7 @@ export function drawBack(p, t, o) {
   SKYREADY = true;
   SKYKEY = NL.join();
   dawn(q, NL);
-  milkyStars(q, ph, NL);
+  milkyStars(q, t, NL);
   moon(q, ph);
   sea(q, t, ph, NL, dn);
   far(q, t, ph, NL, dn);
@@ -187,32 +154,16 @@ function milky(R, i, x, y, ph) {
   }
 }
 // the grain: fixed stars, each on its own slow twinkle, a handful with a four-pixel glint
-function milkyStars(q, ph, NL) {
-  for (let i = 0; i < STARS.length; i++) {
-    const S = STARS[i];
-    const col = hex(S.col);
-    // the twinkle step: a slow counter driven by the star's own frequency (integer 1..5 / 1.6)
-    const step = Math.floor(ph * S.w + S.p) % 3;
-    if (S.tier === 0) {
-      // ONE block, its brightness stepping through 3 levels
-      const a = [0.3, 0.55, 0.85][step] * S.b * 2.2;
-      q.dot(S.x, S.y, col, Math.min(1, a));
-    } else if (S.tier === 1) {
-      // the 5-block plus-star: centre constant, the 4 arms step dim->bright (3 levels)
-      q.px(S.x, S.y, col);
-      const a = [0.22, 0.5, 0.85][step];
-      q.dot(S.x - 1, S.y, col, a); q.dot(S.x + 1, S.y, col, a);
-      q.dot(S.x, S.y - 1, col, a); q.dot(S.x, S.y + 1, col, a);
-    } else {
-      // the 9-block plus-star: the step travels OUTWARD - the inner pair and then the outer
-      // pair brighten in turn, so the shimmer reads as a wave leaving the centre
-      q.px(S.x, S.y, col);
-      const s1 = [0.3, 0.6, 0.9][step], s2 = [0.3, 0.6, 0.9][(step + 1) % 3];
-      q.dot(S.x - 1, S.y, col, s1); q.dot(S.x + 1, S.y, col, s1);
-      q.dot(S.x, S.y - 1, col, s1); q.dot(S.x, S.y + 1, col, s1);
-      q.dot(S.x - 2, S.y, col, s2 * 0.9); q.dot(S.x + 2, S.y, col, s2 * 0.9);
-      q.dot(S.x, S.y - 2, col, s2 * 0.9); q.dot(S.x, S.y + 2, col, s2 * 0.9);
-    }
+function milkyStars(q, t, NL) {
+  const S = 71, D = 16, K = STARCOL;
+  // the shooting-stars star loop, verbatim
+  for (let i = 0; i < 130; i++) {
+    const x = -160 + rand(S, i, 1) * 320, y = -180 + rand(S, i, 2) * 178, r = rand(S, i, 3), c = 1 + Math.floor(rand(S, i, 4) * 4);
+    if (y > HZ - 14) continue;                       // heaven-only guard: stars stay above the cloud sea
+    const tw = 0.5 + 0.5 * Math.sin((TAU * c * t) / D + rand(S, i, 5) * TAU);
+    if (r < 0.6) q.dot(x, y, K[3], 0.35 + 0.5 * tw);
+    else if (r < 0.94) (q.px(x, y, r < 0.8 ? K[4] : WHITE), q.glow(x + 0.5, y + 0.5, 3, K[3], 0.22 * tw));
+    else sparkle(q, x, y, 1 + Math.round(tw * 2), K[4], K[3], 0.3 * tw);
   }
 }
 

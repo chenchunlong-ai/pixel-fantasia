@@ -9,15 +9,17 @@ const TRAIN = 1.6;
 // every meteor carries a FULL 6-colour ramp like the shooting-stars original (dark sheath, mid,
 // bright, warm accent, pale highlight, white core): the craft reads C[1..4] everywhere, and a
 // short palette left C[4] undefined — which the painter drew BLACK (the "crash smoke" bug).
+// the ORIGINAL shooting-stars schedule and palette, verbatim (t0 converted from the
+// original /10 loop to a loop fraction): user asked for a straight copy
+const C0 = ["#3a1e5a", "#7a3a8a", "#e0607a", "#ffa86a", "#ffe6a8", "#ffffff"];
 const LIST = [
-  { t0: 0.06, x: 60, y: -170, a: 2.45, v: 260, life: 0.55, s: 0.6, C: ["#4a2a10", "#a8682a", "#ffb060", "#ffd9a0", "#ffeec8", "#ffffff"] },
-  { t0: 0.14, x: -40, y: -176, a: 2.2, v: 220, life: 0.7, s: 0.8, C: ["#4a1030", "#a83a6a", "#ff7ab8", "#ffc4e8", "#ffe0f0", "#ffffff"] },
-  { t0: 0.22, x: 150, y: -150, a: 2.62, v: 300, life: 0.45, s: 0.5, C: ["#10204a", "#3a5aa8", "#6a9aff", "#a8ccff", "#d8ecff", "#ffffff"] },
-  { t0: 0.3, x: 130, y: -178, a: 2.35, v: 240, life: 1.05, s: 1.4, flare: true, C: ["#4a1a0a", "#a85a1a", "#ffc46a", "#ffe6a8", "#fff2cc", "#ffffff"] },
-  { t0: 0.42, x: -90, y: -168, a: 2.05, v: 200, life: 0.6, s: 0.7, C: ["#10204a", "#3a5aa8", "#6a9aff", "#a8ccff", "#d8ecff", "#ffffff"] },
-  { t0: 0.55, x: 20, y: -160, a: 2.5, v: 280, life: 0.5, s: 0.6, C: ["#4a2a10", "#a8682a", "#ffb060", "#ffd9a0", "#ffeec8", "#ffffff"] },
-  { t0: 0.66, x: -10, y: -176, a: 2.28, v: 230, life: 0.8, s: 1.0, flare: true, C: ["#2a104a", "#6a3aa8", "#a86aff", "#c89aff", "#e8d0ff", "#ffffff"] },
-  { t0: 0.8, x: 100, y: -174, a: 2.15, v: 250, life: 0.65, s: 0.75, C: ["#4a1030", "#a83a6a", "#ff7ab8", "#ffc4e8", "#ffe0f0", "#ffffff"] },
+  { t0: 0.05, x: 60, y: -170, a: 2.45, v: 260, life: 0.55, s: 0.6, C: C0 },
+  { t0: 0.19, x: -40, y: -176, a: 2.2, v: 220, life: 0.7, s: 0.8, C: C0 },
+  { t0: 0.34, x: 150, y: -150, a: 2.62, v: 300, life: 0.45, s: 0.5, C: C0 },
+  { t0: 0.46, x: 130, y: -178, a: 2.35, v: 240, life: 1.05, s: 1.4, flare: true, C: C0 },
+  { t0: 0.67, x: -90, y: -168, a: 2.05, v: 200, life: 0.6, s: 0.7, C: C0 },
+  { t0: 0.79, x: 20, y: -160, a: 2.5, v: 280, life: 0.5, s: 0.6, C: C0 },
+  { t0: 0.92, x: -10, y: -176, a: 2.28, v: 230, life: 0.8, s: 1.0, flare: true, C: C0 },
 ];
 
 /** draw all meteors onto q; t is the scene clock, D the scene's loop duration, seed varies per scene */

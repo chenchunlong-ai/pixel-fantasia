@@ -38,6 +38,7 @@ git diff --stat
 
 ## 2. 现在在哪（2026-11-21 15:29）
 
+- **2026-11-23 二**：heaven 星空/流星逐字复刻 shooting-stars（用户点名"直接抄"）：meteors.js 换原版 7 颗参数+原版 6 色 ramp；heaven 星空=其 130 颗星循环逐字拷贝（星色调亮适配亮银河带，加 HZ-14 守卫）。云海/月亮未动
 - **2026-11-23**：流星黑烟根因=配色数组缺 C[4]（工艺代码用到）→undefined 画成黑；全换 6 色 ramp。星星按用户精确档位重做（1 块 3 阶 / 十字 5 块臂 3 阶 / 十字 9 块外扩波）。**教训：大段索引替换切坏过 heaven（drawBack/draw 丢失），verify 抓到后 git 恢复+唯一锚点重做**
 - **2026-11-22 深夜二**：新共享模块 `src/fx/meteors.js`（流星系统，shooting-stars 工艺移植+循环分数调度，8 颗/循环全不同）接入 heaven/rift/otherworld-rift；heaven 星星亮星改 q.circle 圆盘、色调保留、闪烁放慢。版本 1.0.2.8，MSIX 已产出。**教训：harness 目检必须 fresh bundle+唯一文件名（见 23:20 journal）**
 - **2026-11-22 深夜**：sandstorm 飞线补刀（_tornado wind() 加 noWind，上轮漏网）+落沙加量；heaven 星空按流星壁纸工艺重做（3 大小/5 亮度/5 闪烁频率档 + 蓝紫色偏 + 460 颗 + 亮度走 q.dot alpha）+银河 bloom/granulation 减半。**教训：out/_harness.bundle.js 会过期，目检前必须重建并用唯一文件名防浏览器缓存（_h2/_h3 方式）**
