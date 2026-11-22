@@ -18,6 +18,8 @@ namespace PixelFX
         public SettingsWindow()
         {
             Text = Lang.T("settingsTitle");
+            // the title bar must carry the app icon (the embedded exe icon), not the WinForms default
+            try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch { }
             StartPosition = FormStartPosition.CenterScreen;
             Size = new Size(1600, 1000);
             MinimumSize = new Size(820, 620);
