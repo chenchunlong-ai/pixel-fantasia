@@ -12,8 +12,8 @@
 
 ## 开源合规（可上架的依据）
 
-- 引擎 [patch-gg/pixelfx](https://github.com/patch-gg/pixelfx)（作者 Patch，5.8k star）是 **MIT 协议**，官方明确 "code and effects, use them in anything, commercial included"——商用上架没有问题；
-- MIT 的义务是**分发时随附版权与许可声明**：安装包和 MSIX 内已带 `LICENSE`、`NOTICE.md`、`OPEN-SOURCE-NOTICES.txt`（build.mjs 自动打包）；
+- 引擎 [patch-gg/pixelfx](https://github.com/patch-gg/pixelfx)（作者 Patch，5.8k star）是 **MIT 协议**，官方明确 "code and effects, use them in anything, commercial included"；MIT 代码可并入 GPL-3.0 项目（上游署名随附 NOTICE.md 保留），商用上架没有问题；
+- 本仓库整体按 **GPL-3.0** 发行：分发时随附许可声明，安装包和 MSIX 内已带 `LICENSE`、`NOTICE.md`、`OPEN-SOURCE-NOTICES.txt`（build.mjs 自动打包）；
 - 其中两个特效改编自 Hugo Duprez 的 MIT 素材（NOTICE.md 已注明）；Patch Pixel 字体**本应用未使用**，其"不随 MIT 分发"的例外不涉及。
 
 ## 与第一个壁纸软件（desktop/）的关系

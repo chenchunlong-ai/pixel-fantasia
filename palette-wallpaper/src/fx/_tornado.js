@@ -320,7 +320,7 @@ export function makeTornado(TH) {
       wind(q, t, S, TH, 0);
       TH.fall && TH.fall(p, q, t, S, 0);
       TH.ground(p, q, t, S);
-      strikes(q, t, S, TH, g);
+      if (!TH.noBolt) strikes(q, t, S, TH, g);   // noBolt: themes that must not carry lightning (the sandstorm)
       if (!TH.noFunnel) p.glow(g.ax(0), -2, 30, TH.footGlow, 0.12);
     },
     draw(p, t, o) {

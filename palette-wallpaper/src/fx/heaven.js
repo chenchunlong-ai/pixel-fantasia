@@ -44,7 +44,7 @@ const F2 = field(53, 160, 96, [2, 4, 8, 16]);     // fine grain
 // with a thinner scatter everywhere else and the odd bright one with a glint.
 const STARS = [];
 {
-  for (let i = 0; i < 1500; i++) {
+  for (let i = 0; i < 1050; i++) {
     const x = -160 + rand(801, i, 1) * 320;
     const u = rand(801, i, 2) - 0.5;
     // two thirds hug the spine within +-26 px, the rest fan out to +-55
@@ -82,12 +82,12 @@ export function drawBack(p, t, o) {
   const ph = (TAU * t) / D;
   // seven flat bands, each a little lighter than the one above; the last two are warmed by the dawn below
   const SKY = [
-    mix(NL[0], BLACK, 0.55),
-    NL[0],
-    mix(NL[0], NL[1], 0.8),
-    NL[1],
-    mix(NL[1], NL[2], 0.75),
-    NL[2],
+    BLACK,                        // the top is pure black now (user: the old navy bands were too bright)
+    mix(BLACK, NL[0], 0.28),
+    mix(BLACK, NL[0], 0.55),
+    mix(NL[0], NL[1], 0.55),
+    mix(NL[1], NL[2], 0.6),
+    mix(NL[2], BLACK, 0.3),
     mix(NL[2], NL[3], 0.7),
   ];
   // The sky never changes — only the stars twinkle and the clouds drift — so it is painted once and then copied.
@@ -158,10 +158,10 @@ function milky(R, i, x, y, ph) {
   const veil = clamp(1 - d / 96, 0, 1);
   const arm = clamp(1 - d / (44 + 10 * nz), 0, 1);
   const core = clamp(1 - d / (15 + 9 * nz), 0, 1);
-  R.c[i] = mix(R.c[i], mix(MW_EDGE, MW_CORE, 0.2), veil * veil * 0.09);
-  R.c[i] = mix(R.c[i], mix(MW_EDGE, MW_CORE, 0.45), arm * arm * 0.22);
+  R.c[i] = mix(R.c[i], mix(MW_EDGE, MW_CORE, 0.2), veil * veil * 0.05);
+  R.c[i] = mix(R.c[i], mix(MW_EDGE, MW_CORE, 0.45), arm * arm * 0.12);
   if (core > 0) {
-    R.c[i] = mix(R.c[i], MW_CORE, core * knot * 0.8);
+    R.c[i] = mix(R.c[i], MW_CORE, core * knot * 0.45);
     // the dust lane: a narrow dark rift offset from the spine, wandering as it goes
     const off = 13 + 9 * Math.sin(x * 0.021 + 0.7) + 5 * Math.sin(x * 0.068 + 2);
     const lane = clamp(1 - Math.abs(d - off) / 3.6, 0, 1) * (0.55 + 0.45 * Math.sin(x * 0.14 + 1.4));
@@ -171,7 +171,7 @@ function milky(R, i, x, y, ph) {
     // granulation: single-pixel flecks of light inside the band, so the glow has grain instead of reading as haze
     const hx = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
     const f = hx - Math.floor(hx);
-    if (f > 0.72) R.c[i] = mix(R.c[i], MW_CORE, 0.1 + 0.22 * nz);
+    if (f > 0.72) R.c[i] = mix(R.c[i], MW_CORE, 0.05 + 0.12 * nz);
     R.k[i] = 0.1 * core * knot;
     R.l[i] = MW_CORE;
   }
@@ -267,7 +267,7 @@ function far(q, t, ph, NL, dn) {
   const n = Math.round(11 * Math.min(1.6, dn));
   for (let k = 0; k < n; k++) {
     const R = (j) => rand(91, k, j);
-    const cx = -150 + R(1) * 300 + 9 * (t / D) + 6 * Math.sin(ph + k);
+    const cx = -150 + R(1) * 300 + 7 * Math.sin(ph + k * 1.3);   // was 9*(t/D): raw t jumped 9px at the loop wrap (the '卡一下')
     const cy = -104 + R(2) * 42;
     const r = 3 + R(3) * 6;
     const w = r * 2.6;

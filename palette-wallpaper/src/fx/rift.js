@@ -12,7 +12,7 @@ import { clip, rows, field, sample, trips, wave, tree } from "../../../src/fx/we
 
 export const meta = {
   name: "Spacetime rift",
-  desc: "The sky is torn open: a ragged crack runs corner to corner, bulging and pinching like a wound that will not hold. Cold electric-violet gas churns inside it, cut by lanes of deep black, ringed by a near-black lip and a burning rim. Every second or so the wound detonates: light bursts outward — rays, sparks and chips fly off the lip, a flattened ring races out — then everything falls back into the dark.",
+  desc: "The sky is torn open: a ragged crack runs corner to corner, bulging and pinching like a wound that will not hold. Cold electric-violet gas churns inside it, cut by lanes of deep black, ringed by a near-black lip and a burning rim. Every second or so the wound detonates in storm-style lightning — a strike out through the lip, a fork burst, or an arc leaping along the tear — while rays, sparks and chips fly off the lip and a flattened ring races out.",
   tags: ["weather", "scene", "rift", "nebula", "space", "stars", "violet", "blue", "energy", "discharge", "ambient", "loop"],
   size: [320, 180],
   origin: [160, 170],
@@ -267,9 +267,52 @@ function energy(p, t, o, NL) {
     const hw = edge(u);
     const [cx, cy] = at(u, 0);
 
-    // (the lightning bolts are gone by user request — the discharge survives as light,
-    // not as strikes: rays, sparks, chips, lip flares and the shock ring below)
+    // the lightning is back (user), redone in the storm's craft: a three-pass stroke — dark
+    // sheath, pale body, white-hot core — with three styles picked per discharge event
     const [ox, oy] = at(u, (rand(313, i, 7) - 0.5) * hw * 0.35);
+    const V = [HALO, mix(HALO, ICE, 0.5), ICE, mix(ICE, ARC, 0.6), ARC, "#ffffff"];
+    const stroke = (paths) => {
+      for (const pass of [0, 1, 2])
+        for (const path of paths) {
+          const trunk = path.w >= 1;
+          if (!trunk && (a < 0.4 || (pass === 0 && path.w < 0.5))) continue;
+          for (let k2 = 0; k2 < path.pts.length - 1; k2++) {
+            const [ax, ay] = path.pts[k2], [bx, by] = path.pts[k2 + 1];
+            const l = Math.max(1, Math.hypot(bx - ax, by - ay));
+            for (let d = 0; d <= l; d += 0.5) {
+              const X = ax + ((bx - ax) * d) / l, Y = ay + ((by - ay) * d) / l;
+              if (pass === 0) q.circle(X, Y, trunk ? 1.8 : 1.1, a > 0.6 ? V[2] : V[1]);
+              else if (pass === 1) q.circle(X, Y, trunk ? 1.1 : 0.6, trunk ? V[4] : V[3]);
+              else if (trunk) { q.px(X, Y, a > 0.7 ? "#ffffff" : V[4]); if (a > 0.85) q.px(X + 1, Y, "#ffffff"); }
+              else if (path.w > 0.4 && a > 0.6) q.px(X, Y, V[4]);
+            }
+            if (pass === 0 && k2 % 3 === 0) q.glow(ax, ay, trunk ? 12 : 6, V[3], (trunk ? 0.4 : 0.25) * a * path.w);
+          }
+        }
+    };
+    const style = rand(313, i, 8);
+    if (style < 0.45) {
+      // style 1 — strike out: a trunk from inside the wound, across the lip, into open space
+      const side = rand(317, i, 1) < 0.5 ? -1 : 1;
+      const reach = hw * 3 + 40 + rand(317, i, 3) * 55;
+      const [tx, ty] = at(u + (rand(317, i, 5) - 0.5) * 0.1, side * reach);
+      stroke(tree(new Rng(321 + i * 23), ox, oy, tx, ty, 0.26, 0.18));
+      const pf = 0.3 + rand(317, i, 6) * 0.4;
+      const [fx2, fy2] = at(u + (rand(317, i, 7) - 0.5) * 0.06, side * reach * pf);
+      stroke(tree(new Rng(329 + i * 11), ox, oy, fx2, fy2, 0.3, 0.3));
+    } else if (style < 0.75) {
+      // style 2 — fork burst: three short bolts bursting sideways off one point on the spine
+      for (let b = 0; b < 3; b++) {
+        const side = b % 2 ? 1 : -1;
+        const reach = hw * 1.6 + 14 + rand(317, i, b + 2) * 30;
+        const [tx, ty] = at(u + (rand(317, i, b + 5) - 0.5) * 0.12, side * reach);
+        stroke(tree(new Rng(321 + i * 23 + b * 7), ox, oy, tx, ty, 0.3, 0.25));
+      }
+    } else {
+      // style 3 — along-spine arc: energy jumping along the tear, hugging the centre line
+      const ua = u + (rand(341, i, 1) - 0.5) * 0.16, ub = ua + (rand(341, i, 2) - 0.5) * 0.18;
+      stroke(tree(new Rng(351 + i * 13), ...at(ua, (rand(341, i, 3) - 0.5) * hw * 0.3), ...at(ub, (rand(341, i, 4) - 0.5) * hw * 0.3), 0.4, 0.25));
+    }
     q.glow(ox, oy, 8, HALO, 0.5 * a);
     q.glow(ox, oy, 3, ARC, 0.42 * a);
 

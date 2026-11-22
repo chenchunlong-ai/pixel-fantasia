@@ -8,7 +8,7 @@
 
 *Lightweight pixel-art live wallpapers · one-click recolor · desktop pets · open container*
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-blue)](https://github.com/chenchunlong-ai/pixel-fantasia/releases)
 [![Size](https://img.shields.io/badge/installer%20%3C%201%20MB-green)](https://github.com/chenchunlong-ai/pixel-fantasia/releases)
 
@@ -81,5 +81,5 @@ npx http-server -p 8080 -c-1
 
 ## 📄 许可
 
-[MIT](LICENSE) — 引擎部分 Copyright (c) 2026 Patch，部分特效改编自 Hugo Duprez 的开源素材，
+[GPL-3.0](LICENSE) — 引擎部分 Copyright (c) 2026 Patch，部分特效改编自 Hugo Duprez 的开源素材，
 第三方声明见 [NOTICE.md](NOTICE.md)。

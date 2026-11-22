@@ -1,14 +1,15 @@
 // 沙尘暴：a sandstorm on the tornado framework with the funnel taken out — a black sky, the
 // storm deck pressing down, and the sand itself carrying the scene: dust banks rolling across
-// the plain, sand streaks ripping past, grains hopping off the ground, and a rare bolt through
-// the dust. Own copy for the palette wallpaper, built on ./_tornado.js (noFunnel mode).
+// the plain, grains hopping off the ground, banks rolling and sand sifting down — no bolts,
+// the dust, no straight lines, no swirl rings (user: they read as scratches and circles, not sand).
+// Own copy for the palette wallpaper, built on ./_tornado.js (noFunnel + noBolt mode).
 import { cycle, rand, TAU, hex } from "../../../src/core/index.js";
 import { clip, rows, trips } from "../../../src/fx/weather/_lib.js";
 import { setMeta, makeTornado } from "./_tornado.js";
 
 export const meta = {
   name: "Sandstorm",
-  desc: "A sandstorm under a black sky: dust banks roll across the plain, sand streaks rip past and grains hop off the ground as the storm deck churns overhead.",
+  desc: "A sandstorm under a black sky: dust banks roll across the plain, sand sifts down and grains hop off the ground as the storm deck churns overhead.",
   tags: ["weather", "sandstorm", "desert", "sand", "wind", "storm", "ambient", "loop"],
   size: [320, 180],
   origin: [160, 170],
@@ -27,7 +28,8 @@ const SAND = ["#3e301c", "#6e5232", "#a87c46", "#d8a860", "#f0d096"].map(hex);
 
 const TH = {
   D, FH, C, Dst,
-  noFunnel: true, // the storm, not a funnel: the framework draws deck, wind, strikes and hooks only
+  noFunnel: true, // the storm, not a funnel: the framework draws deck, wind and hooks only
+  noBolt: true,   // user: no lightning in the sandstorm
   bolt: "#e8d8a8", boltHot: "#ffffff", footGlow: hex("#a8906c"),
   sky(p) {
     // pure black — the lit deck and the flying sand carry the frame
@@ -51,15 +53,6 @@ const TH = {
       q.dot(x, y, SAND[1 + Math.floor(R.range(0, 3))], (1 - k) * 0.9);
     });
   },
-  groundFront(p, q, t, S) {
-    // near-ground sand skimming across the frame: grains in a short trail, no straight lines
-    trips(t, D, Math.round(22 * DEN), S * 31, 3, 5, (u, k, m, i) => {
-      const j = ((k % m) + m) % m, R = (n) => rand(S * 37, i, j, n);
-      const y = -2 - R(1) * 26, x = -180 + 380 * u;
-      for (let g = 0; g < 4; g++) q.dot(x - g * 3 - R(2) * 2, y + Math.sin(g * 1.7 + R(3) * 6) * 1.5, SAND[2 + Math.floor(R(3) * 2)], 0.7 - g * 0.15);
-      if (R(4) < 0.3) q.glow(x, y, 3, SAND[3], 0.1);
-    });
-  },
   fall(p, q, t, S, near) {
     // sand sifting down out of the deck everywhere, thicker near the ground
     const sd = S * 47 + near;
@@ -80,25 +73,6 @@ const TH = {
       q.disc(x, y, rx, Dst[back ? 1 : 2], a * 0.8);
       q.disc(x + rx * 0.3, y - ry * 0.4, rx * 0.6, Dst[back ? 2 : 3], a * 0.6);
       if (!back) q.disc(x - rx * 0.2, y - ry * 0.5, rx * 0.4, Dst[4], a * 0.4);
-    });
-    // airborne sand: drifting grain trails instead of straight streaks (user: the straight
-    // lines read as scratches, not sand) — far ones sparse and faint, near ones denser
-    trips(t, D, Math.round((back ? 34 : 20) * DEN), S * 29 + (back ? 0 : 1), 3, 5, (u, k, m, i) => {
-      const j = ((k % m) + m) % m, R = (n) => rand(S * 41 + (back ? 0 : 1), i, j, n);
-      const y = -8 - R(1) * (back ? 110 : 70), x = -190 + 400 * u;
-      const c = back ? SAND[1] : SAND[2 + Math.floor(R(3) * 2)];
-      for (let g = 0; g < 5; g++)
-        q.dot(x - g * (back ? 2.5 : 4) - R(2) * 3, y + Math.sin(g * 2.1 + R(3) * 6) * 2, c, (back ? 0.4 : 0.7) * (1 - g * 0.17));
-      if (!back && R(4) < 0.25) q.px(x, y, SAND[4]);
-    });
-    // gust swirls: little eddies of sand curling through the air
-    cycle(t, D, Math.round(8 * DEN), S * 53 + (back ? 0 : 1), (r) => r.range(0.25, 0.4), (age, life, R) => {
-      const k = age / life, x0 = -140 + R.range(0, 300), y0 = -20 - R.range(0, 60);
-      for (let j = 0; j < 9; j++) {
-        const th = (j / 9) * TAU + age * 9 + R.range(0, 1);
-        const rr = 3 + k * (8 + R.range(0, 8));
-        q.dot(x0 + Math.cos(th) * rr, y0 + Math.sin(th) * rr * 0.6 + k * 6, SAND[back ? 1 : 2], Math.sin(Math.PI * k) * 0.7);
-      }
     });
   },
 };

@@ -12,7 +12,7 @@
 | 构建产物（2026-11-21 15:25 重建） | `PixelPalette.exe` 591 KB / `PixelPalette-Setup.exe` 921 KB / `4A5AB34E.62945D70D0F14_1.0.2.1_x64.msix` 0.8 MB |
 | 验证状态 |（地狱/2D雏菊水塘/峡谷晨雾均已下线，勿再验收） `build.mjs` **通过**；真机 3D 壁纸跑通（02:45）；真机宠物跟随壁纸 **通过**（17:01 自动轮换实跑：`dbg fx=weather/black-hole n=0`）；设置页预览 3D→2D 宠物残留修复 17:30 浏览器实测**通过**（`#pvPetCv` 移除、`#pvPets` 清空、状态行跟随）；新增两款主题在 harness 逐帧目检通过（天堂 14.3 ms / 地狱 9.2 ms），**真机切换与宠物跟随待人工验收**；`verify.mjs` 上次通过于 02:06（本次未跑） |
 | WebView2 缓存（真机实测） | 新构建全新 profile 6 分钟后 **11.7 MB**（旧 profile 72.5 MB，降 84%） |
-| git HEAD | （提交前）下线两场景+参数挪位+rift/sandstorm调整 待提交 2026-11-21 |
+| git HEAD | （提交前）GPL3.0+rift雷暴闪电+sandstorm收尾+heaven四修 待提交 2026-11-22 |
 
 ## 正在进行的改动（在飞）
 
@@ -24,7 +24,8 @@
 
 ## 最近 3 条
 
-1. 2026-11-21 15:55 · ZCode · **下线 2D 雏菊水塘/峡谷晨雾 + 参数面板挪进场景卡片 + rift 去闪电 + sandstorm 去直线**：场景 25→23（源文件留 DRAFT，旧配置自动回退 snow）；沙线改点状拖尾；裂缝放电保留光效去螺栓。exe 532 KB。真机目检待用户
+1. 2026-11-22 22:49 · ZCode · **GPL-3.0 + rift 雷暴闪电三样式 + sandstorm 收尾 + heaven 四修**：LICENSE 换 GPLv3（README/NOTICE 同步，商店许可条款字段需用户手动同步）；rift 闪电用 _tornado 三层 stroke 工艺重做（strike out/fork burst/along-spine arc，harness 抽帧目检通过）；sandstorm noBolt+删拖尾/圆环只剩沙丘落沙跳粒；heaven 纯黑天空+银河减淡45%+星1050+循环卡顿修复（far() 裸 t 线性漂移回绕跳 9px→周期项）。真机待人工
+2. 2026-11-21 15:55 · ZCode · **下线 2D 雏菊水塘/峡谷晨雾 + 参数面板挪进场景卡片 + rift 去闪电 + sandstorm 去直线**：场景 25→23（源文件留 DRAFT，旧配置自动回退 snow）；沙线改点状拖尾；裂缝放电保留光效去螺栓。exe 532 KB。真机目检待用户
 2. 2026-11-21 15:29 · ZCode · **发行准备 1.0.2.1**：雏菊阴影改花瓣形；下拉分组对调（本地在上）；**3D 雏菊水塘打包预装**（exe 资源 → 启动时写 WallpaperDir 并注册，daisyPondGone 尊重删除）；版本 1.0.0.0 → 1.0.2.1。MSIX 已产出 1.0.2.1。WACK 未重跑；商店上传/GitHub 推送待执行
 2. 2026-11-21 15:13 · ZCode · **uv→像素 X 映射修复（鱼食漂移真根因）**：画布层三处 `(v/A)*W` 应为 `v*W`（X 被压到 56%）；用户"涟漪准、鱼食不准"点破——着色器直接用 uv 所以准。教训：像素验证的期望值必须独立推导，别复用被测公式。另修 drawDaisies 引用已删 A2 的静默 ReferenceError。重载壁纸文件即生效
 2. 2026-11-21 15:03 · ZCode · **鱼食漂移排查 + 点击十字诊断**：逐像素证明代码链路精确（此前"复现漂移"是测试脚本 y 轴期望算反）。真机漂移剩余两种可能：应用里有旧版副本（重导会生成新 id，同名易选错）；40ms 轮询取检测时刻光标（移动中点击偏几十 px）。十字标记+dbg click 坐标已加，等用户真机点击分辨
@@ -51,7 +52,7 @@
 - [ ] **人工验收 5**（gorgefall）：设置 → 壁纸列表里选「峡谷晨雾」→ 瀑布应有向下流动的暗亮带、落水处薄雾；再从 3D 壁纸切到它，宠物需跟着换、不得残留；`out\PixelPalette.exe` 需重建后才会包含本场景
 - [ ] **人工验收 7**（daisypond）：重建 exe 后设置里选「雏菊水塘」→ 清透水面应有变形焦散光网、6 朵白雏菊漂移、细涟漪环扩散；换几套调色板确认换装正常
 - [ ] 补 8 语言缺失的文案（ja/ko/ru/es/pt/de/fr 键数少于 zh/en；fxDaisyPond/fxGorgefall 已随下线删除）
-- [ ] 待裁决：开源协议——LICENSE 实际是 MIT（HANDOVER 旧记录写 GPL-3.0 与事实不符已纠正）；用户嫌 MIT 过宽，若改 GPL-3.0 需更新 LICENSE/README/商店许可条款（对外承诺区，待用户拍板）
+- [ ] 商店 Partner Center「许可条款」字段若填过 MIT 需同步为 GPL-3.0（LICENSE 已于 2026-11-22 改为 GPLv3）
 - [ ] 商店字段：9 语言 Short description、Keywords、App features 录入 Partner Center（定稿在 `D:\AAAAA\ShiPin\1\about-prompt\商店短语-9语言与配套字段.md`）
 - [ ] 内容扩充：从引擎 244 个效果里挑选可当全屏壁纸的（nature / water / fire / scifi 优先）- [ ] 打赏：Microsoft Store 消耗型附加组件（¥6 / ¥18），等 1.0.0.0 过审后开工
 - [ ] 鼠标交互（雪随气流）：外壳 GetCursorPos 轮询 → 现有 Push 通道
