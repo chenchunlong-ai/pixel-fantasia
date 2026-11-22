@@ -28,7 +28,7 @@ git diff --stat
 | 发行 | 迷游兔工作室，GPL-3.0，**免费开源、离线、不收集信息** |
 | 仓库 | `D:\aaa\2D动效pixelfx`（引擎根）；产品在 `palette-wallpaper\` |
 | 人类工作目录 | `D:\AAAAA\ShiPin\1`（知识包 `skill\`、产物 `work\`、`about-prompt\`、`collab-kit\`） |
-| 商店 | Store ID `9NZV5LCNMW9F`，Identity `4A5AB34E.62945D70D0F14`，已提交待审 |
+| 商店 | Store ID `9NZV5LCNMW9F`，Identity `4A5AB34E.62945D70D0F14`；1.0.0.0 已上架，**1.0.2.8 待用户提交**（WACK 已过） |
 | 版本 | `palette-wallpaper\version.mjs` = **`1.0.2.1`**（**唯一版本源**，只有发行才改） |
 | 构建 | `node palette-wallpaper/build.mjs` → 产物在 `out\`（exe/setup/msix/app.zip） |
 | 启动测试 | **`out\msix\PixelPalette.exe`**（`out\` 根缺 dll，从那里启动必崩） |
@@ -36,27 +36,26 @@ git diff --stat
 
 ---
 
-## 2. 现在在哪（2026-11-21 15:29）
+## 2. 现在在哪（2026-11-23 08:35 · 交接版）
 
-- **2026-11-23 四**：**WACK 通过**——1.0.2.8 msix 24/24 全 PASS、OVERALL PASS（appcert 需管理员权限，用 Start-Process -Verb RunAs + cmd 重定向跑的，报告 out/_wack_result/report.xml）。商店提交就绪：上传 msix + What's new + 许可条款改 GPL-3.0
-- **2026-11-23 三**：**引擎级根因=painter 只收 hex() 打包数值色，字符串渲染成黑**——meteors.js 全部颜色 m.C.map(hex)；drawMeteors 加 dy（heaven origin 170 vs 流星表 180 的裁切）；heaven 星 130→300。多轮无效修复（换色/换档/复刻）皆因没查颜色格式
-- **2026-11-23 二**：heaven 星空/流星逐字复刻 shooting-stars（用户点名"直接抄"）：meteors.js 换原版 7 颗参数+原版 6 色 ramp；heaven 星空=其 130 颗星循环逐字拷贝（星色调亮适配亮银河带，加 HZ-14 守卫）。云海/月亮未动
-- **2026-11-23**：流星黑烟根因=配色数组缺 C[4]（工艺代码用到）→undefined 画成黑；全换 6 色 ramp。星星按用户精确档位重做（1 块 3 阶 / 十字 5 块臂 3 阶 / 十字 9 块外扩波）。**教训：大段索引替换切坏过 heaven（drawBack/draw 丢失），verify 抓到后 git 恢复+唯一锚点重做**
-- **2026-11-22 深夜二**：新共享模块 `src/fx/meteors.js`（流星系统，shooting-stars 工艺移植+循环分数调度，8 颗/循环全不同）接入 heaven/rift/otherworld-rift；heaven 星星亮星改 q.circle 圆盘、色调保留、闪烁放慢。版本 1.0.2.8，MSIX 已产出。**教训：harness 目检必须 fresh bundle+唯一文件名（见 23:20 journal）**
-- **2026-11-22 深夜**：sandstorm 飞线补刀（_tornado wind() 加 noWind，上轮漏网）+落沙加量；heaven 星空按流星壁纸工艺重做（3 大小/5 亮度/5 闪烁频率档 + 蓝紫色偏 + 460 颗 + 亮度走 q.dot alpha）+银河 bloom/granulation 减半。**教训：out/_harness.bundle.js 会过期，目检前必须重建并用唯一文件名防浏览器缓存（_h2/_h3 方式）**
-- **2026-11-22**：LICENSE 改 **GPL-3.0**（README/NOTICE 同步；商店许可条款字段待用户同步）；rift 闪电重做（雷暴三层 stroke 工艺，三样式：贯穿雷击/叉状爆发/沿缝电弧）；sandstorm noBolt+删拖尾圆环；heaven 纯黑天空+银河减淡+循环卡顿修复（far() 裸 t 回绕跳 9px）。已推 GitHub。
-- **发行准备 1.0.2.1 已就绪**（journal `collab/journal/2026-11-21-1529-ZCode-release-1.0.2.1.md`）：雏菊阴影改花瓣形、下拉分组对调（本地在上）、**3D 雏菊水塘打包预装**（exe 资源 → 启动写 WallpaperDir + 注册，`daisyPondGone` 尊重用户删除）、version 1.0.2.1。产物：exe 591 KB / Setup 921 KB / `4A5AB34E.62945D70D0F14_1.0.2.1_x64.msix` 0.8 MB。
-- 本日早前：uv→像素 X 映射修复（鱼食漂移真根因，画布层 X 曾被压到 56%）+ 点击十字诊断标记；锦鲤/鱼食/雏菊晃动/改名全落地（见 journal 13:22~15:13 各条）。
-- **商店/GitHub 待执行**：用户在 Partner Center 上传 1.0.2.1 msix + 填 What's new；GitHub push（origin 已配 ssh）。
+- **HEAD `6985991`，已全部推 GitHub，工作区干净。版本 1.0.2.8，WACK 24/24 全 PASS，商店提交就绪**——待用户在 Partner Center 上传 `out\4A5AB34E.62945D70D0F14_1.0.2.8_x64.msix` + What's new（文案在 `D:\AAAAA\ShiPin\1\about-prompt\商店更新说明-1.0.2.8.md`）+ 许可条款字段改 GPL-3.0。
+- 本轮（11-21~23，ZCode）按时间倒序：
+  1. `6985991` 设置窗标题栏挂 app 图标（原来显示 WinForms 默认的彩色格子，用户截图反馈）
+  2. `8c9010d` **painter 字符串色真根因**：引擎 painter 只收 hex() 打包数值色，字符串渲染成黑——meteors.js 流星从上线起就没渲染出来过（黑烟/看不见）；修=LIST 后 m.C.map(hex)。另修 heaven origin 170 vs 流星表 180 的 10px 裁切（drawMeteors 加 dy），星星 130→300
+  3. `6b43d00`/`f5678f2` heaven 星空/流星逐字复刻 shooting-stars（用户点名"直接抄"），含 6 色 ramp 修 C[4] undefined 黑烟
+  4. `1c46813` 共享流星系统 src/fx/meteors.js 接入 heaven/rift/otherworld-rift
+  5. `0e9d31f` **GPL-3.0**（LICENSE/README/NOTICE 同步；商店许可条款字段待用户同步）；rift 雷暴闪电三样式；sandstorm noBolt/noWind/删圆环；heaven 纯黑天空+银河减淡+循环卡顿修复（far() 裸 t 回绕跳 9px）
+  6. `3baeafa` 下线 2D 雏菊水塘+峡谷晨雾（场景 25→23，源留 DRAFT，旧配置自动回退）；参数面板挪进场景卡片
+  7. `0a9bd1b` 发行 1.0.2.1：雏菊花瓣阴影、下拉分组对调（本地在上）、**3D 雏菊水塘预装**（exe 资源→启动写 WallpaperDir+注册，daisyPondGone 尊重删除）
+  8. 更早：锦鲤层/鱼食抢食/雏菊晃动/壁纸改名；uv→像素 X 映射修复（鱼食"漂移"根因=v*H 应为 v*W）
+- **设置页 UI 现状**：本地壁纸并入"当前壁纸"下拉（本地在上、系统在下）+ 加载/删除/改名/恢复三按钮；「此壁纸的参数」在场景卡片内背景上方；窗口 1600×1000。
 
 ## 3. 未完成 / 未验证
 
-- [ ] 真机验收：预装壁纸出现在"本地壁纸"组、删除后重启不复活、花瓣阴影、下拉分组顺序
-- [ ] 真机验收（遗留）：预览即时显示、窗口 1600×1000、锦鲤/鱼食/逃跑手感、改名弹窗、桌面点击双环、调参滑杆
-- [ ] 旧验收项与 8 语言缺 46 键待办见 `collab\STATE.md`
-- [ ] 内置 320×180 版 daisypond 角色待裁决（保留 or 下线留 DRAFT）
-
----
+- [ ] 用户：Partner Center 上传 1.0.2.8 + What's new + 许可条款改 GPL-3.0
+- [ ] 真机验收：设置窗标题栏图标（本轮修复）、预装壁纸出现在"本地壁纸"组、删除不复活、流星/星星观感、锦鲤/鱼食/逃跑手感、改名弹窗、预览即时显示
+- [ ] 8 语言缺键待办与旧验收项见 `collab\STATE.md`
+- [ ] 待裁决：开源协议已改 GPL-3.0，商店 1.0.0.0 已上架版本不受影响；后续发行记得同步许可条款
 
 ## 4. 硬规矩（违反这几条最容易出事）
 
