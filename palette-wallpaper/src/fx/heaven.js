@@ -48,19 +48,18 @@ const STARS = [];
   // tiers are quantised at build time (user's spec): 3 sizes, 5 brightness levels, 5 twinkle
   // frequencies, and a slight blue/violet tint on roughly a third of the stars — the craft is
   // the shooting-stars scene's: dim dots, plain px, px+glow, and a rare cross-glint
-  const tier = (r) => (r < 0.6 ? 0 : r < 0.92 ? 1 : r < 0.985 ? 2 : 3);   // dot / mid / bright+halo / glint (few of the loud ones)
-  const tint = (r) => (r < 0.2 ? "#b9c8ff" : r < 0.35 ? "#c4b8ff" : r < 0.45 ? "#ffe2c8" : "#dfe6ff");   // a little blue/violet/warm
+  const tier = (r) => (r < 0.6 ? 0 : r < 0.9 ? 1 : 2);   // user's spec: 1-block / 5-block plus / 9-block plus
+  const tint = (r) => (r < 0.2 ? "#b9c8ff" : r < 0.35 ? "#c4b8ff" : "#dfe6ff");   // a little blue/violet
   const push = (x, y, near, rr, ri) => {
     if (y < -169 || y > HZ - 20) return;
     const m = starMag(near, rr);
     STARS.push({
       x: Math.round(x), y: Math.round(y),
-      m: 0.18 + 0.18 * Math.floor(Math.min(1, m) * 4.999),              // 5 brightness levels
+      b: 0.35 + 0.275 * Math.floor(Math.min(1, m) * 2.999),             // 3 brightness steps
       tier: tier(rand(801, ri, 9)),
       w: (1 + Math.floor(rand(801, ri, 5) * 4.999)) / 1.6,              // 5 twinkle frequencies, slowed
       p: rand(801, ri, 6) * TAU,
       col: tint(rand(801, ri, 10)),
-      g: rand(801, ri, 7) < 0.05,
     });
   };
   for (let i = 0; i < 340; i++) {
@@ -191,27 +190,28 @@ function milky(R, i, x, y, ph) {
 function milkyStars(q, ph, NL) {
   for (let i = 0; i < STARS.length; i++) {
     const S = STARS[i];
-    const tw = 0.62 + 0.38 * Math.sin(ph * S.w + S.p);   // w is an integer 1..5: five twinkle rates
-    if (tw < 0.3) continue;
-    const a = S.m * tw;
-    const col = mix(hex(S.col), MW_CORE, clamp(S.m * 0.3, 0, 0.3));   // keep the tint visible
-    // brightness MUST ride on q.dot alpha: q.px is solid and would flatten the five levels
-    // into identical bright blobs (looked like snow)
-    if (S.tier === 0) {                                   // dim speck
-      q.dot(S.x, S.y, col, a * 0.6);
-    } else if (S.tier === 1) {                            // mid star
-      q.dot(S.x, S.y, col, a);
-    } else if (S.tier === 2) {                            // bright star: a real 2-3 px disc + halo
-      q.circle(S.x, S.y, 1.1, col);
-      q.glow(S.x, S.y, 2.8, col, 0.14 * a);
-    } else {                                              // the rare bright one: big disc + cross glint
-      q.circle(S.x, S.y, 1.5, mix(col, "#ffffff", 0.35));
-      q.glow(S.x, S.y, 3.5, col, 0.18 * a);
-      if (S.g && tw > 0.75) {
-        q.px(S.x - 1, S.y, col); q.px(S.x + 1, S.y, col);
-        q.px(S.x, S.y - 1, col); q.px(S.x, S.y + 1, col);
-        q.glow(S.x, S.y, 5, MW_CORE, 0.2 * a);
-      }
+    const col = hex(S.col);
+    // the twinkle step: a slow counter driven by the star's own frequency (integer 1..5 / 1.6)
+    const step = Math.floor(ph * S.w + S.p) % 3;
+    if (S.tier === 0) {
+      // ONE block, its brightness stepping through 3 levels
+      const a = [0.3, 0.55, 0.85][step] * S.b * 2.2;
+      q.dot(S.x, S.y, col, Math.min(1, a));
+    } else if (S.tier === 1) {
+      // the 5-block plus-star: centre constant, the 4 arms step dim->bright (3 levels)
+      q.px(S.x, S.y, col);
+      const a = [0.22, 0.5, 0.85][step];
+      q.dot(S.x - 1, S.y, col, a); q.dot(S.x + 1, S.y, col, a);
+      q.dot(S.x, S.y - 1, col, a); q.dot(S.x, S.y + 1, col, a);
+    } else {
+      // the 9-block plus-star: the step travels OUTWARD - the inner pair and then the outer
+      // pair brighten in turn, so the shimmer reads as a wave leaving the centre
+      q.px(S.x, S.y, col);
+      const s1 = [0.3, 0.6, 0.9][step], s2 = [0.3, 0.6, 0.9][(step + 1) % 3];
+      q.dot(S.x - 1, S.y, col, s1); q.dot(S.x + 1, S.y, col, s1);
+      q.dot(S.x, S.y - 1, col, s1); q.dot(S.x, S.y + 1, col, s1);
+      q.dot(S.x - 2, S.y, col, s2 * 0.9); q.dot(S.x + 2, S.y, col, s2 * 0.9);
+      q.dot(S.x, S.y - 2, col, s2 * 0.9); q.dot(S.x, S.y + 2, col, s2 * 0.9);
     }
   }
 }
