@@ -202,6 +202,11 @@ function ensureAssets() {
 
 export async function buildMsix() {
   if (!existsSync(APP_DIR)) throw new Error("palette-wallpaper/out/app 不存在，先跑 node palette-wallpaper/build.mjs");
+  // the Store refuses any package whose revision (4th section) is non-zero:
+  // "应用程序不得拥有版本，其版本号在应用清单中指定的非零" — it means revision, not the version.
+  const parts = VERSION.split(".");
+  if (parts.length !== 4 || !parts.every((p) => /^\d+$/.test(p)) || Number(parts[3]) !== 0)
+    throw new Error(`商店要求版本形如 x.y.z.0（第四段必须是 0），当前 version.mjs 是 "${VERSION}"`);
   const makeappx = join(DESKTOP, ".sdk", "bin", "10.0.28000.0", "x64", "makeappx.exe");
   if (!existsSync(makeappx)) throw new Error("找不到 makeappx.exe（desktop/.sdk）");
 
