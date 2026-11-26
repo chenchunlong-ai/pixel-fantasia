@@ -14,7 +14,7 @@
 
 ---
 
-**Pixel Fantasia** is a **fully offline** Windows live-wallpaper app: 21 procedural pixel
+**Pixel Fantasia** is a **fully offline** Windows live-wallpaper app: 23 procedural pixel
 scenes drawn in real time by code, 27 palettes that recolor the whole scene in one click,
 11 pixel critters living inside your wallpaper — and an **open container**: anyone can load
 their own single-file HTML wallpapers (2D / 3D / WebGL / video) and transparent pet files,
@@ -29,7 +29,7 @@ or have an AI generate them with the
 
 ## ✨ Features
 
-- 🎨 **21 procedural scenes** — snow, rain, storms, aurora, fireflies, black holes, a dimensional rift, waterfall valley, fire tornado and more. No videos, no downloads, seamless loops.
+- 🎨 **23 procedural scenes** — snow, rain, storms, aurora, fireflies, black holes, a dimensional rift, waterfall valley, fire tornado and more. No videos, no downloads, seamless loops.
 - 🌈 **One-click recolor** — 27 palettes swap the whole scene in an instant: snowfield becomes lava, grassland becomes toxic.
 - 🐾 **Desktop pets** — 11 built-in critters (ghost, bat, butterfly, frog…); load your own pet files; position, scale and rotation are remembered per wallpaper.
 - 📦 **Open container** — drag-and-drop single-file HTML wallpapers/pets, sandboxed with a CSP that blocks all network access.
