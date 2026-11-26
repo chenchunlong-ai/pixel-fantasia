@@ -28,18 +28,20 @@ git diff --stat
 | 发行 | 迷游兔工作室，GPL-3.0，**免费开源、离线、不收集信息** |
 | 仓库 | `D:\aaa\2D动效pixelfx`（引擎根）；产品在 `palette-wallpaper\` |
 | 人类工作目录 | `D:\AAAAA\ShiPin\1`（知识包 `skill\`、产物 `work\`、`about-prompt\`、`collab-kit\`） |
-| 商店 | Store ID `9NZV5LCNMW9F`，Identity `4A5AB34E.62945D70D0F14`；1.0.0.0 已上架，**1.0.2.8 待用户提交**（WACK 已过） |
-| 版本 | `palette-wallpaper\version.mjs` = **`1.0.2.1`**（**唯一版本源**，只有发行才改） |
+| 商店 | Store ID `9NZV5LCNMW9F`，Identity `4A5AB34E.62945D70D0F14`；1.0.0.0 已上架，**1.0.3.0 待用户上传**（同名升级，1.0.2.8 被以「版本号非零」拒收） |
+| 版本 | `palette-wallpaper\version.mjs` = **`1.0.3.0`**（**唯一版本源**，只有发行才改；**第四段必须为 0**，生成号当计数器 → 1.0.4.0、1.0.5.0…） |
 | 构建 | `node palette-wallpaper/build.mjs` → 产物在 `out\`（exe/setup/msix/app.zip） |
 | 启动测试 | **`out\msix\PixelPalette.exe`**（`out\` 根缺 dll，从那里启动必崩） |
 | 数据目录 | `%LOCALAPPDATA%\PixelPalette`（`settings.json` / `wallpapers` / `pets` / `webview` / `log.txt`） |
 
 ---
 
-## 2. 现在在哪（2026-11-23 08:35 · 交接版）
+## 2. 现在在哪（2026-11-26 22:50 · 交接版）
 
-- **HEAD `6985991`，已全部推 GitHub，工作区干净。版本 1.0.2.8，WACK 24/24 全 PASS，商店提交就绪**——待用户在 Partner Center 上传 `out\4A5AB34E.62945D70D0F14_1.0.2.8_x64.msix` + What's new（文案在 `D:\AAAAA\ShiPin\1\about-prompt\商店更新说明-1.0.2.8.md`）+ 许可条款字段改 GPL-3.0。
-- 本轮（11-21~23，ZCode）按时间倒序：
+- **HEAD `6abea63`，已推 GitHub，工作区干净。版本 1.0.3.0，商店包已重建（794 KB），待用户上传**——1.0.2.8 被 Partner Center 拒收，报错原文「应用程序不得拥有版本，其版本号在应用清单中指定的非零」，**实指第四个版本段（修订号 revision）必须为 0**：1.0.2.1（rev=1）、1.0.2.8（rev=8）都违规，只有 1.0.0.0（rev=0）合规。已改 `version.mjs` 为 1.0.3.0，并在 `msix.mjs` 加了前置校验（非 x.y.z.0 直接抛错不产包）。`runFullTrust` 那条是警告不是错误，1.0.0.0 已带它在架，无需处理。
+- 本轮（11-26，豆包）：
+  1. `6abea63` 版本 1.0.2.8→1.0.3.0 + msix.mjs 修订号校验（journal: `collab/journal/2026-11-26-2243-豆包-msix-revision-zero.md`）
+- 上一轮（11-21~23，ZCode）按时间倒序：
   1. `6985991` 设置窗标题栏挂 app 图标（原来显示 WinForms 默认的彩色格子，用户截图反馈）
   2. `8c9010d` **painter 字符串色真根因**：引擎 painter 只收 hex() 打包数值色，字符串渲染成黑——meteors.js 流星从上线起就没渲染出来过（黑烟/看不见）；修=LIST 后 m.C.map(hex)。另修 heaven origin 170 vs 流星表 180 的 10px 裁切（drawMeteors 加 dy），星星 130→300
   3. `6b43d00`/`f5678f2` heaven 星空/流星逐字复刻 shooting-stars（用户点名"直接抄"），含 6 色 ramp 修 C[4] undefined 黑烟
@@ -52,7 +54,9 @@ git diff --stat
 
 ## 3. 未完成 / 未验证
 
-- [ ] 用户：Partner Center 上传 1.0.2.8 + What's new + 许可条款改 GPL-3.0
+- [ ] 用户：Partner Center 上传 **`out\4A5AB34E.62945D70D0F14_1.0.3.0_x64.msix`** + What's new（文案在 `D:\AAAAA\ShiPin\1\about-prompt\商店更新说明-1.0.2.8.md`，**文内版本号要改成 1.0.3.0**）+ 许可条款字段 GPL-3.0；旧的 1.0.2.8 提交删掉
+- [ ] GitHub 侧还没跟上：远端最新 tag 是 `v1.0.2.8`，**没有 v1.0.3.0 tag、没有对应 Release**；CHANGELOG 只写到 1.0.0.0；README 的「21 个程序化场景」已过时（现为 23）。`out/**` 被 .gitignore 排除，安装器与 msix 必须走 Release 附件手工上传
+- [ ] 1.0.3.0 未重跑 WACK（只改了 Version 属性，负载未变；商店若要求可补）
 - [ ] 真机验收：设置窗标题栏图标（本轮修复）、预装壁纸出现在"本地壁纸"组、删除不复活、流星/星星观感、锦鲤/鱼食/逃跑手感、改名弹窗、预览即时显示
 - [ ] 8 语言缺键待办与旧验收项见 `collab\STATE.md`
 - [ ] 待裁决：开源协议已改 GPL-3.0，商店 1.0.0.0 已上架版本不受影响；后续发行记得同步许可条款
